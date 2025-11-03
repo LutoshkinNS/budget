@@ -8,9 +8,6 @@ namespace ExpenseService;
 model User {
   @minValue(1)
   id: integer;
-
-  @minLength(1)
-  email: string;
 }
 
 model Category {
@@ -68,6 +65,13 @@ model CategoryNoContentResponse {
   ...NoContentResponse;
 }
 
+model CategoryCreate {
+  @minLength(1)
+  name: string;
+
+  subcategory: Subcategory;
+}
+
 @route("/categories")
 @tag("Categories")
 interface Categories {
@@ -78,7 +82,7 @@ interface Categories {
   ): CategoryResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
-    @body category: Category,
+    @body category: CategoryCreate,
   ): CategoryCreatedResponse | CategoryErrorResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer): {
@@ -132,6 +136,17 @@ model ExpenseNoContentResponse {
   ...NoContentResponse;
 }
 
+model ExpenseCreate {
+  @minValue(0.01)
+  amount: float64;
+
+  @minValue(1)
+  categoryId: integer;
+
+  description: string;
+  date: utcDateTime;
+}
+
 @route("/expenses")
 @tag("Expenses")
 interface Expenses {
@@ -142,7 +157,7 @@ interface Expenses {
   ): ExpenseResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
-    @body expense: Expense,
+    @body expense: ExpenseCreate,
   ): ExpenseCreatedResponse | ExpenseErrorResponse | InternalServerErrorResponse;
 
   @delete delete(@path expenseId: integer): {
