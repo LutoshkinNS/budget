@@ -19,13 +19,17 @@ model Category {
 
   @minLength(1)
   name: string;
-
-  subcategory: Subcategory;
 }
 
 model Subcategory {
   @minValue(1)
   id: integer;
+
+  @minValue(1)
+  userId: integer;
+
+  @minValue(1)
+  categoryId: integer;
 
   @minLength(1)
   name: string;
@@ -68,8 +72,6 @@ model CategoryNoContentResponse {
 model CategoryCreate {
   @minLength(1)
   name: string;
-
-  subcategory: Subcategory;
 }
 
 @route("/categories")
@@ -78,7 +80,7 @@ interface Categories {
   @get list(): CategoryListResponse | CategoryNotFoundResponse;
 
   @get get(
-    @path CategoryId: integer,
+    @path categoryId: integer,
   ): CategoryResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
@@ -86,6 +88,62 @@ interface Categories {
   ): CategoryCreatedResponse | CategoryErrorResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer): {
+    @statusCode statusCode: 204;
+  } | InternalServerErrorResponse;
+}
+
+model SubcategoryListResponse {
+  ...OkResponse;
+  ...Body<Subcategory[]>;
+}
+
+model SubcategoryResponse {
+  ...OkResponse;
+  ...Body<Subcategory>;
+}
+
+model SubcategoryCreatedResponse {
+  ...CreatedResponse;
+  ...Body<Subcategory>;
+}
+
+model SubcategoryErrorResponse {
+  ...BadRequestResponse;
+  ...Body<ValidationError>;
+}
+
+model SubcategoryNotFoundResponse {
+  ...NotFoundResponse;
+  ...Body<NotFoundError>;
+}
+
+model SubcategoryNoContentResponse {
+  ...NoContentResponse;
+}
+
+model SubcategoryCreate {
+  @minLength(1)
+  name: string;
+}
+
+@route("/categories/{categoryId}/subcategories")
+@tag("Subcategories")
+interface CategorySubcategories {
+  @get list(
+    @path categoryId: integer,
+  ): SubcategoryListResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+
+  @post create(
+    @path categoryId: integer,
+    @body subcategory: SubcategoryCreate,
+  ): SubcategoryCreatedResponse | SubcategoryErrorResponse | InternalServerErrorResponse;
+
+  @get get(
+    @path categoryId: integer,
+    @path subcategoryId: integer,
+  ): SubcategoryResponse | SubcategoryNotFoundResponse | InternalServerErrorResponse;
+
+  @delete delete(@path categoryId: integer, @path subcategoryId: integer): {
     @statusCode statusCode: 204;
   } | InternalServerErrorResponse;
 }

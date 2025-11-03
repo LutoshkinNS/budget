@@ -9,6 +9,9 @@
       "name": "Categories"
     },
     {
+      "name": "Subcategories"
+    },
+    {
       "name": "Expenses"
     }
   ],
@@ -96,12 +99,12 @@
         }
       }
     },
-    "/categories/{CategoryId}": {
+    "/categories/{categoryId}": {
       "get": {
         "operationId": "Categories_get",
         "parameters": [
           {
-            "name": "CategoryId",
+            "name": "categoryId",
             "in": "path",
             "required": true,
             "schema": {
@@ -144,9 +147,7 @@
         "tags": [
           "Categories"
         ]
-      }
-    },
-    "/categories/{categoryId}": {
+      },
       "delete": {
         "operationId": "Categories_delete",
         "parameters": [
@@ -176,6 +177,214 @@
         },
         "tags": [
           "Categories"
+        ]
+      }
+    },
+    "/categories/{categoryId}/subcategories": {
+      "get": {
+        "operationId": "CategorySubcategories_list",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subcategory"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Subcategories"
+        ]
+      },
+      "post": {
+        "operationId": "CategorySubcategories_create",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The request has succeeded and a new resource has been created as a result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subcategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Subcategories"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubcategoryCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/{categoryId}/subcategories/{subcategoryId}": {
+      "get": {
+        "operationId": "CategorySubcategories_get",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "subcategoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subcategory"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Subcategories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategorySubcategories_delete",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "subcategoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "There is no content to send for this request, but the headers may be useful. "
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Subcategories"
         ]
       }
     },
@@ -351,8 +560,7 @@
         "required": [
           "id",
           "userId",
-          "name",
-          "subcategory"
+          "name"
         ],
         "properties": {
           "id": {
@@ -366,9 +574,6 @@
           "name": {
             "type": "string",
             "minLength": 1
-          },
-          "subcategory": {
-            "$ref": "#/components/schemas/Subcategory"
           }
         },
         "unevaluatedProperties": {
@@ -378,16 +583,12 @@
       "CategoryCreate": {
         "type": "object",
         "required": [
-          "name",
-          "subcategory"
+          "name"
         ],
         "properties": {
           "name": {
             "type": "string",
             "minLength": 1
-          },
-          "subcategory": {
-            "$ref": "#/components/schemas/Subcategory"
           }
         },
         "unevaluatedProperties": {
@@ -537,10 +738,20 @@
         "type": "object",
         "required": [
           "id",
+          "userId",
+          "categoryId",
           "name"
         ],
         "properties": {
           "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "userId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "categoryId": {
             "type": "integer",
             "minimum": 1
           },
@@ -549,6 +760,27 @@
             "minLength": 1
           }
         },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SubcategoryCreate": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SubcategoryNoContentResponse": {
+        "type": "object",
         "unevaluatedProperties": {
           "not": {}
         }
