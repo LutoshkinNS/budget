@@ -11,7 +11,8 @@ model Category {
 
   @minLength(1)
   name: string;
-  subcategory: Subcategory
+
+  subcategory: Subcategory;
 }
 
 model Subcategory {
@@ -56,13 +57,6 @@ model CategoryNoContentResponse {
   ...NoContentResponse;
 }
 
-// @route("/categories")
-// @tag("Categories")
-// interface Categories{
-//   @get index(): Category[];
-//   @get item(@path id: Category.id): Category;
-// }
-
 @route("/categories")
 @tag("Categories")
 interface Categories {
@@ -77,6 +71,68 @@ interface Categories {
   ): CategoryCreatedResponse | CategoryErrorResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer): {
+    @statusCode statusCode: 204;
+  } | InternalServerErrorResponse;
+}
+
+// Модель траты
+model Expense {
+  @minValue(1)
+  id: integer;
+
+  @minValue(0.01)
+  amount: float64;
+
+  @minValue(1)
+  categoryId: integer;
+
+  description: string;
+  date: utcDateTime;
+}
+
+model ExpenseListResponse {
+  ...OkResponse;
+  ...Body<Expense[]>;
+}
+
+model ExpenseResponse {
+  ...OkResponse;
+  ...Body<Expense>;
+}
+
+model ExpenseCreatedResponse {
+  ...CreatedResponse;
+  ...Body<Expense>;
+}
+
+model ExpenseErrorResponse {
+  ...BadRequestResponse;
+  ...Body<ValidationError>;
+}
+
+model ExpenseNotFoundResponse {
+  ...NotFoundResponse;
+  ...Body<NotFoundError>;
+}
+
+model ExpenseNoContentResponse {
+  ...NoContentResponse;
+}
+
+@route("/expenses")
+@tag("Expenses")
+interface Expenses {
+  @get list(): ExpenseListResponse | ExpenseNotFoundResponse;
+
+  @get get(
+    @path expenseId: integer,
+  ): ExpenseResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
+
+  @post create(
+    @body expense: Expense,
+  ): ExpenseCreatedResponse | ExpenseErrorResponse | InternalServerErrorResponse;
+
+  @delete delete(@path expenseId: integer): {
     @statusCode statusCode: 204;
   } | InternalServerErrorResponse;
 }
