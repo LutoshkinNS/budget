@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "PostBodyVariantSIMPLE.json"
+    },
+    {
+      "$ref": "PostBodyVariantREPLY.json"
+    },
+    {
+      "$ref": "PostBodyVariantTRAVEL.json"
+    }
+  ],
+  "discriminator": {
+    "propertyName": "kind"
+  }
+}

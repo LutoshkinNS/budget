@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": [
+    "replyId"
+  ],
+  "properties": {
+    "replyId": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false
+}

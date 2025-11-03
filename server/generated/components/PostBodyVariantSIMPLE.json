@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "value"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "SIMPLE"
+      ]
+    },
+    "value": {
+      "$ref": "PostSimpleBody.json"
+    }
+  },
+  "additionalProperties": false
+}

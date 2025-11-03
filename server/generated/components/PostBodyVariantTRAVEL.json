@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "value"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "TRAVEL"
+      ]
+    },
+    "value": {
+      "$ref": "PostTravelBody.json"
+    }
+  },
+  "additionalProperties": false
+}

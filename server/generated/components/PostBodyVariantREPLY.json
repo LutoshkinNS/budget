@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "value"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "REPLY"
+      ]
+    },
+    "value": {
+      "$ref": "PostReplyBody.json"
+    }
+  },
+  "additionalProperties": false
+}

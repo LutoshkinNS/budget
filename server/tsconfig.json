@@ -1,11 +1,26 @@
 {
   "extends": "fastify-tsconfig",
   "compilerOptions": {
+    "lib": ["ES2020", "ES2024.Promise"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "target": "ESNext",
+    "module": "NodeNext",
+    "skipLibCheck": true,
+
+    "noEmit": true,
+
     "outDir": "dist",
     "declaration": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "moduleResolution": "nodenext",
   },
   "include": [
-    "src/**/*.ts"
-  ]
+    "./src/**/*.ts", "./deref.ts"
+  ],
+  "exclude": ["node_modules"]
 }
