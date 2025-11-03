@@ -1,13 +1,24 @@
 import "@typespec/http";
 
 using Http;
-@service(#{ title: "Spending service" })
+@service(#{ title: "Expense service" })
 @server("https://example.com", "Single server endpoint")
-namespace SpendingService;
+namespace ExpenseService;
+
+model User {
+  @minValue(1)
+  id: integer;
+
+  @minLength(1)
+  email: string;
+}
 
 model Category {
   @minValue(1)
   id: integer;
+
+  @minValue(1)
+  userId: integer;
 
   @minLength(1)
   name: string;
@@ -75,10 +86,12 @@ interface Categories {
   } | InternalServerErrorResponse;
 }
 
-// Модель траты
 model Expense {
   @minValue(1)
   id: integer;
+
+  @minValue(1)
+  userId: integer;
 
   @minValue(0.01)
   amount: float64;
