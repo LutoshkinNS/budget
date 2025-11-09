@@ -8,7 +8,8 @@
     "dev": "node --watch src/index.ts",
     "typespec:generate": "tsp compile ./typespec",
     "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
-    "typespec": "npm run typespec:generate && npm run typespec:generateTsSchemas"
+    "typespec": "npm run typespec:generate && npm run typespec:generateTsSchemas",
+    "prisma:studio": "npx prisma studio"
   },
   "keywords": [],
   "author": "",
@@ -16,16 +17,17 @@
   "description": "",
   "dependencies": {
     "@fastify/type-provider-json-schema-to-ts": "^5.0.0",
+    "@prisma/client": "^6.19.0",
     "@typespec/openapi3": "^1.5.0",
     "ajv": "^8.17.1",
-    "fastify": "^5.6.1",
-    "sqlite3": "^5.1.7"
+    "fastify": "^5.6.1"
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^14.2.1",
     "@types/node": "^24.5.2",
     "@typespec/http": "^1.5.0",
     "fastify-tsconfig": "^3.0.0",
+    "prisma": "^6.19.0",
     "rimraf": "^6.0.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.2"
