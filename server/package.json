@@ -6,9 +6,9 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "dev": "node --watch src/index.ts",
-    "magic:tsp": "tsp compile . --watch",
-    "magic:deref": "node deref.ts",
-    "magic": "npm run magic:tsp && npm run magic:deref"
+    "typespec:generate": "tsp compile .",
+    "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
+    "typespec": "npm run typespec:generate && npm run typespec:generateTsSchemas"
   },
   "keywords": [],
   "author": "",

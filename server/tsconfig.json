@@ -20,7 +20,8 @@
     "moduleResolution": "nodenext",
   },
   "include": [
-    "./src/**/*.ts", "./deref.ts"
+    "./src/**/*.ts",
+    "./typespec-helper.ts"
   ],
   "exclude": ["node_modules"]
 }
