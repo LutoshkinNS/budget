@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "dev": "node --watch src/index.ts",
-    "typespec:generate": "tsp compile .",
+    "typespec:generate": "tsp compile ./typespec",
     "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
     "typespec": "npm run typespec:generate && npm run typespec:generateTsSchemas"
   },
