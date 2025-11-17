@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 .env
-generated
 
 # Editor directories and files
 .vscode/*
@@ -28,4 +27,6 @@ generated
 coverage
 
 git-info.json
-/generated/prisma
+
+# server
+/server/generated/**
