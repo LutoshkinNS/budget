@@ -18,10 +18,18 @@
     "declaration": false,
     "sourceMap": true,
     "moduleResolution": "nodenext",
+
+    "baseUrl": "./",
+    "paths": {
+      "#src/*": ["src/*"],
+      "#s/*": ["generated/@typespec/ts-schemas/*"]
+    }
   },
   "include": [
     "./src/**/*.ts",
-    "./typespec-helper.ts"
+    "./typespec-helper.ts",
+    "./generated/@typespec/ts-schemas/**/*.ts",
+    "./generated/prisma/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

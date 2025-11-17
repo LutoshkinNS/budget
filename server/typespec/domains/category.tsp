@@ -13,19 +13,9 @@ model Category {
   name: string;
 }
 
-model CategoryListResponse {
-  ...OkResponse;
-  ...Body<Category[]>;
-}
-
-model CategoryResponse {
-  ...OkResponse;
-  ...Body<Category>;
-}
-
-model CategoryCreatedResponse {
-  ...CreatedResponse;
-  ...Body<Category>;
+model CategoryCreate {
+  @minLength(1)
+  name: string;
 }
 
 model CategoryErrorResponse {
@@ -38,16 +28,6 @@ model CategoryNotFoundResponse {
   ...Body<NotFoundError>;
 }
 
-model CategorySuccessResponse {
-  ...OkResponse;
-  ...Body<string>;
-}
-
 model CategoryNoContentResponse {
   ...NoContentResponse;
-}
-
-model CategoryCreate {
-  @minLength(1)
-  name: string;
 }

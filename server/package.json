@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "imports": {
+    "#src/*": "./src/*",
+    "#s/*": "./generated/@typespec/ts-schemas/*"
+  },
   "scripts": {
     "build": "rimraf dist && tsc",
-    "dev": "node --watch src/index.ts",
+    "dev": "tsx watch ./src/index.ts",
     "typespec:generate": "tsp compile ./typespec",
+    "typespec:generate:watch": "tsp compile ./typespec --watch",
     "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
     "typespec": "npm run typespec:generate && npm run typespec:generateTsSchemas",
     "prisma:studio": "npx prisma studio"

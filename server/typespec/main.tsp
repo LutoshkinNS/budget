@@ -1,27 +1,31 @@
 import "@typespec/http";
-import "./general.tsp"
-import "./domains/category.tsp"
-import "./domains/subcategory.tsp"
-import "./domains/expense.tsp"
-import "./domains/user.tsp"
+import "./general.tsp";
+import "./domains/category.tsp";
+import "./domains/subcategory.tsp";
+import "./domains/expense.tsp";
+import "./domains/user.tsp";
 
 using Http;
 @service(#{ title: "Expense service" })
-@server("https://example.com", "Single server endpoint")
+@server("http://localhost:3000", "Single server endpoint")
 namespace ExpenseService;
+
+model idObj{
+  id: integer
+}
 
 @route("/categories")
 @tag("Categories")
 interface Categories {
-  @get list(): CategoryListResponse | CategoryNotFoundResponse;
+  @get list(): Category[] | CategoryNotFoundResponse;
 
   @get get(
     @path categoryId: integer,
-  ): CategoryResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Category | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
     @body category: CategoryCreate,
-  ): CategoryCreatedResponse | CategoryErrorResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer): {
     @statusCode statusCode: 204;
