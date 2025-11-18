@@ -5,11 +5,12 @@
   "main": "index.js",
   "imports": {
     "#src/*": "./src/*",
-    "#s/*": "./generated/@typespec/ts-schemas/*"
+    "#s/*": "./generated/@typespec/ts-schemas/*",
+    "#generated/*": "./generated/*"
   },
   "scripts": {
     "build": "rimraf dist && tsc",
-    "dev": "tsx watch ./src/index.ts",
+    "dev": "tsx watch src/main.ts",
     "typespec:generate": "tsp compile ./typespec",
     "typespec:generate:watch": "tsp compile ./typespec --watch",
     "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
