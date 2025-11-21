@@ -15,7 +15,8 @@
     "typespec:generate:watch": "tsp compile ./typespec --watch",
     "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
     "typespec": "npm run typespec:generate && npm run typespec:generateTsSchemas",
-    "prisma:studio": "npx prisma studio"
+    "prisma:studio": "npx prisma studio",
+    "prisma:seed": "npx prisma db seed"
   },
   "keywords": [],
   "author": "",

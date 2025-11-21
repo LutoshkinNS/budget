@@ -1,9 +1,11 @@
-import appInit from "#src/appInit.js";
-import categoriesModule from "#src/domains/categories/categories.js";
+import appInit from "#src/appInit.ts";
+import categoriesModule from "#src/domains/categories/categories.ts";
+import expensesModule from "#src/domains/expenses/expenses.ts";
 
 const app = await appInit();
 
 app.register(categoriesModule, { prefix: '/categories' });
+app.register(expensesModule, { prefix: '/expenses' });
 
 app.listen({
     port: 3000,
