@@ -4,8 +4,8 @@ import expensesModule from "#src/domains/expenses/expenses.ts";
 
 const app = await appInit();
 
-app.register(categoriesModule, { prefix: '/categories' });
-app.register(expensesModule, { prefix: '/expenses' });
+app.register(categoriesModule, { prefix: '/api/v1/categories' });
+app.register(expensesModule, { prefix: '/api/v1/expenses' });
 
 app.listen({
     port: 3000,

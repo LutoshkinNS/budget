@@ -8,6 +8,7 @@ import "./domains/user.tsp";
 using Http;
 @service(#{ title: "Expense service" })
 @server("http://localhost:3000", "Single server endpoint")
+@route("/api/v1")
 namespace ExpenseService;
 
 model idObj{
