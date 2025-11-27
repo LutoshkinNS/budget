@@ -6,7 +6,7 @@ export default defineConfig({
     output: {
       mode: "tags-split",
       target: "src/kernel/api/generate/budget.ts",
-      schemas: "src/model",
+      schemas: "src/kernel/api/generate/model",
       client: "react-query",
       mock: false,
       // override: {

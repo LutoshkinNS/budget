@@ -29,7 +29,7 @@ import type {
   InternalServerError,
   NotFoundError,
   ValidationError
-} from '../../../../model';
+} from '.././model';
 
 
 
@@ -154,9 +154,9 @@ export function useExpensesList<TData = Awaited<ReturnType<typeof expensesList>>
 
 
 
-export type expensesCreateResponse201 = {
+export type expensesCreateResponse200 = {
   data: Expense
-  status: 201
+  status: 200
 }
 
 export type expensesCreateResponse400 = {
@@ -169,7 +169,7 @@ export type expensesCreateResponse500 = {
   status: 500
 }
     
-export type expensesCreateResponseSuccess = (expensesCreateResponse201) & {
+export type expensesCreateResponseSuccess = (expensesCreateResponse200) & {
   headers: Headers;
 };
 export type expensesCreateResponseError = (expensesCreateResponse400 | expensesCreateResponse500) & {

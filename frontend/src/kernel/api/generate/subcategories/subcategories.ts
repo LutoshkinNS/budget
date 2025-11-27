@@ -29,7 +29,7 @@ import type {
   Subcategory,
   SubcategoryCreate,
   ValidationError
-} from '../../../../model';
+} from '.././model';
 
 
 

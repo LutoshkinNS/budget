@@ -10,6 +10,6 @@ export interface ExpenseCreate {
   amount: number;
   /** @minimum 1 */
   categoryId: number;
-  description: string;
-  date: string;
+  description?: string;
+  date?: string;
 }

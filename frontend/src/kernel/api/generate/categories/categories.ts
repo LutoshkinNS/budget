@@ -29,7 +29,7 @@ import type {
   InternalServerError,
   NotFoundError,
   ValidationError
-} from '../../../../model';
+} from '.././model';
 
 
 
