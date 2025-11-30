@@ -1,10 +1,10 @@
-import { useExpensesCreate } from "@/kernel/api/generate/expenses/expenses.ts";
-import type { ExpenseCreate } from "@/kernel/api/generate/model";
+import { useExpensesCreate } from "@/kernel/api/generate/expenses/expenses.gen.ts";
+import { ExpenseCreateDTO } from "@/kernel/api/generate/model";
 
 export function useCreateExpense() {
   const mutation = useExpensesCreate();
 
-  const createExpense = (data: ExpenseCreate) => {
+  const createExpense = (data: ExpenseCreateDTO) => {
     return mutation.mutateAsync({ data });
   };
 

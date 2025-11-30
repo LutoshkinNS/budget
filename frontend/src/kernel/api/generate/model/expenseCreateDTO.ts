@@ -5,11 +5,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface ExpenseCreate {
+export interface ExpenseCreateDTO {
   /** @minimum 0.01 */
   amount: number;
   /** @minimum 1 */
   categoryId: number;
-  description?: string;
   date?: string;
+  description?: string;
 }

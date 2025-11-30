@@ -5,16 +5,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export * from './category';
-export * from './categoryCreate';
-export * from './expense';
-export * from './expenseCreate';
-export * from './idObj';
-export * from './internalServerError';
-export * from './internalServerErrorCode';
-export * from './notFoundError';
-export * from './notFoundErrorCode';
-export * from './subcategory';
-export * from './subcategoryCreate';
-export * from './validationError';
-export * from './validationErrorCode';
+export * from "./categoryCreateDTO";
+export * from "./categoryDTO";
+export * from "./expenseCreateDTO";
+export * from "./expenseDTO";
+export * from "./expenseDTODescription";
+export * from "./idObjDTO";
+export * from "./internalServerErrorDTO";
+export * from "./internalServerErrorDTOCode";
+export * from "./notFoundErrorDTO";
+export * from "./notFoundErrorDTOCode";
+export * from "./subcategoryCreateDTO";
+export * from "./subcategoryDTO";
+export * from "./validationErrorDTO";
+export * from "./validationErrorDTOCode";

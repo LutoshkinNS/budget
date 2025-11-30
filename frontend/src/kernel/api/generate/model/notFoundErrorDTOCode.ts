@@ -5,10 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type NotFoundErrorCode = typeof NotFoundErrorCode[keyof typeof NotFoundErrorCode];
-
+export type NotFoundErrorDTOCode =
+  (typeof NotFoundErrorDTOCode)[keyof typeof NotFoundErrorDTOCode];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const NotFoundErrorCode = {
-  NOT_FOUND: 'NOT_FOUND',
+export const NotFoundErrorDTOCode = {
+  NOT_FOUND: "NOT_FOUND",
 } as const;

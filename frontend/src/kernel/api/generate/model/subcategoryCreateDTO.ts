@@ -5,13 +5,7 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface Subcategory {
-  /** @minimum 1 */
-  id: number;
-  /** @minimum 1 */
-  userId: number;
-  /** @minimum 1 */
-  categoryId: number;
+export interface SubcategoryCreateDTO {
   /** @minLength 1 */
   name: string;
 }

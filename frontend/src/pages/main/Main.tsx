@@ -1,5 +1,5 @@
 import { useCreateExpense } from "@/features/expenses/model/useCreateExpense.ts";
-import { useCategoriesList } from "@/kernel/api/generate/categories/categories";
+import { useCategories } from "@/entities/categories";
 
 const IDS = {
   CATEGORY: "category",
@@ -17,10 +17,11 @@ const FIELD_VALUES = {
 
 export function Main() {
   const { createExpense } = useCreateExpense();
-  const { data: categoriesResponse } = useCategoriesList();
+  const { data: categoriesResponse, status } = useCategories();
 
-  const categories =
-    categoriesResponse?.status === 200 ? categoriesResponse.data : [];
+  console.log(categoriesResponse);
+
+  const categories = status === "success" ? categoriesResponse : [];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,7 +34,7 @@ export function Main() {
     await createExpense({
       amount,
       categoryId,
-      date: new Date().toISOString(),
+      // date: new Date().toISOString(),
       description,
     });
 

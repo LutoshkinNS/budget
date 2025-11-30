@@ -5,11 +5,7 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface Category {
-  /** @minimum 1 */
-  id: number;
-  /** @minimum 1 */
-  userId: number;
+export interface CategoryCreateDTO {
   /** @minLength 1 */
   name: string;
 }

@@ -4,16 +4,17 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { ExpenseDTODescription } from "./expenseDTODescription";
 
-export interface Expense {
-  /** @minimum 1 */
-  id: number;
-  /** @minimum 1 */
-  userId: number;
+export interface ExpenseDTO {
   /** @minimum 0.01 */
   amount: number;
   /** @minimum 1 */
   categoryId: number;
-  description: string;
   date: string;
+  description?: ExpenseDTODescription;
+  /** @minimum 1 */
+  id: number;
+  /** @minimum 1 */
+  userId: number;
 }

@@ -5,7 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface SubcategoryCreate {
-  /** @minLength 1 */
-  name: string;
-}
+export type ExpenseDTODescription = string | null;

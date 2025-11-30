@@ -5,16 +5,38 @@ export default defineConfig({
     input: "../server/generated/@typespec/openapi3/openapi.json",
     output: {
       mode: "tags-split",
-      target: "src/kernel/api/generate/budget.ts",
+      target: "src/kernel/api/generate",
       schemas: "src/kernel/api/generate/model",
+      fileExtension: ".gen.ts",
       client: "react-query",
       mock: false,
-      // override: {
-      //   mutator: {
-      //     path: "src/kernel/api/client.ts",
-      //     name: "customFetch",
-      //   },
-      // },
+      prettier: true,
+      propertySortOrder: "Alphabetical",
+      override: {
+        query: {
+          useInvalidate: true,
+          shouldSplitQueryKey: true,
+          useOperationIdAsQueryKey: true,
+        },
+        components: {
+          schemas: {
+            suffix: "DTO",
+          },
+        },
+        fetch: {
+          includeHttpResponseReturnType: false,
+        },
+      },
+    },
+  },
+  budgetZod: {
+    input: "../server/generated/@typespec/openapi3/openapi.json",
+    output: {
+      mode: "tags-split",
+      client: "zod",
+      target: "src/kernel/api/generate",
+      fileExtension: ".zod.ts",
+      prettier: true,
     },
   },
 });

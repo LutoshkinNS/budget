@@ -4,9 +4,9 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { NotFoundErrorCode } from './notFoundErrorCode';
+import type { NotFoundErrorDTOCode } from "./notFoundErrorDTOCode";
 
-export interface NotFoundError {
-  code: NotFoundErrorCode;
+export interface NotFoundErrorDTO {
+  code: NotFoundErrorDTOCode;
   message: string;
 }

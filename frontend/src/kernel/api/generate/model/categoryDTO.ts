@@ -5,6 +5,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface IdObj {
+export interface CategoryDTO {
+  /** @minimum 1 */
   id: number;
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  userId: number;
 }
