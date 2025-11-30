@@ -21,8 +21,6 @@ export function Main() {
 
   console.log(categoriesResponse);
 
-  const categories = status === "success" ? categoriesResponse : [];
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -41,6 +39,14 @@ export function Main() {
     e.currentTarget.reset();
   };
 
+  if (status === "error") {
+    return <div>error</div>;
+  }
+
+  if (status === "pending") {
+    return <div>loading...</div>;
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <fieldset>
@@ -57,7 +63,7 @@ export function Main() {
           <label htmlFor={IDS.CATEGORY}>Категория</label>
           <select name={FIELD_VALUES.CATEGORY_ID} id={IDS.CATEGORY}>
             <option value="">Выбери категорию</option>
-            {categories.map((category) => (
+            {categoriesResponse.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>
