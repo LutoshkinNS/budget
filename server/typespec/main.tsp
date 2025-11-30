@@ -6,7 +6,7 @@ import "./domains/expense.tsp";
 import "./domains/user.tsp";
 
 using Http;
-@service(#{ title: "Expense service" })
+@service(#{title: "Expense service"})
 @server("http://localhost:3000", "Single server endpoint")
 @route("/api/v1")
 namespace ExpenseService;
@@ -58,15 +58,15 @@ interface CategorySubcategories {
 @route("/expenses")
 @tag("Expenses")
 interface Expenses {
-  @get list(): ExpenseListResponse | ExpenseNotFoundResponse;
+  @get list(): Expense[] | ExpenseNotFoundResponse;
 
   @get get(
     @path expenseId: integer,
-  ): ExpenseResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
+  ): Expense | ExpenseNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
     @body expense: ExpenseCreate,
-  ): ExpenseCreatedResponse | ExpenseErrorResponse | InternalServerErrorResponse;
+  ): Expense | ExpenseErrorResponse | InternalServerErrorResponse;
 
   @delete delete(@path expenseId: integer): {
     @statusCode statusCode: 204;

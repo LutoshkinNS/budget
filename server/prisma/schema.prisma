@@ -29,7 +29,7 @@ model Expense{
   category    Category @relation(fields: [categoryId], references: [id])
   categoryId  Int
   amount      Float
-  description String
+  description String?
   date        DateTime
 }
 

@@ -50,8 +50,8 @@ export default async function expensesModule(app: FastifyApp) {
             data: {
                 amount: req.body.amount,
                 categoryId: req.body.categoryId,
-                description: req.body.description,
-                date: new Date(req.body.date),
+                description: req.body.description ?? null,
+                date: req.body.date ?? new Date(),
                 userId: 1
             },
             include: {

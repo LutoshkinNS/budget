@@ -15,23 +15,20 @@ model Expense {
   @minValue(1)
   categoryId: integer;
 
-  description: string;
+  description?: string | null;
   date: utcDateTime;
 }
 
-model ExpenseListResponse {
-  ...OkResponse;
-  ...Body<Expense[]>;
-}
+model ExpenseCreate {
+  @minValue(0.01)
+  amount: float64;
 
-model ExpenseResponse {
-  ...OkResponse;
-  ...Body<Expense>;
-}
+  @minValue(1)
+  categoryId: integer;
 
-model ExpenseCreatedResponse {
-  ...CreatedResponse;
-  ...Body<Expense>;
+  description?: string;
+
+  date?: utcDateTime;
 }
 
 model ExpenseErrorResponse {
@@ -46,15 +43,4 @@ model ExpenseNotFoundResponse {
 
 model ExpenseNoContentResponse {
   ...NoContentResponse;
-}
-
-model ExpenseCreate {
-  @minValue(0.01)
-  amount: float64;
-
-  @minValue(1)
-  categoryId: integer;
-
-  description: string;
-  date: utcDateTime;
 }
