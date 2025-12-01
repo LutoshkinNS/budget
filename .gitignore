@@ -30,3 +30,6 @@ git-info.json
 
 # server
 /server/generated/**
+
+# client
+.tanstak
