@@ -6,6 +6,7 @@ const IDS = {
   EXPENSE: {
     VALUE: "value",
     DESCRIPTION: "description",
+    DATE: "date",
   },
 } as const;
 
@@ -13,6 +14,7 @@ const FIELD_VALUES = {
   AMOUNT: "amount",
   CATEGORY_ID: "category_id",
   DESCRIPTION: "description",
+  DATE: "date",
 } as const;
 
 export function Main() {
@@ -28,12 +30,15 @@ export function Main() {
     const amount = Number(formData.get(FIELD_VALUES.AMOUNT));
     const categoryId = Number(formData.get(FIELD_VALUES.CATEGORY_ID));
     const description = String(formData.get(FIELD_VALUES.DESCRIPTION));
+    const date = String(formData.get(FIELD_VALUES.DATE));
+
+    console.log(amount, categoryId, description, date);
 
     await createExpense({
       amount,
       categoryId,
-      // date: new Date().toISOString(),
-      description,
+      date: date ? new Date(date).toISOString() : undefined,
+      description: description ? description : undefined,
     });
 
     e.currentTarget.reset();
@@ -48,7 +53,7 @@ export function Main() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} noValidate>
       <fieldset>
         <legend>Добавление траты</legend>
         <p>
@@ -69,6 +74,10 @@ export function Main() {
               </option>
             ))}
           </select>
+        </p>
+        <p>
+          <label htmlFor={IDS.EXPENSE.DATE}>Дата</label>
+          <input type="date" name={FIELD_VALUES.DATE} id={IDS.EXPENSE.DATE} />
         </p>
         <p>
           <label htmlFor={IDS.EXPENSE.DESCRIPTION}>Описание</label>
