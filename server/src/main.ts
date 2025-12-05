@@ -1,11 +1,13 @@
 import appInit from "#src/appInit.ts";
 import categoriesModule from "#src/domains/categories/categories.ts";
 import expensesModule from "#src/domains/expenses/expenses.ts";
+import subcategoriesModule from "#src/domains/subcategories/subcategories.ts";
 
 const app = await appInit();
 
 app.register(categoriesModule, { prefix: '/api/v1/categories' });
 app.register(expensesModule, { prefix: '/api/v1/expenses' });
+app.register(subcategoriesModule, { prefix: '/api/v1/subcategories' });
 
 app.listen({
     port: 3000,

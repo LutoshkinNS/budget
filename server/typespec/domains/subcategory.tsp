@@ -7,28 +7,18 @@ model Subcategory {
   id: integer;
 
   @minValue(1)
-  userId: integer;
-
-  @minValue(1)
   categoryId: integer;
 
   @minLength(1)
   name: string;
 }
 
-model SubcategoryListResponse {
-  ...OkResponse;
-  ...Body<Subcategory[]>;
-}
+model SubcategoryCreate {
+  @minValue(1)
+  categoryId: integer;
 
-model SubcategoryResponse {
-  ...OkResponse;
-  ...Body<Subcategory>;
-}
-
-model SubcategoryCreatedResponse {
-  ...CreatedResponse;
-  ...Body<Subcategory>;
+  @minLength(1)
+  name: string;
 }
 
 model SubcategoryErrorResponse {
@@ -43,9 +33,4 @@ model SubcategoryNotFoundResponse {
 
 model SubcategoryNoContentResponse {
   ...NoContentResponse;
-}
-
-model SubcategoryCreate {
-  @minLength(1)
-  name: string;
 }

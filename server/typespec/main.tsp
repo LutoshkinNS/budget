@@ -38,17 +38,17 @@ interface Categories {
 interface CategorySubcategories {
   @get list(
     @path categoryId: integer,
-  ): SubcategoryListResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Subcategory[] | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
     @path categoryId: integer,
     @body subcategory: SubcategoryCreate,
-  ): SubcategoryCreatedResponse | SubcategoryErrorResponse | InternalServerErrorResponse;
+  ): Subcategory | SubcategoryErrorResponse | InternalServerErrorResponse;
 
   @get get(
     @path categoryId: integer,
     @path subcategoryId: integer,
-  ): SubcategoryResponse | SubcategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Subcategory | SubcategoryNotFoundResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer, @path subcategoryId: integer): {
     @statusCode statusCode: 204;
