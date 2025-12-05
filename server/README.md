@@ -320,3 +320,9 @@ docker-compose -f docker-compose.prod.yml up -d
 - **База данных (dev)**: `server/prisma/dev.db`
 - **База данных (production)**: `server/data/budget.db`
 - **Логи**: `docker logs fastify_app`
+
+
+### TODO
+- [ ] Добавить проверку на добавление категорий с одинаковым наименованием
+- [ ] Удалять категорию из базы и предлагать пользователю переместить траты в другую категорию
+- [ ] 
