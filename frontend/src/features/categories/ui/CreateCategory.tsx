@@ -51,9 +51,11 @@ export function CreateCategory() {
               }))
             }
           />
+          <br />
+          <span style={{ color: "red" }}>
+            {errors?.fieldErrors.name || errors?.formErrors}
+          </span>
         </p>
-        <div style={{ color: "red" }}>{errors?.formErrors}</div>
-        <div style={{ color: "red" }}>{errors?.fieldErrors.name}</div>
         {isError && (
           <SimpleError>
             Ошибка: {error?.message || "Не удалось создать категорию"}

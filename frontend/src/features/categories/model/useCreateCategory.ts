@@ -1,5 +1,6 @@
-import { useCategoriesCreate } from "@/kernel/api/generate/categories/categories.gen.ts";
 import { z } from "zod";
+
+import { useCategoriesCreate } from "@/kernel/api/generate/categories/categories.gen.ts";
 import { categoriesCreateBody } from "@/kernel/api/generate/categories/categories.zod.gen.ts";
 import { errorHandler } from "@/shared/lib";
 

@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { useCategoriesList } from "@/kernel/api/generate/categories/categories.gen.ts";
+
+import { queryClient } from "@/kernel/api/appQuery";
+import {
+  getCategoriesListQueryKey,
+  useCategoriesList,
+} from "@/kernel/api/generate/categories/categories.gen.ts";
 import { categoriesListResponse } from "@/kernel/api/generate/categories/categories.zod.gen.ts";
 
 export function useCategories() {
@@ -17,4 +22,11 @@ export function useCategories() {
   }, [query.data]);
 
   return { ...query, data: validatedData };
+}
+
+export function useInvalidateCategories() {
+  return () =>
+    queryClient.invalidateQueries({
+      queryKey: getCategoriesListQueryKey(),
+    });
 }

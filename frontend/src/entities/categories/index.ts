@@ -1,1 +1,1 @@
-export { useCategories } from "./useCategories.ts";
+export { useCategories, useInvalidateCategories } from "./useCategories.ts";

@@ -1,5 +1,5 @@
-import { useCreateExpense } from "@/features/expenses/model/useCreateExpense.ts";
-import { useCategories } from "@/entities/categories";
+import { CategoriesSelect } from "@/features/categories";
+import { useCreateExpense } from "@/features/expenses";
 
 const IDS = {
   CATEGORY: "category",
@@ -19,9 +19,6 @@ const FIELD_VALUES = {
 
 export function Main() {
   const { createExpense } = useCreateExpense();
-  const { data: categoriesResponse, status } = useCategories();
-
-  console.log(categoriesResponse);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,15 +62,7 @@ export function Main() {
           />
         </p>
         <p>
-          <label htmlFor={IDS.CATEGORY}>Категория</label>
-          <select name={FIELD_VALUES.CATEGORY_ID} id={IDS.CATEGORY}>
-            <option value="">Выбери категорию</option>
-            {categoriesResponse.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <CategoriesSelect />
         </p>
         <p>
           <label htmlFor={IDS.EXPENSE.DATE}>Дата</label>
