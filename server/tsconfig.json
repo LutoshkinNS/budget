@@ -15,6 +15,7 @@
 
     "noEmit": true,
 
+    "rootDir": "./",
     "outDir": "dist",
     "declaration": false,
     "sourceMap": true,

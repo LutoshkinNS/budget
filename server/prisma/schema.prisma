@@ -8,38 +8,61 @@ generator client {
   output   = "./../generated/prisma"
 }
 
-model User{
-  id         Int        @id @default(autoincrement())
+model User {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+
+  ownedAccounts Account[]     @relation("AccountOwner")
+  accounts      AccountUser[]
+}
+
+model Account {
+  id        Int      @id @default(autoincrement())
+  name      String
+  ownerId   Int
+  owner     User     @relation("AccountOwner", fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+
+  users      AccountUser[]
   categories Category[]
   expenses   Expense[]
 }
 
-model Category{
+model AccountUser {
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id])
+  joinedAt  DateTime @default(now())
+
+  @@id([userId, accountId])
+}
+
+model Category {
   id            Int           @id @default(autoincrement())
-  user          User          @relation(fields: [userId], references: [id])
-  userId        Int
+  accountId     Int
+  account       Account       @relation(fields: [accountId], references: [id])
   name          String
   deletedAt     DateTime?
   expenses      Expense[]
   subcategories Subcategory[]
 }
 
-model Subcategory{
+model Subcategory {
   id         Int       @id @default(autoincrement())
-  category   Category  @relation(fields: [categoryId], references: [id])
   categoryId Int
+  category   Category  @relation(fields: [categoryId], references: [id])
   name       String
   deletedAt  DateTime?
 }
 
-model Expense{
+model Expense {
   id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  accountId   Int
+  account     Account  @relation(fields: [accountId], references: [id])
   categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
   amount      Float
   description String?
   date        DateTime
 }
-

@@ -7,7 +7,7 @@ model Expense {
   id: integer;
 
   @minValue(1)
-  userId: integer;
+  accountId: integer;
 
   @minValue(0.01)
   amount: float64;

@@ -1,5 +1,6 @@
 import "@typespec/http";
 import "./general.tsp";
+import "./domains/account.tsp";
 import "./domains/category.tsp";
 import "./domains/subcategory.tsp";
 import "./domains/expense.tsp";
@@ -13,6 +14,12 @@ namespace ExpenseService;
 
 model idObj{
   id: integer
+}
+
+@route("/accounts")
+@tag("Accounts")
+interface Accounts {
+  @get list(): Account[] | AccountNotFoundResponse;
 }
 
 @route("/categories")

@@ -34,10 +34,13 @@ export default async function categoriesModule(app: FastifyApp) {
       response: {200: Category}
     }
   }, async function (req) {
+    // TODO: Исправить после добавления авторизации
+    const accountId = 1;
+
     return await this.prisma.category.create({
       data: {
         name: req.body.name,
-        userId: 1
+        accountId
       }
     });
   })

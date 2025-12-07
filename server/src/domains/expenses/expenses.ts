@@ -12,7 +12,7 @@ export default async function expensesModule(app: FastifyApp) {
         const expenses = await this.prisma.expense.findMany({
             include: {
                 category: true,
-                user: true
+                account: true
             }
         });
         return expenses.map(expense => ({
@@ -31,7 +31,7 @@ export default async function expensesModule(app: FastifyApp) {
             where: {id: req.params.id},
             include: {
                 category: true,
-                user: true
+                account: true
             }
         });
         return {
@@ -46,17 +46,20 @@ export default async function expensesModule(app: FastifyApp) {
             response: {200: Expense}
         }
     }, async function (req) {
+        // TODO: Исправить после добавления авторизации
+        const accountId = 1;
+
         const result = await this.prisma.expense.create({
             data: {
                 amount: req.body.amount,
                 categoryId: req.body.categoryId,
                 description: req.body.description ?? null,
                 date: req.body.date ?? new Date(),
-                userId: 1
+                accountId
             },
             include: {
                 category: true,
-                user: true
+                account: true
             }
         })
         return {

@@ -7,7 +7,7 @@ model Category {
   id: integer;
 
   @minValue(1)
-  userId: integer;
+  accountId: integer;
 
   @minLength(1)
   name: string;
