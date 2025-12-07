@@ -7,9 +7,9 @@
 
 export interface CategoryDTO {
   /** @minimum 1 */
+  accountId: number;
+  /** @minimum 1 */
   id: number;
   /** @minLength 1 */
   name: string;
-  /** @minimum 1 */
-  userId: number;
 }

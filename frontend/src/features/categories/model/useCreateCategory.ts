@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { useInvalidateCategories } from "@/entities/categories";
 import { useCategoriesCreate } from "@/kernel/api/generate/categories/categories.gen.ts";
 import { categoriesCreateBody } from "@/kernel/api/generate/categories/categories.zod.gen.ts";
 import { errorHandler } from "@/shared/lib";
@@ -7,7 +8,15 @@ import { errorHandler } from "@/shared/lib";
 export type CategoryCreateData = z.infer<typeof categoriesCreateBody>;
 
 export function useCreateCategory() {
-  const mutation = useCategoriesCreate();
+  const invalidateCategory = useInvalidateCategories();
+
+  const mutation = useCategoriesCreate({
+    mutation: {
+      onSuccess: async () => {
+        await invalidateCategory();
+      },
+    },
+  });
 
   const createCategory = async (data: CategoryCreateData) => {
     const validateResult = categoriesCreateBody.safeParse(data);

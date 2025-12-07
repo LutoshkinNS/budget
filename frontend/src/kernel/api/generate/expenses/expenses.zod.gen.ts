@@ -10,7 +10,7 @@ export const expensesListResponseAmountMin = 0.01;
 
 export const expensesListResponseItem = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
+  accountId: zod.number().min(1),
   amount: zod.number().min(expensesListResponseAmountMin),
   categoryId: zod.number().min(1),
   description: zod.union([zod.string(), zod.null()]).optional(),
@@ -31,7 +31,7 @@ export const expensesCreateResponseAmountMin = 0.01;
 
 export const expensesCreateResponse = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
+  accountId: zod.number().min(1),
   amount: zod.number().min(expensesCreateResponseAmountMin),
   categoryId: zod.number().min(1),
   description: zod.union([zod.string(), zod.null()]).optional(),
@@ -46,7 +46,7 @@ export const expensesGetResponseAmountMin = 0.01;
 
 export const expensesGetResponse = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
+  accountId: zod.number().min(1),
   amount: zod.number().min(expensesGetResponseAmountMin),
   categoryId: zod.number().min(1),
   description: zod.union([zod.string(), zod.null()]).optional(),

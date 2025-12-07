@@ -29,25 +29,13 @@ export function Main() {
     const description = String(formData.get(FIELD_VALUES.DESCRIPTION));
     const date = String(formData.get(FIELD_VALUES.DATE));
 
-    console.log(amount, categoryId, description, date);
-
     await createExpense({
       amount,
       categoryId,
       date: date ? new Date(date).toISOString() : undefined,
       description: description ? description : undefined,
     });
-
-    e.currentTarget.reset();
   };
-
-  if (status === "error") {
-    return <div>error</div>;
-  }
-
-  if (status === "pending") {
-    return <div>loading...</div>;
-  }
 
   return (
     <form onSubmit={handleSubmit} noValidate>

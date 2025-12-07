@@ -6,6 +6,8 @@
  */
 
 export interface SubcategoryCreateDTO {
+  /** @minimum 1 */
+  categoryId: number;
   /** @minLength 1 */
   name: string;
 }

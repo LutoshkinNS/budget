@@ -5,6 +5,7 @@
  * OpenAPI spec version: 0.0.0
  */
 
+export * from "./accountDTO";
 export * from "./categoryCreateDTO";
 export * from "./categoryDTO";
 export * from "./expenseCreateDTO";

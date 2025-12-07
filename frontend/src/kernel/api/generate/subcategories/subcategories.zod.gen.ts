@@ -12,7 +12,6 @@ export const categorySubcategoriesListParams = zod.object({
 
 export const categorySubcategoriesListResponseItem = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
   categoryId: zod.number().min(1),
   name: zod.string().min(1),
 });
@@ -25,6 +24,13 @@ export const categorySubcategoriesCreateParams = zod.object({
 });
 
 export const categorySubcategoriesCreateBody = zod.object({
+  categoryId: zod.number().min(1),
+  name: zod.string().min(1),
+});
+
+export const categorySubcategoriesCreateResponse = zod.object({
+  id: zod.number().min(1),
+  categoryId: zod.number().min(1),
   name: zod.string().min(1),
 });
 
@@ -35,7 +41,6 @@ export const categorySubcategoriesGetParams = zod.object({
 
 export const categorySubcategoriesGetResponse = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
   categoryId: zod.number().min(1),
   name: zod.string().min(1),
 });

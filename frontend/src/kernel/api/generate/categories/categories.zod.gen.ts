@@ -8,7 +8,7 @@ import * as zod from "zod";
 
 export const categoriesListResponseItem = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
+  accountId: zod.number().min(1),
   name: zod.string().min(1),
 });
 export const categoriesListResponse = zod.array(categoriesListResponseItem);
@@ -19,7 +19,7 @@ export const categoriesCreateBody = zod.object({
 
 export const categoriesCreateResponse = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
+  accountId: zod.number().min(1),
   name: zod.string().min(1),
 });
 
@@ -29,7 +29,7 @@ export const categoriesGetParams = zod.object({
 
 export const categoriesGetResponse = zod.object({
   id: zod.number().min(1),
-  userId: zod.number().min(1),
+  accountId: zod.number().min(1),
   name: zod.string().min(1),
 });
 

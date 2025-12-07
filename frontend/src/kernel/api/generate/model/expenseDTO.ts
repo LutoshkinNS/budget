@@ -7,6 +7,8 @@
 import type { ExpenseDTODescription } from "./expenseDTODescription";
 
 export interface ExpenseDTO {
+  /** @minimum 1 */
+  accountId: number;
   /** @minimum 0.01 */
   amount: number;
   /** @minimum 1 */
@@ -15,6 +17,4 @@ export interface ExpenseDTO {
   description?: ExpenseDTODescription;
   /** @minimum 1 */
   id: number;
-  /** @minimum 1 */
-  userId: number;
 }

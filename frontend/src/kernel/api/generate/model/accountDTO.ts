@@ -5,11 +5,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface SubcategoryDTO {
-  /** @minimum 1 */
-  categoryId: number;
+export interface AccountDTO {
+  createdAt: string;
   /** @minimum 1 */
   id: number;
   /** @minLength 1 */
   name: string;
+  /** @minimum 1 */
+  ownerId: number;
 }
