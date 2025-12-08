@@ -1,8 +1,10 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "../kernel/api/appQuery";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 
-import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { Notifications } from "@/shared/lib/notifications";
+
+import { queryClient } from "../kernel/api/appQuery";
 
 // Import the generated route tree
 import { routeTree } from "./routes/routeTree.gen";
@@ -20,7 +22,9 @@ declare module "@tanstack/react-router" {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <Notifications>
+        <RouterProvider router={router} />
+      </Notifications>
       <ReactQueryDevtools />
     </QueryClientProvider>
   );
