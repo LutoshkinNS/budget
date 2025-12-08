@@ -20,6 +20,10 @@ import type {
 
 import type { AccountDTO, NotFoundErrorDTO } from ".././model";
 
+import { customFetcher } from "../../customFetcher";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 export const getAccountsListUrl = () => {
   return `/api/v1/accounts`;
 };
@@ -27,15 +31,10 @@ export const getAccountsListUrl = () => {
 export const accountsList = async (
   options?: RequestInit,
 ): Promise<AccountDTO[]> => {
-  const res = await fetch(getAccountsListUrl(), {
+  return customFetcher<AccountDTO[]>(getAccountsListUrl(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: AccountDTO[] = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getAccountsListQueryKey = () => {
@@ -49,15 +48,15 @@ export const getAccountsListQueryOptions = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetcher>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getAccountsListQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof accountsList>>> = ({
     signal,
-  }) => accountsList({ signal, ...fetchOptions });
+  }) => accountsList({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof accountsList>>,
@@ -87,7 +86,7 @@ export function useAccountsList<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -109,7 +108,7 @@ export function useAccountsList<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -123,7 +122,7 @@ export function useAccountsList<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -138,7 +137,7 @@ export function useAccountsList<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {

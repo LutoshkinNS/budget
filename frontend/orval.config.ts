@@ -13,6 +13,10 @@ export default defineConfig({
       prettier: true,
       propertySortOrder: "Alphabetical",
       override: {
+        mutator: {
+          path: "./src/kernel/api/customFetcher.ts",
+          name: "customFetcher",
+        },
         query: {
           useInvalidate: true,
           shouldSplitQueryKey: true,

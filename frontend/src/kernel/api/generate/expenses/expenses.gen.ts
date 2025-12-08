@@ -29,6 +29,10 @@ import type {
   ValidationErrorDTO,
 } from ".././model";
 
+import { customFetcher } from "../../customFetcher";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 export const getExpensesListUrl = () => {
   return `/api/v1/expenses`;
 };
@@ -36,15 +40,10 @@ export const getExpensesListUrl = () => {
 export const expensesList = async (
   options?: RequestInit,
 ): Promise<ExpenseDTO[]> => {
-  const res = await fetch(getExpensesListUrl(), {
+  return customFetcher<ExpenseDTO[]>(getExpensesListUrl(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: ExpenseDTO[] = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getExpensesListQueryKey = () => {
@@ -58,15 +57,15 @@ export const getExpensesListQueryOptions = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetcher>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getExpensesListQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof expensesList>>> = ({
     signal,
-  }) => expensesList({ signal, ...fetchOptions });
+  }) => expensesList({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof expensesList>>,
@@ -96,7 +95,7 @@ export function useExpensesList<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -118,7 +117,7 @@ export function useExpensesList<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -132,7 +131,7 @@ export function useExpensesList<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -147,7 +146,7 @@ export function useExpensesList<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -185,17 +184,12 @@ export const expensesCreate = async (
   expenseCreateDTO: ExpenseCreateDTO,
   options?: RequestInit,
 ): Promise<ExpenseDTO> => {
-  const res = await fetch(getExpensesCreateUrl(), {
+  return customFetcher<ExpenseDTO>(getExpensesCreateUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
     body: JSON.stringify(expenseCreateDTO),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: ExpenseDTO = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getExpensesCreateMutationOptions = <
@@ -208,7 +202,7 @@ export const getExpensesCreateMutationOptions = <
     { data: ExpenseCreateDTO },
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof expensesCreate>>,
   TError,
@@ -216,13 +210,13 @@ export const getExpensesCreateMutationOptions = <
   TContext
 > => {
   const mutationKey = ["expensesCreate"];
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof expensesCreate>>,
@@ -230,7 +224,7 @@ export const getExpensesCreateMutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return expensesCreate(data, fetchOptions);
+    return expensesCreate(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -255,7 +249,7 @@ export const useExpensesCreate = <
       { data: ExpenseCreateDTO },
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -276,15 +270,10 @@ export const expensesGet = async (
   expenseId: number,
   options?: RequestInit,
 ): Promise<ExpenseDTO> => {
-  const res = await fetch(getExpensesGetUrl(expenseId), {
+  return customFetcher<ExpenseDTO>(getExpensesGetUrl(expenseId), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: ExpenseDTO = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getExpensesGetQueryKey = (expenseId?: number) => {
@@ -300,16 +289,16 @@ export const getExpensesGetQueryOptions = <
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesGet>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getExpensesGetQueryKey(expenseId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof expensesGet>>> = ({
     signal,
-  }) => expensesGet(expenseId, { signal, ...fetchOptions });
+  }) => expensesGet(expenseId, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -345,7 +334,7 @@ export function useExpensesGet<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -368,7 +357,7 @@ export function useExpensesGet<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -383,7 +372,7 @@ export function useExpensesGet<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesGet>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -399,7 +388,7 @@ export function useExpensesGet<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesGet>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -438,15 +427,10 @@ export const expensesDelete = async (
   expenseId: number,
   options?: RequestInit,
 ): Promise<void> => {
-  const res = await fetch(getExpensesDeleteUrl(expenseId), {
+  return customFetcher<void>(getExpensesDeleteUrl(expenseId), {
     ...options,
     method: "DELETE",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: void = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getExpensesDeleteMutationOptions = <
@@ -459,7 +443,7 @@ export const getExpensesDeleteMutationOptions = <
     { expenseId: number },
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof expensesDelete>>,
   TError,
@@ -467,13 +451,13 @@ export const getExpensesDeleteMutationOptions = <
   TContext
 > => {
   const mutationKey = ["expensesDelete"];
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof expensesDelete>>,
@@ -481,7 +465,7 @@ export const getExpensesDeleteMutationOptions = <
   > = (props) => {
     const { expenseId } = props ?? {};
 
-    return expensesDelete(expenseId, fetchOptions);
+    return expensesDelete(expenseId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -504,7 +488,7 @@ export const useExpensesDelete = <
       { expenseId: number },
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
