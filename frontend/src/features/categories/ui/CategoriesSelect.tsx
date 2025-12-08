@@ -11,7 +11,7 @@ const FIELD_VALUES = {
 type CategoriesSelectProps = React.ComponentPropsWithoutRef<"select">;
 
 export function CategoriesSelect(props: CategoriesSelectProps) {
-  const { data: categoriesResponse, isError } = useCategories();
+  const { data: categoriesResponse } = useCategories();
 
   return (
     <>
@@ -26,9 +26,6 @@ export function CategoriesSelect(props: CategoriesSelectProps) {
         }
         {...props}
       >
-        {isError ? (
-          <option value="">Не удалось получить категории</option>
-        ) : null}
         {!categoriesResponse || !categoriesResponse.length ? (
           <option value="">Категорий не найдено</option>
         ) : null}

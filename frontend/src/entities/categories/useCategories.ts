@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect } from "react";
 
 import { queryClient } from "@/kernel/api/appQuery";
 import {
@@ -6,22 +6,36 @@ import {
   useCategoriesList,
 } from "@/kernel/api/generate/categories/categories.gen.ts";
 import { categoriesListResponse } from "@/kernel/api/generate/categories/categories.zod.gen.ts";
+import { useNotifications } from "@/shared/lib/notifications";
 
 export function useCategories() {
-  const query = useCategoriesList();
+  const { data, isError, error } = useCategoriesList();
+  const { addNotification } = useNotifications();
 
-  const validatedData = useMemo(() => {
-    if (!query.data) return [];
-
-    try {
-      return categoriesListResponse.parse(query.data);
-    } catch (error) {
-      console.error("Categories validation error:", error);
-      return [];
+  useEffect(() => {
+    if (isError) {
+      addNotification({
+        id: "useCategoriesError",
+        title: error?.code || "Error",
+        message: error?.message,
+      });
+      return;
     }
-  }, [query.data]);
 
-  return { ...query, data: validatedData };
+    if (data) {
+      const validation = categoriesListResponse.safeParse(data);
+      if (!validation.success) {
+        addNotification({
+          id: "useCategoriesValidation",
+          title: "Некорректные данные",
+          message: "повторите запрос позднее",
+        });
+      }
+    }
+  }, [isError, error, data, addNotification]);
+
+  const validation = categoriesListResponse.safeParse(data);
+  return { data: data && validation.success ? validation.data : [] };
 }
 
 export function useInvalidateCategories() {
