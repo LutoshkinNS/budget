@@ -73,3 +73,7 @@ export default defineConfig([
   },
 ]);
 ```
+
+#### TODO
+- Добавить глобальные useQuery useMutation с обработкой ошибок
+- useLogin добавить функцию для исключения undefined полей
