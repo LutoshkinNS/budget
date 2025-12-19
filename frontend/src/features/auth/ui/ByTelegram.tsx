@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { useLogin } from "@/features/auth/model/useLogin.ts";
@@ -15,6 +16,7 @@ export function ByTelegram() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { login } = useLogin();
   const { addNotification } = useNotifications();
+  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -35,7 +37,7 @@ export function ByTelegram() {
         return;
       }
 
-      await login({
+      const result = await login({
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
@@ -44,6 +46,10 @@ export function ByTelegram() {
         auth_date: user.auth_date,
         hash: user.hash,
       });
+
+      if (result) {
+        await navigate({ to: "/" });
+      }
     };
 
     const script = document.createElement("script");
@@ -61,7 +67,7 @@ export function ByTelegram() {
         container.removeChild(script);
       }
     };
-  }, []);
+  }, [login, addNotification, navigate]);
 
   return <div ref={containerRef} />;
 }
