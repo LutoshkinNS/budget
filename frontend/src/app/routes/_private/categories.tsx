@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_private/categories")({
   beforeLoad: async () => {
     try {
       await authMe();
-    } catch (error) {
+    } catch (_error) {
       throw redirect({ to: "/login" });
     }
   },
