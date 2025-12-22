@@ -13,8 +13,8 @@ export function useLogin() {
       onError: (error) => {
         addNotification({
           id: "useLoginError",
-          title: error?.code,
-          message: error?.message,
+          title: error?.code ?? "Ошибка авторизации",
+          message: error?.message ?? "Не удалось авторизоваться",
         });
       },
     },
