@@ -5,6 +5,7 @@ import "./domains/category.tsp";
 import "./domains/subcategory.tsp";
 import "./domains/expense.tsp";
 import "./domains/user.tsp";
+import "./domains/auth.tsp";
 
 using Http;
 @service(#{title: "Expense service"})
@@ -78,4 +79,22 @@ interface Expenses {
   @delete delete(@path expenseId: integer): {
     @statusCode statusCode: 204;
   } | InternalServerErrorResponse;
+}
+
+@route("/auth")
+@tag("Authentication")
+interface Auth {
+  @route("/login")
+  @post op login(
+    @body loginRequest: LoginRequest
+  ): SuccessResponse | AuthUnauthorizedResponse | NotFoundResponse | NoAccountResponse | InternalServerErrorResponse;
+
+  @route("/refresh")
+  @post op refresh(): SuccessResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+
+  @route("/logout")
+  @post op logout(): SuccessResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+
+  @route("/me")
+  @get op me(): UserInfo | AuthUnauthorizedResponse | InternalServerErrorResponse;
 }

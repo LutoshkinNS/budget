@@ -1,7 +1,8 @@
-import fastifyEnv from "@fastify/env";
-import fp from "fastify-plugin";
-import {FastifyApp} from "#src/appInit.ts";
-import { FromSchema } from "json-schema-to-ts";
+import fastifyEnv from '@fastify/env';
+import fp from 'fastify-plugin';
+import { FromSchema } from 'json-schema-to-ts';
+
+import { FastifyApp } from '#src/appInit.ts';
 
 const schema = {
   type: 'object',
@@ -38,8 +39,8 @@ const schema = {
 
 const options = {
   confKey: 'envs',
-  schema: schema,
-}
+  schema: schema
+};
 
 export type Envs = FromSchema<typeof schema>;
 

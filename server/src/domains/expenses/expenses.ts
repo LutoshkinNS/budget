@@ -1,82 +1,108 @@
-import {FastifyApp} from "#src/appInit.js";
-import Expense from "#s/Expense.js";
-import idObj from "#s/idObj.js";
-import ExpenseCreate from "#s/ExpenseCreate.js";
+import Expense from '#s/Expense.js';
+import ExpenseCreate from '#s/ExpenseCreate.js';
+import idObj from '#s/idObj.js';
+import { FastifyApp } from '#src/appInit.js';
 
 export default async function expensesModule(app: FastifyApp) {
-    app.get('/', {
-        schema: {
-            response: {200: {type: 'array', items: Expense}}
-        }
-    }, async function () {
-        const expenses = await this.prisma.expense.findMany({
-            include: {
-                category: true,
-                account: true
-            }
-        });
-        return expenses.map(expense => ({
-            ...expense,
-            date: expense.date.toISOString()
-        }));
-    })
+  app.addHook('preHandler', app.authenticate);
 
-    app.get('/:id', {
-        schema: {
-            params: idObj,
-            response: {200: Expense}
+  app.get(
+    '/',
+    {
+      schema: {
+        response: { 200: { type: 'array', items: Expense } }
+      }
+    },
+    async function (req) {
+      const expenses = await this.prisma.expense.findMany({
+        where: {
+          accountId: req.user.accountId
+        },
+        include: {
+          category: true,
+          account: true
         }
-    }, async function (req) {
-        const expense = await this.prisma.expense.findUniqueOrThrow({
-            where: {id: req.params.id},
-            include: {
-                category: true,
-                account: true
-            }
-        });
-        return {
-            ...expense,
-            date: expense.date.toISOString()
-        };
-    })
+      });
+      return expenses.map((expense) => ({
+        ...expense,
+        date: expense.date.toISOString()
+      }));
+    }
+  );
 
-    app.post('/', {
-        schema: {
-            body: ExpenseCreate,
-            response: {200: Expense}
+  app.get(
+    '/:id',
+    {
+      schema: {
+        params: idObj,
+        response: { 200: Expense }
+      }
+    },
+    async function (req) {
+      const expense = await this.prisma.expense.findFirstOrThrow({
+        where: {
+          id: req.params.id,
+          accountId: req.user.accountId
+        },
+        include: {
+          category: true,
+          account: true
         }
-    }, async function (req) {
-        // TODO: Исправить после добавления авторизации
-        const accountId = 1;
+      });
+      return {
+        ...expense,
+        date: expense.date.toISOString()
+      };
+    }
+  );
 
-        const result = await this.prisma.expense.create({
-            data: {
-                amount: req.body.amount,
-                categoryId: req.body.categoryId,
-                description: req.body.description ?? null,
-                date: req.body.date ?? new Date(),
-                accountId
-            },
-            include: {
-                category: true,
-                account: true
-            }
-        })
-        return {
-            ...result,
-            date: result.date.toISOString()
-        };
-    })
+  app.post(
+    '/',
+    {
+      schema: {
+        body: ExpenseCreate,
+        response: { 200: Expense }
+      }
+    },
+    async function (req) {
+      const accountId = req.user.accountId;
 
-    app.delete('/:id', {
-        schema: {
-            params: idObj,
-            response: {204: {type: 'null'}}
+      const result = await this.prisma.expense.create({
+        data: {
+          amount: req.body.amount,
+          categoryId: req.body.categoryId,
+          description: req.body.description ?? null,
+          date: req.body.date ?? new Date(),
+          accountId
+        },
+        include: {
+          category: true,
+          account: true
         }
-    }, async function (req, reply) {
-        await this.prisma.expense.delete({
-            where: {id: req.params.id}
-        });
-        return reply.code(204).send();
-    })
+      });
+      return {
+        ...result,
+        date: result.date.toISOString()
+      };
+    }
+  );
+
+  app.delete(
+    '/:id',
+    {
+      schema: {
+        params: idObj,
+        response: { 204: { type: 'null' } }
+      }
+    },
+    async function (req, reply) {
+      await this.prisma.expense.deleteMany({
+        where: {
+          id: req.params.id,
+          accountId: req.user.accountId
+        }
+      });
+      return reply.code(204).send();
+    }
+  );
 }
