@@ -1,8 +1,8 @@
-import LoginRequest from '#s/LoginRequest.js';
-import NoAccountError from '#s/NoAccountError.js';
-import SuccessResponse from '#s/SuccessResponse.js';
-import UnauthorizedError from '#s/UnauthorizedError.js';
-import UserInfo from '#s/UserInfo.js';
+import LoginRequest from '#s/LoginRequest.ts';
+import NoAccountError from '#s/NoAccountError.ts';
+import SuccessResponse from '#s/SuccessResponse.ts';
+import UnauthorizedError from '#s/UnauthorizedError.ts';
+import UserInfo from '#s/UserInfo.ts';
 import type { FastifyApp } from '#src/appInit.ts';
 
 import { loginHandler } from './handlers/login.handler.ts';
