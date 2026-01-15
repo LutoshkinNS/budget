@@ -2,23 +2,39 @@ import "@typespec/http";
 
 using Http;
 
-@error
-model NotFoundError {
-  code: "NOT_FOUND";
-  message: string;
+enum ErrorCode {
+  MISSING_TOKEN: "MISSING_TOKEN",
+  INVALID_TOKEN: "INVALID_TOKEN",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  NOT_FOUND: "NOT_FOUND",
+  NO_ACCOUNT: "NO_ACCOUNT",
+  INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR"
 }
 
 @error
-model ValidationError {
-  code: "VALIDATION_ERROR";
+model BaseError {
+  code: ErrorCode;
   message: string;
-  details: string[];
+  statusCode: integer;
 }
 
 @error
-model InternalServerError {
-  code: "INTERNAL_SERVER_ERROR";
-  message: string;
+model NotFoundError extends BaseError {
+  code: ErrorCode.NOT_FOUND;
+  statusCode: 404;
+}
+
+@error
+model ValidationError extends BaseError {
+  code: ErrorCode.VALIDATION_ERROR;
+  statusCode: 400;
+}
+
+@error
+model InternalServerError extends BaseError {
+  code: ErrorCode.INTERNAL_SERVER_ERROR;
+  statusCode: 500;
 }
 
 model InternalServerErrorResponse {

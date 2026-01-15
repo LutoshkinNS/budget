@@ -44,21 +44,25 @@ model UserInfo {
   accounts: AccountInfo[];
 }
 
-model UnauthorizedError {
-  code: "UNAUTHORIZED" | "INVALID_TOKEN" | "INVALID_TOKEN_TYPE" | "MISSING_TOKEN";
-  message: string;
+@error
+model UnauthorizedError extends BaseError {
+  code: ErrorCode.UNAUTHORIZED | ErrorCode.INVALID_TOKEN | ErrorCode.MISSING_TOKEN;
+  statusCode: 401;
 }
 
+@error
 model AuthUnauthorizedResponse {
   @statusCode statusCode: 401;
   @body error: UnauthorizedError;
 }
 
-model NoAccountError {
-  code: "NO_ACCOUNT";
-  message: string;
+@error
+model NoAccountError extends BaseError {
+  code: ErrorCode.NO_ACCOUNT;
+  statusCode: 409;
 }
 
+@error
 model NoAccountResponse {
   @statusCode statusCode: 409;
   @body error: NoAccountError;

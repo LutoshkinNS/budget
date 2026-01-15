@@ -20,13 +20,13 @@ model idObj{
 @route("/accounts")
 @tag("Accounts")
 interface Accounts {
-  @get list(): Account[] | AccountNotFoundResponse;
+  @get list(): Account[] | AccountNotFoundResponse | InternalServerErrorResponse;
 }
 
 @route("/categories")
 @tag("Categories")
 interface Categories {
-  @get list(): Category[] | CategoryNotFoundResponse;
+  @get list(): Category[] | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @get get(
     @path categoryId: integer,

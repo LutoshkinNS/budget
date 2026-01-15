@@ -41,7 +41,7 @@ export default async function authRoutes(app: FastifyApp) {
     {
       preHandler: [app.authenticate],
       schema: {
-        response: { 200: UserInfo }
+        response: { 200: UserInfo, 401: UnauthorizedError }
       }
     },
     meHandler

@@ -4,6 +4,7 @@ import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-
 import fastify from 'fastify';
 
 import envPlugin from './plugins/env/envPlugin.ts';
+import errorHandlerPlugin from './plugins/errorHandler/errorHandlerPlugin.ts';
 import jwtPlugin from './plugins/jwt/jwtPlugin.ts';
 import prismaPlugin from './plugins/prisma/prismaPlugin.ts';
 
@@ -25,6 +26,9 @@ export default async function appInit() {
   await app.register(fastifyCookie);
   await app.register(prismaPlugin);
   await app.register(jwtPlugin);
+
+  // error handler последний
+  await app.register(errorHandlerPlugin);
 
   return app;
 }
