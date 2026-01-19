@@ -13,27 +13,23 @@ enum ErrorCode {
 }
 
 @error
-model BaseError {
-  code: ErrorCode;
-  message: string;
-  statusCode: integer;
-}
-
-@error
-model NotFoundError extends BaseError {
+model NotFoundError {
   code: ErrorCode.NOT_FOUND;
+  message: string;
   statusCode: 404;
 }
 
 @error
-model ValidationError extends BaseError {
+model ValidationError {
   code: ErrorCode.VALIDATION_ERROR;
+  message: string;
   statusCode: 400;
 }
 
 @error
-model InternalServerError extends BaseError {
+model InternalServerError {
   code: ErrorCode.INTERNAL_SERVER_ERROR;
+  message: string;
   statusCode: 500;
 }
 

@@ -45,8 +45,9 @@ model UserInfo {
 }
 
 @error
-model UnauthorizedError extends BaseError {
+model UnauthorizedError {
   code: ErrorCode.UNAUTHORIZED | ErrorCode.INVALID_TOKEN | ErrorCode.MISSING_TOKEN;
+  message: string;
   statusCode: 401;
 }
 
@@ -57,8 +58,9 @@ model AuthUnauthorizedResponse {
 }
 
 @error
-model NoAccountError extends BaseError {
+model NoAccountError {
   code: ErrorCode.NO_ACCOUNT;
+  message: string;
   statusCode: 409;
 }
 
