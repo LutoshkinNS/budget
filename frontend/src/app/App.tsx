@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
@@ -23,7 +24,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Notifications>
-        <RouterProvider router={router} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <RouterProvider router={router} />
+        </Suspense>
       </Notifications>
       <ReactQueryDevtools />
     </QueryClientProvider>

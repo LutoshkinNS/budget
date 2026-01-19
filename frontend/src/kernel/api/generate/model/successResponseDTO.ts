@@ -5,6 +5,6 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface SimpleSuccessResponseDTO {
+export interface SuccessResponseDTO {
   success: boolean;
 }

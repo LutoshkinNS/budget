@@ -5,8 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { UnauthorizedErrorDTOCode } from "./unauthorizedErrorDTOCode";
+import type { UnauthorizedErrorDTOStatusCode } from "./unauthorizedErrorDTOStatusCode";
 
 export interface UnauthorizedErrorDTO {
-  code: UnauthorizedErrorDTOCode;
+  code: (typeof UnauthorizedErrorDTOCode)[keyof typeof UnauthorizedErrorDTOCode];
   message: string;
+  statusCode: UnauthorizedErrorDTOStatusCode;
 }

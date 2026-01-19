@@ -29,7 +29,7 @@ import type {
   ValidationErrorDTO,
 } from ".././model";
 
-import { customFetcher } from "../../customFetcher";
+import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -41,7 +41,7 @@ export const categorySubcategoriesList = async (
   categoryId: number,
   options?: RequestInit,
 ): Promise<SubcategoryDTO[]> => {
-  return customFetcher<SubcategoryDTO[]>(
+  return fetcher<SubcategoryDTO[]>(
     getCategorySubcategoriesListUrl(categoryId),
     {
       ...options,
@@ -67,7 +67,7 @@ export const getCategorySubcategoriesListQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -120,7 +120,7 @@ export function useCategorySubcategoriesList<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -147,7 +147,7 @@ export function useCategorySubcategoriesList<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -166,7 +166,7 @@ export function useCategorySubcategoriesList<
         TData
       >
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -186,7 +186,7 @@ export function useCategorySubcategoriesList<
         TData
       >
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -229,7 +229,7 @@ export const categorySubcategoriesCreate = async (
   subcategoryCreateDTO: SubcategoryCreateDTO,
   options?: RequestInit,
 ): Promise<SubcategoryDTO> => {
-  return customFetcher<SubcategoryDTO>(
+  return fetcher<SubcategoryDTO>(
     getCategorySubcategoriesCreateUrl(categoryId),
     {
       ...options,
@@ -250,7 +250,7 @@ export const getCategorySubcategoriesCreateMutationOptions = <
     { categoryId: number; data: SubcategoryCreateDTO },
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof categorySubcategoriesCreate>>,
   TError,
@@ -297,7 +297,7 @@ export const useCategorySubcategoriesCreate = <
       { categoryId: number; data: SubcategoryCreateDTO },
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -323,7 +323,7 @@ export const categorySubcategoriesGet = async (
   subcategoryId: number,
   options?: RequestInit,
 ): Promise<SubcategoryDTO> => {
-  return customFetcher<SubcategoryDTO>(
+  return fetcher<SubcategoryDTO>(
     getCategorySubcategoriesGetUrl(categoryId, subcategoryId),
     {
       ...options,
@@ -353,7 +353,7 @@ export const getCategorySubcategoriesGetQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -411,7 +411,7 @@ export function useCategorySubcategoriesGet<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -439,7 +439,7 @@ export function useCategorySubcategoriesGet<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -459,7 +459,7 @@ export function useCategorySubcategoriesGet<
         TData
       >
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -480,7 +480,7 @@ export function useCategorySubcategoriesGet<
         TData
       >
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -530,7 +530,7 @@ export const categorySubcategoriesDelete = async (
   subcategoryId: number,
   options?: RequestInit,
 ): Promise<void> => {
-  return customFetcher<void>(
+  return fetcher<void>(
     getCategorySubcategoriesDeleteUrl(categoryId, subcategoryId),
     {
       ...options,
@@ -549,7 +549,7 @@ export const getCategorySubcategoriesDeleteMutationOptions = <
     { categoryId: number; subcategoryId: number },
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof categorySubcategoriesDelete>>,
   TError,
@@ -598,7 +598,7 @@ export const useCategorySubcategoriesDelete = <
       { categoryId: number; subcategoryId: number },
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<

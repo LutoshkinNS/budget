@@ -13,6 +13,7 @@ import { Route as PublicRouteRouteImport } from './_public/route'
 import { Route as PrivateRouteRouteImport } from './_private/route'
 import { Route as PrivateIndexRouteImport } from './_private/index'
 import { Route as PublicLoginRouteImport } from './_public/login'
+import { Route as PrivateSettingsRouteImport } from './_private/settings'
 import { Route as PrivateCategoriesRouteImport } from './_private/categories'
 
 const PublicRouteRoute = PublicRouteRouteImport.update({
@@ -33,6 +34,11 @@ const PublicLoginRoute = PublicLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PrivateSettingsRoute = PrivateSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 const PrivateCategoriesRoute = PrivateCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -41,11 +47,13 @@ const PrivateCategoriesRoute = PrivateCategoriesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/categories': typeof PrivateCategoriesRoute
+  '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/': typeof PrivateIndexRoute
 }
 export interface FileRoutesByTo {
   '/categories': typeof PrivateCategoriesRoute
+  '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/': typeof PrivateIndexRoute
 }
@@ -54,19 +62,21 @@ export interface FileRoutesById {
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_private/categories': typeof PrivateCategoriesRoute
+  '/_private/settings': typeof PrivateSettingsRoute
   '/_public/login': typeof PublicLoginRoute
   '/_private/': typeof PrivateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/categories' | '/login' | '/'
+  fullPaths: '/categories' | '/settings' | '/login' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/categories' | '/login' | '/'
+  to: '/categories' | '/settings' | '/login' | '/'
   id:
     | '__root__'
     | '/_private'
     | '/_public'
     | '/_private/categories'
+    | '/_private/settings'
     | '/_public/login'
     | '/_private/'
   fileRoutesById: FileRoutesById
@@ -106,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_private/settings': {
+      id: '/_private/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof PrivateSettingsRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_private/categories': {
       id: '/_private/categories'
       path: '/categories'
@@ -118,11 +135,13 @@ declare module '@tanstack/react-router' {
 
 interface PrivateRouteRouteChildren {
   PrivateCategoriesRoute: typeof PrivateCategoriesRoute
+  PrivateSettingsRoute: typeof PrivateSettingsRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateCategoriesRoute: PrivateCategoriesRoute,
+  PrivateSettingsRoute: PrivateSettingsRoute,
   PrivateIndexRoute: PrivateIndexRoute,
 }
 

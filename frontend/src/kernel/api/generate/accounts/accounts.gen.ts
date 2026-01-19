@@ -18,9 +18,13 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { AccountDTO, NotFoundErrorDTO } from ".././model";
+import type {
+  AccountDTO,
+  InternalServerErrorDTO,
+  NotFoundErrorDTO,
+} from ".././model";
 
-import { customFetcher } from "../../customFetcher";
+import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -31,7 +35,7 @@ export const getAccountsListUrl = () => {
 export const accountsList = async (
   options?: RequestInit,
 ): Promise<AccountDTO[]> => {
-  return customFetcher<AccountDTO[]>(getAccountsListUrl(), {
+  return fetcher<AccountDTO[]>(getAccountsListUrl(), {
     ...options,
     method: "GET",
   });
@@ -43,12 +47,12 @@ export const getAccountsListQueryKey = () => {
 
 export const getAccountsListQueryOptions = <
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -68,11 +72,11 @@ export const getAccountsListQueryOptions = <
 export type AccountsListQueryResult = NonNullable<
   Awaited<ReturnType<typeof accountsList>>
 >;
-export type AccountsListQueryError = NotFoundErrorDTO;
+export type AccountsListQueryError = NotFoundErrorDTO | InternalServerErrorDTO;
 
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options: {
     query: Partial<
@@ -86,7 +90,7 @@ export function useAccountsList<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -94,7 +98,7 @@ export function useAccountsList<
 };
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -108,7 +112,7 @@ export function useAccountsList<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -116,13 +120,13 @@ export function useAccountsList<
 };
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -131,13 +135,13 @@ export function useAccountsList<
 
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {

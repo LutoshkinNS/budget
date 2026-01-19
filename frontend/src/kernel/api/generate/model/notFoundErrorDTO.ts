@@ -5,8 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { NotFoundErrorDTOCode } from "./notFoundErrorDTOCode";
+import type { NotFoundErrorDTOStatusCode } from "./notFoundErrorDTOStatusCode";
 
 export interface NotFoundErrorDTO {
   code: NotFoundErrorDTOCode;
   message: string;
+  statusCode: NotFoundErrorDTOStatusCode;
 }

@@ -5,9 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { ValidationErrorDTOCode } from "./validationErrorDTOCode";
+import type { ValidationErrorDTOStatusCode } from "./validationErrorDTOStatusCode";
 
 export interface ValidationErrorDTO {
   code: ValidationErrorDTOCode;
-  details: string[];
   message: string;
+  statusCode: ValidationErrorDTOStatusCode;
 }

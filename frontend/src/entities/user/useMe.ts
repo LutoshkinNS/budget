@@ -5,7 +5,7 @@ import { authMeResponse } from "@/kernel/api/generate/authentication/authenticat
 import { useNotifications } from "@/shared/lib/notifications";
 
 export function useMe() {
-  const { data, isError, error } = useAuthMe();
+  const { data, isError, error, ...rest } = useAuthMe();
   const { addNotification } = useNotifications();
 
   useEffect(() => {
@@ -31,5 +31,10 @@ export function useMe() {
   }, [isError, error, data, addNotification]);
 
   const validation = authMeResponse.safeParse(data);
-  return { data: data && validation.success ? validation.data : null };
+  return {
+    ...rest,
+    data: data && validation.success ? validation.data : null,
+    isError,
+    error,
+  };
 }

@@ -5,9 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
+export type ValidationErrorDTOStatusCode =
+  (typeof ValidationErrorDTOStatusCode)[keyof typeof ValidationErrorDTOStatusCode];
+
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UnauthorizedErrorDTOCode = {
-  UNAUTHORIZED: "UNAUTHORIZED",
-  INVALID_TOKEN: "INVALID_TOKEN",
-  MISSING_TOKEN: "MISSING_TOKEN",
+export const ValidationErrorDTOStatusCode = {
+  NUMBER_400: 400,
 } as const;

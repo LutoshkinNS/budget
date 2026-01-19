@@ -5,8 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { InternalServerErrorDTOCode } from "./internalServerErrorDTOCode";
+import type { InternalServerErrorDTOStatusCode } from "./internalServerErrorDTOStatusCode";
 
 export interface InternalServerErrorDTO {
   code: InternalServerErrorDTOCode;
   message: string;
+  statusCode: InternalServerErrorDTOStatusCode;
 }

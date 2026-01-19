@@ -25,12 +25,12 @@ import type {
   InternalServerErrorDTO,
   LoginRequestDTO,
   NoAccountErrorDTO,
-  SimpleSuccessResponseDTO,
+  SuccessResponseDTO,
   UnauthorizedErrorDTO,
   UserInfoDTO,
 } from ".././model";
 
-import { customFetcher } from "../../customFetcher";
+import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -41,8 +41,8 @@ export const getAuthLoginUrl = () => {
 export const authLogin = async (
   loginRequestDTO: LoginRequestDTO,
   options?: RequestInit,
-): Promise<SimpleSuccessResponseDTO> => {
-  return customFetcher<SimpleSuccessResponseDTO>(getAuthLoginUrl(), {
+): Promise<SuccessResponseDTO> => {
+  return fetcher<SuccessResponseDTO>(getAuthLoginUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -51,7 +51,11 @@ export const authLogin = async (
 };
 
 export const getAuthLoginMutationOptions = <
-  TError = NoAccountErrorDTO | void | InternalServerErrorDTO,
+  TError =
+    | UnauthorizedErrorDTO
+    | void
+    | NoAccountErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -60,7 +64,7 @@ export const getAuthLoginMutationOptions = <
     { data: LoginRequestDTO },
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof authLogin>>,
   TError,
@@ -93,12 +97,17 @@ export type AuthLoginMutationResult = NonNullable<
 >;
 export type AuthLoginMutationBody = LoginRequestDTO;
 export type AuthLoginMutationError =
-  | NoAccountErrorDTO
+  | UnauthorizedErrorDTO
   | void
+  | NoAccountErrorDTO
   | InternalServerErrorDTO;
 
 export const useAuthLogin = <
-  TError = NoAccountErrorDTO | void | InternalServerErrorDTO,
+  TError =
+    | UnauthorizedErrorDTO
+    | void
+    | NoAccountErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
@@ -108,7 +117,7 @@ export const useAuthLogin = <
       { data: LoginRequestDTO },
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -127,8 +136,8 @@ export const getAuthLogoutUrl = () => {
 
 export const authLogout = async (
   options?: RequestInit,
-): Promise<SimpleSuccessResponseDTO> => {
-  return customFetcher<SimpleSuccessResponseDTO>(getAuthLogoutUrl(), {
+): Promise<SuccessResponseDTO> => {
+  return fetcher<SuccessResponseDTO>(getAuthLogoutUrl(), {
     ...options,
     method: "POST",
   });
@@ -144,7 +153,7 @@ export const getAuthLogoutMutationOptions = <
     void,
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof authLogout>>,
   TError,
@@ -189,7 +198,7 @@ export const useAuthLogout = <
       void,
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -207,7 +216,7 @@ export const getAuthMeUrl = () => {
 };
 
 export const authMe = async (options?: RequestInit): Promise<UserInfoDTO> => {
-  return customFetcher<UserInfoDTO>(getAuthMeUrl(), {
+  return fetcher<UserInfoDTO>(getAuthMeUrl(), {
     ...options,
     method: "GET",
   });
@@ -224,7 +233,7 @@ export const getAuthMeQueryOptions = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof authMe>>, TError, TData>
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -260,7 +269,7 @@ export function useAuthMe<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -282,7 +291,7 @@ export function useAuthMe<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -296,7 +305,7 @@ export function useAuthMe<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof authMe>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -311,7 +320,7 @@ export function useAuthMe<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof authMe>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -347,8 +356,8 @@ export const getAuthRefreshUrl = () => {
 
 export const authRefresh = async (
   options?: RequestInit,
-): Promise<SimpleSuccessResponseDTO> => {
-  return customFetcher<SimpleSuccessResponseDTO>(getAuthRefreshUrl(), {
+): Promise<SuccessResponseDTO> => {
+  return fetcher<SuccessResponseDTO>(getAuthRefreshUrl(), {
     ...options,
     method: "POST",
   });
@@ -364,7 +373,7 @@ export const getAuthRefreshMutationOptions = <
     void,
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof authRefresh>>,
   TError,
@@ -409,7 +418,7 @@ export const useAuthRefresh = <
       void,
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<

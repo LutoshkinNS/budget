@@ -29,7 +29,7 @@ import type {
   ValidationErrorDTO,
 } from ".././model";
 
-import { customFetcher } from "../../customFetcher";
+import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -40,7 +40,7 @@ export const getCategoriesListUrl = () => {
 export const categoriesList = async (
   options?: RequestInit,
 ): Promise<CategoryDTO[]> => {
-  return customFetcher<CategoryDTO[]>(getCategoriesListUrl(), {
+  return fetcher<CategoryDTO[]>(getCategoriesListUrl(), {
     ...options,
     method: "GET",
   });
@@ -52,12 +52,12 @@ export const getCategoriesListQueryKey = () => {
 
 export const getCategoriesListQueryOptions = <
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -77,11 +77,13 @@ export const getCategoriesListQueryOptions = <
 export type CategoriesListQueryResult = NonNullable<
   Awaited<ReturnType<typeof categoriesList>>
 >;
-export type CategoriesListQueryError = NotFoundErrorDTO;
+export type CategoriesListQueryError =
+  | NotFoundErrorDTO
+  | InternalServerErrorDTO;
 
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options: {
     query: Partial<
@@ -95,7 +97,7 @@ export function useCategoriesList<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -103,7 +105,7 @@ export function useCategoriesList<
 };
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -117,7 +119,7 @@ export function useCategoriesList<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -125,13 +127,13 @@ export function useCategoriesList<
 };
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -140,13 +142,13 @@ export function useCategoriesList<
 
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO,
+  TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -184,7 +186,7 @@ export const categoriesCreate = async (
   categoryCreateDTO: CategoryCreateDTO,
   options?: RequestInit,
 ): Promise<CategoryDTO> => {
-  return customFetcher<CategoryDTO>(getCategoriesCreateUrl(), {
+  return fetcher<CategoryDTO>(getCategoriesCreateUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -202,7 +204,7 @@ export const getCategoriesCreateMutationOptions = <
     { data: CategoryCreateDTO },
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof categoriesCreate>>,
   TError,
@@ -249,7 +251,7 @@ export const useCategoriesCreate = <
       { data: CategoryCreateDTO },
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -270,7 +272,7 @@ export const categoriesGet = async (
   categoryId: number,
   options?: RequestInit,
 ): Promise<CategoryDTO> => {
-  return customFetcher<CategoryDTO>(getCategoriesGetUrl(categoryId), {
+  return fetcher<CategoryDTO>(getCategoriesGetUrl(categoryId), {
     ...options,
     method: "GET",
   });
@@ -289,7 +291,7 @@ export const getCategoriesGetQueryOptions = <
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesGet>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -335,7 +337,7 @@ export function useCategoriesGet<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -358,7 +360,7 @@ export function useCategoriesGet<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -373,7 +375,7 @@ export function useCategoriesGet<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesGet>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -389,7 +391,7 @@ export function useCategoriesGet<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesGet>>, TError, TData>
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -428,7 +430,7 @@ export const categoriesDelete = async (
   categoryId: number,
   options?: RequestInit,
 ): Promise<void> => {
-  return customFetcher<void>(getCategoriesDeleteUrl(categoryId), {
+  return fetcher<void>(getCategoriesDeleteUrl(categoryId), {
     ...options,
     method: "DELETE",
   });
@@ -444,7 +446,7 @@ export const getCategoriesDeleteMutationOptions = <
     { categoryId: number },
     TContext
   >;
-  request?: SecondParameter<typeof customFetcher>;
+  request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof categoriesDelete>>,
   TError,
@@ -489,7 +491,7 @@ export const useCategoriesDelete = <
       { categoryId: number },
       TContext
     >;
-    request?: SecondParameter<typeof customFetcher>;
+    request?: SecondParameter<typeof fetcher>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<

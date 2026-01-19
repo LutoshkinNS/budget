@@ -5,8 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { NoAccountErrorDTOCode } from "./noAccountErrorDTOCode";
+import type { NoAccountErrorDTOStatusCode } from "./noAccountErrorDTOStatusCode";
 
 export interface NoAccountErrorDTO {
   code: NoAccountErrorDTOCode;
   message: string;
+  statusCode: NoAccountErrorDTOStatusCode;
 }

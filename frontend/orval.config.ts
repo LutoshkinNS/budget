@@ -14,8 +14,8 @@ export default defineConfig({
       propertySortOrder: "Alphabetical",
       override: {
         mutator: {
-          path: "./src/kernel/api/customFetcher.ts",
-          name: "customFetcher",
+          path: "./src/kernel/api/fetcher.ts",
+          name: "fetcher",
         },
         query: {
           useInvalidate: true,
