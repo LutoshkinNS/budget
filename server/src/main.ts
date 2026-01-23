@@ -1,4 +1,5 @@
 import appInit from '#src/appInit.ts';
+import accountsRoutes from '#src/domains/accounts/routes.ts';
 import authRoutes from '#src/domains/auth/routes.ts';
 import categoriesModule from '#src/domains/categories/categories.ts';
 import expensesModule from '#src/domains/expenses/expenses.ts';
@@ -7,6 +8,7 @@ import subcategoriesModule from '#src/domains/subcategories/subcategories.ts';
 const app = await appInit();
 
 app.register(authRoutes, { prefix: '/api/v1/auth' });
+app.register(accountsRoutes, { prefix: '/api/v1/accounts' });
 app.register(categoriesModule, { prefix: '/api/v1/categories' });
 app.register(expensesModule, { prefix: '/api/v1/expenses' });
 app.register(subcategoriesModule, { prefix: '/api/v1/subcategories' });
