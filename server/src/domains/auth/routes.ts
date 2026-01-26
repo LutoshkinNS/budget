@@ -1,14 +1,14 @@
-import LoginRequest from '#s/LoginRequest.ts';
-import NoAccountError from '#s/NoAccountError.ts';
-import SuccessResponse from '#s/SuccessResponse.ts';
-import UnauthorizedError from '#s/UnauthorizedError.ts';
-import UserInfo from '#s/UserInfo.ts';
-import type { FastifyApp } from '#src/appInit.ts';
+import LoginRequest from '#s/LoginRequest.js';
+import NoAccountError from '#s/NoAccountError.js';
+import SuccessResponse from '#s/SuccessResponse.js';
+import UnauthorizedError from '#s/UnauthorizedError.js';
+import UserInfo from '#s/UserInfo.js';
+import type { FastifyApp } from '#src/appInit.js';
 
-import { loginHandler } from './handlers/login.handler.ts';
-import { logoutHandler } from './handlers/logout.handler.ts';
-import { meHandler } from './handlers/me.handler.ts';
-import { refreshHandler } from './handlers/refresh.handler.ts';
+import { loginHandler } from './handlers/login.handler.js';
+import { logoutHandler } from './handlers/logout.handler.js';
+import { meHandler } from './handlers/me.handler.js';
+import { refreshHandler } from './handlers/refresh.handler.js';
 
 export default async function authRoutes(app: FastifyApp) {
   app.post(

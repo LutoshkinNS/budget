@@ -2,19 +2,19 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 
 import type LoginRequest from '#s/LoginRequest.js';
-import type { FastifyApp } from '#src/appInit.ts';
+import type { FastifyApp } from '#src/appInit.js';
 
 import {
   ACCESS_TOKEN_MAX_AGE_SECONDS,
   AUTH_DATA_MAX_AGE_SECONDS,
   AUTH_ERRORS,
   REFRESH_TOKEN_MAX_AGE_SECONDS
-} from '../constants.ts';
+} from '../constants.js';
 import {
   findOrCreateUser,
   getFirstAccountId
-} from '../repositories/user.repository.ts';
-import { validateTelegramAuth } from '../validateTelegramAuth.ts';
+} from '../repositories/user.repository.js';
+import { validateTelegramAuth } from '../validateTelegramAuth.js';
 
 type LoginRequestBody = FromSchema<typeof LoginRequest>;
 

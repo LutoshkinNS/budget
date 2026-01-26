@@ -3,10 +3,10 @@ import fastifyCors from '@fastify/cors';
 import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import fastify from 'fastify';
 
-import envPlugin from './plugins/env/envPlugin.ts';
-import errorHandlerPlugin from './plugins/errorHandler/errorHandlerPlugin.ts';
-import jwtPlugin from './plugins/jwt/jwtPlugin.ts';
-import prismaPlugin from './plugins/prisma/prismaPlugin.ts';
+import envPlugin from './plugins/env/envPlugin.js';
+import errorHandlerPlugin from './plugins/errorHandler/errorHandlerPlugin.js';
+import jwtPlugin from './plugins/jwt/jwtPlugin.js';
+import prismaPlugin from './plugins/prisma/prismaPlugin.js';
 
 export default async function appInit() {
   const app = fastify({

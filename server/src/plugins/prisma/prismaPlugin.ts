@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin';
 
 import { PrismaClient } from '#generated/prisma/index.js';
-import type { FastifyApp } from '#src/appInit.ts';
+import type { FastifyApp } from '#src/appInit.js';
 
 async function prismaPlugin(app: FastifyApp) {
   const prisma = new PrismaClient();

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import { ACCESS_TOKEN_MAX_AGE_SECONDS } from '../constants.ts';
+import { ACCESS_TOKEN_MAX_AGE_SECONDS } from '../constants.js';
 
 export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
   await req.refreshJwtVerify();

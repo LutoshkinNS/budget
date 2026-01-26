@@ -2,7 +2,7 @@ import fastifyEnv from '@fastify/env';
 import fp from 'fastify-plugin';
 import { FromSchema } from 'json-schema-to-ts';
 
-import { FastifyApp } from '#src/appInit.ts';
+import { FastifyApp } from '#src/appInit.js';
 
 const schema = {
   type: 'object',

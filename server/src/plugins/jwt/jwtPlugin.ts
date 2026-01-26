@@ -1,7 +1,7 @@
 import fastifyJwt from '@fastify/jwt';
 import fp from 'fastify-plugin';
 
-import type { FastifyApp } from '#src/appInit.ts';
+import type { FastifyApp } from '#src/appInit.js';
 
 const accessTokenMessages = {
   badRequestErrorMessage: 'Неверный формат access токена',

@@ -2,7 +2,7 @@ import { createHash, createHmac } from 'node:crypto';
 
 import { FromSchema } from 'json-schema-to-ts';
 
-import LoginRequest from '#s/LoginRequest.ts';
+import LoginRequest from '#s/LoginRequest.js';
 
 type TelegramUserData = FromSchema<typeof LoginRequest>;
 

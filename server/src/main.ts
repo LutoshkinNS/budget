@@ -1,9 +1,9 @@
-import appInit from '#src/appInit.ts';
-import accountsRoutes from '#src/domains/accounts/routes.ts';
-import authRoutes from '#src/domains/auth/routes.ts';
-import categoriesModule from '#src/domains/categories/categories.ts';
-import expensesModule from '#src/domains/expenses/expenses.ts';
-import subcategoriesModule from '#src/domains/subcategories/subcategories.ts';
+import appInit from '#src/appInit.js';
+import accountsRoutes from '#src/domains/accounts/routes.js';
+import authRoutes from '#src/domains/auth/routes.js';
+import categoriesModule from '#src/domains/categories/categories.js';
+import expensesModule from '#src/domains/expenses/expenses.js';
+import subcategoriesModule from '#src/domains/subcategories/subcategories.js';
 
 const app = await appInit();
 

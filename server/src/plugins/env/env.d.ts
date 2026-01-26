@@ -1,4 +1,4 @@
-import { Envs } from '#src/plugins/env/envPlugin.ts';
+import { Envs } from '#src/plugins/env/envPlugin.js';
 
 declare module 'fastify' {
   interface FastifyInstance {

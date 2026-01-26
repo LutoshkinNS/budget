@@ -1,21 +1,24 @@
 import fp from 'fastify-plugin';
-import { FromSchema } from 'json-schema-to-ts';
 
-import BaseError from '#s/BaseError.ts';
-import { FastifyApp } from '#src/appInit.ts';
+import { FastifyApp } from '#src/appInit.js';
 
 import {
   CUSTOM_ERROR_CODES,
+  CustomErrorCode,
   FASTIFY_JWT_ERROR_CODES,
   isJwtError
-} from './errorCodes.ts';
+} from './errorCodes.js';
 
-type ErrorResponse = FromSchema<typeof BaseError>;
+type ErrorResponse = {
+  code: CustomErrorCode;
+  message: string;
+  statusCode: number;
+};
 
 async function errorHandlerPlugin(app: FastifyApp) {
   app.setErrorHandler((error, _request, reply) => {
     const errorResponse: ErrorResponse = {
-      code: error.code,
+      code: error.code as CustomErrorCode, // BAD
       message: error.message,
       statusCode: error.statusCode || 500
     };
