@@ -1,5 +1,3 @@
-import { authRefresh } from "../api/generate/authentication/authentication.gen.ts";
-
 let isRefreshing = false;
 
 export const fetcher = async <T>(
@@ -14,7 +12,14 @@ export const fetcher = async <T>(
   if (res.status === 401 && !isRefreshing) {
     isRefreshing = true;
     try {
-      await authRefresh();
+      const refreshRes = await fetch("/api/v1/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!refreshRes.ok) {
+        throw new Error("Failed to refresh token");
+      }
 
       res = await fetch(url, {
         ...options,

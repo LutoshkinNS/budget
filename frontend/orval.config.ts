@@ -1,8 +1,12 @@
 import { defineConfig } from "orval";
 
+const openapiPath =
+  process.env.OPENAPI_PATH ||
+  "../server/generated/@typespec/openapi3/openapi.json";
+
 export default defineConfig({
   budget: {
-    input: "../server/generated/@typespec/openapi3/openapi.json",
+    input: openapiPath,
     output: {
       mode: "tags-split",
       target: "src/kernel/api/generate",
@@ -34,7 +38,7 @@ export default defineConfig({
     },
   },
   budgetZod: {
-    input: "../server/generated/@typespec/openapi3/openapi.json",
+    input: openapiPath,
     output: {
       mode: "tags-split",
       client: "zod",
