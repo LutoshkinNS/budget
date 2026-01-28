@@ -6,7 +6,7 @@ COPY frontend/package*.json ./
 
 RUN --mount=type=cache,target=/root/.npm npm ci
 
-COPY server/generated/@typespec/openapi3/openapi.json ./openapi.json
+COPY --from=budget-server:latest /app/generated/@typespec/openapi3/openapi.json ./openapi.json
 
 COPY frontend/ .
 

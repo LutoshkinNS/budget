@@ -22,6 +22,7 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist/src ./src
 COPY --from=builder /app/dist/generated ./generated
+COPY --from=builder /app/generated/@typespec ./generated/@typespec
 COPY --from=builder /app/prisma ./prisma
 
 RUN mkdir -p /app/data

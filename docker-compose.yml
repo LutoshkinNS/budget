@@ -3,6 +3,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    image: budget-server
     container_name: budget_server
     restart: always
     ports:
