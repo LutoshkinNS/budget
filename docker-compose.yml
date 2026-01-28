@@ -1,0 +1,39 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: budget_server
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL:-file:/app/data/budget.db}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    volumes:
+      - ./server/data:/app/data
+    networks:
+      - budget-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: budget_frontend
+    restart: always
+    ports:
+      - '3001:8080'
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-/api}
+      VITE_NGROK_DOMAIN: ${VITE_NGROK_DOMAIN:-}
+    depends_on:
+      - server
+    networks:
+      - budget-network
+
+networks:
+  budget-network:
+    driver: bridge
