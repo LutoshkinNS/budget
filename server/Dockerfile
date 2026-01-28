@@ -6,6 +6,9 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+ENV DATABASE_URL="file:/app/data/budget.db"
+
 RUN npx prisma generate
 RUN npm run build
 RUN cp -r /app/generated/prisma /app/dist/generated/prisma
