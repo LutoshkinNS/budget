@@ -1,10 +1,12 @@
 let isRefreshing = false;
 
+const BASE_URL = import.meta.env.VITE_API_URL || "";
+
 export const fetcher = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
-  let res = await fetch(url, {
+  let res = await fetch(`${BASE_URL}${url}`, {
     ...options,
     credentials: "include",
   });
@@ -12,7 +14,7 @@ export const fetcher = async <T>(
   if (res.status === 401 && !isRefreshing) {
     isRefreshing = true;
     try {
-      const refreshRes = await fetch("/api/v1/auth/refresh", {
+      const refreshRes = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
         method: "POST",
         credentials: "include",
       });
@@ -21,7 +23,7 @@ export const fetcher = async <T>(
         throw new Error("Failed to refresh token");
       }
 
-      res = await fetch(url, {
+      res = await fetch(`${BASE_URL}${url}`, {
         ...options,
         credentials: "include",
       });
