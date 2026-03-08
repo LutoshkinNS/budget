@@ -7,7 +7,7 @@ import { authLoginBody } from "@/kernel/api/generate/authentication/authenticati
 import { useNotifications } from "@/shared/lib/notifications";
 
 const telegram_widget_config = {
-  botName: "BudgetBestRuBot",
+  botName: import.meta.env.VITE_TELEGRAM_BOT_NAME,
   src: "https://telegram.org/js/telegram-widget.js?22",
   btnSize: "large",
 };
