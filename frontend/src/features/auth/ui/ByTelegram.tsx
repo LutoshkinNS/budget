@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { INVITE_CODE_KEY } from "@/features/auth";
 import { useLogin } from "@/features/auth/model/useLogin.ts";
 import { authLoginBody } from "@/kernel/api/generate/authentication/authentication.zod.gen.ts";
 import { useNotifications } from "@/shared/lib/notifications";
@@ -48,7 +49,16 @@ export function ByTelegram() {
       });
 
       if (result) {
-        await navigate({ to: "/" });
+        const pendingCode = sessionStorage.getItem(INVITE_CODE_KEY);
+        if (pendingCode) {
+          sessionStorage.removeItem(INVITE_CODE_KEY);
+          await navigate({
+            to: "/invite/$code",
+            params: { code: pendingCode },
+          });
+        } else {
+          await navigate({ to: "/" });
+        }
       }
     };
 

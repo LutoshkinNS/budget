@@ -4,24 +4,32 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
   InvalidateOptions,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
 import type {
   AccountDTO,
+  AccountInvitationDTO,
+  ForbiddenErrorDTO,
   InternalServerErrorDTO,
+  InvitationNotFoundErrorDTO,
   NotFoundErrorDTO,
+  RedeemInvitationRequestDTO,
+  UnauthorizedErrorDTO,
 } from ".././model";
 
 import { fetcher } from "../../fetcher";
@@ -169,4 +177,186 @@ export const invalidateAccountsList = async (
   );
 
   return queryClient;
+};
+
+export const getAccountsRedeemInvitationUrl = () => {
+  return `/api/v1/accounts/invitations/redeem`;
+};
+
+export const accountsRedeemInvitation = async (
+  redeemInvitationRequestDTO: RedeemInvitationRequestDTO,
+  options?: RequestInit,
+): Promise<AccountInvitationDTO> => {
+  return fetcher<AccountInvitationDTO>(getAccountsRedeemInvitationUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(redeemInvitationRequestDTO),
+  });
+};
+
+export const getAccountsRedeemInvitationMutationOptions = <
+  TError =
+    | UnauthorizedErrorDTO
+    | InvitationNotFoundErrorDTO
+    | InternalServerErrorDTO,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof accountsRedeemInvitation>>,
+    TError,
+    { data: RedeemInvitationRequestDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof accountsRedeemInvitation>>,
+  TError,
+  { data: RedeemInvitationRequestDTO },
+  TContext
+> => {
+  const mutationKey = ["accountsRedeemInvitation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof accountsRedeemInvitation>>,
+    { data: RedeemInvitationRequestDTO }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return accountsRedeemInvitation(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AccountsRedeemInvitationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof accountsRedeemInvitation>>
+>;
+export type AccountsRedeemInvitationMutationBody = RedeemInvitationRequestDTO;
+export type AccountsRedeemInvitationMutationError =
+  | UnauthorizedErrorDTO
+  | InvitationNotFoundErrorDTO
+  | InternalServerErrorDTO;
+
+export const useAccountsRedeemInvitation = <
+  TError =
+    | UnauthorizedErrorDTO
+    | InvitationNotFoundErrorDTO
+    | InternalServerErrorDTO,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof accountsRedeemInvitation>>,
+      TError,
+      { data: RedeemInvitationRequestDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof accountsRedeemInvitation>>,
+  TError,
+  { data: RedeemInvitationRequestDTO },
+  TContext
+> => {
+  const mutationOptions = getAccountsRedeemInvitationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const getAccountsCreateInvitationUrl = (accountId: number) => {
+  return `/api/v1/accounts/${accountId}/invitations`;
+};
+
+export const accountsCreateInvitation = async (
+  accountId: number,
+  options?: RequestInit,
+): Promise<AccountInvitationDTO> => {
+  return fetcher<AccountInvitationDTO>(
+    getAccountsCreateInvitationUrl(accountId),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getAccountsCreateInvitationMutationOptions = <
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof accountsCreateInvitation>>,
+    TError,
+    { accountId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof accountsCreateInvitation>>,
+  TError,
+  { accountId: number },
+  TContext
+> => {
+  const mutationKey = ["accountsCreateInvitation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof accountsCreateInvitation>>,
+    { accountId: number }
+  > = (props) => {
+    const { accountId } = props ?? {};
+
+    return accountsCreateInvitation(accountId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AccountsCreateInvitationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof accountsCreateInvitation>>
+>;
+
+export type AccountsCreateInvitationMutationError =
+  | UnauthorizedErrorDTO
+  | ForbiddenErrorDTO
+  | InternalServerErrorDTO;
+
+export const useAccountsCreateInvitation = <
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof accountsCreateInvitation>>,
+      TError,
+      { accountId: number },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof accountsCreateInvitation>>,
+  TError,
+  { accountId: number },
+  TContext
+> => {
+  const mutationOptions = getAccountsCreateInvitationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
 };

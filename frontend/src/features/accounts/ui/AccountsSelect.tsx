@@ -1,4 +1,4 @@
-import { useAccounts } from "@/entities/accounts";
+import { useMe, useSwitchAccount } from "@/entities/user";
 
 const IDS = {
   SELECT: "select",
@@ -8,10 +8,19 @@ const FIELD_VALUES = {
   ACCOUNT_ID: "account_id",
 } as const;
 
-type AccountSelectProps = React.ComponentPropsWithoutRef<"select">;
+export function AccountsSelect() {
+  const { data: me } = useMe();
+  const { mutate: switchAccount, isPending } = useSwitchAccount();
 
-export function AccountsSelect(props: AccountSelectProps) {
-  const { data: accountsResponse } = useAccounts();
+  const accounts = me?.accounts ?? [];
+  const currentAccountId = me?.currentAccountId;
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const accountId = Number(e.target.value);
+    if (accountId && accountId !== currentAccountId) {
+      switchAccount({ data: { accountId } });
+    }
+  };
 
   return (
     <div>
@@ -19,13 +28,14 @@ export function AccountsSelect(props: AccountSelectProps) {
       <select
         name={FIELD_VALUES.ACCOUNT_ID}
         id={IDS.SELECT}
-        value={accountsResponse[0]?.id ?? ""}
-        {...props}
+        value={currentAccountId ?? ""}
+        onChange={handleChange}
+        disabled={isPending}
       >
-        {!accountsResponse || !accountsResponse.length ? (
+        {accounts.length === 0 ? (
           <option value="">Аккаунтов не найдено</option>
         ) : null}
-        {accountsResponse.map((account) => (
+        {accounts.map((account) => (
           <option key={account.id} value={account.id}>
             {account.name}
           </option>

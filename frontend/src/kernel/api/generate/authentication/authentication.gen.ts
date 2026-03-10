@@ -22,10 +22,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  ForbiddenErrorDTO,
   InternalServerErrorDTO,
   LoginRequestDTO,
   NoAccountErrorDTO,
   SuccessResponseDTO,
+  SwitchAccountRequestDTO,
   UnauthorizedErrorDTO,
   UserInfoDTO,
 } from ".././model";
@@ -428,6 +430,93 @@ export const useAuthRefresh = <
   TContext
 > => {
   const mutationOptions = getAuthRefreshMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const getAuthSwitchAccountUrl = () => {
+  return `/api/v1/auth/switch-account`;
+};
+
+export const authSwitchAccount = async (
+  switchAccountRequestDTO: SwitchAccountRequestDTO,
+  options?: RequestInit,
+): Promise<SuccessResponseDTO> => {
+  return fetcher<SuccessResponseDTO>(getAuthSwitchAccountUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(switchAccountRequestDTO),
+  });
+};
+
+export const getAuthSwitchAccountMutationOptions = <
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authSwitchAccount>>,
+    TError,
+    { data: SwitchAccountRequestDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authSwitchAccount>>,
+  TError,
+  { data: SwitchAccountRequestDTO },
+  TContext
+> => {
+  const mutationKey = ["authSwitchAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof authSwitchAccount>>,
+    { data: SwitchAccountRequestDTO }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return authSwitchAccount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AuthSwitchAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authSwitchAccount>>
+>;
+export type AuthSwitchAccountMutationBody = SwitchAccountRequestDTO;
+export type AuthSwitchAccountMutationError =
+  | UnauthorizedErrorDTO
+  | ForbiddenErrorDTO
+  | InternalServerErrorDTO;
+
+export const useAuthSwitchAccount = <
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof authSwitchAccount>>,
+      TError,
+      { data: SwitchAccountRequestDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof authSwitchAccount>>,
+  TError,
+  { data: SwitchAccountRequestDTO },
+  TContext
+> => {
+  const mutationOptions = getAuthSwitchAccountMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

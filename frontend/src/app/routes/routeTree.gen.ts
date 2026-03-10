@@ -15,6 +15,7 @@ import { Route as PrivateIndexRouteImport } from './_private/index'
 import { Route as PublicLoginRouteImport } from './_public/login'
 import { Route as PrivateSettingsRouteImport } from './_private/settings'
 import { Route as PrivateCategoriesRouteImport } from './_private/categories'
+import { Route as PublicInviteCodeRouteImport } from './_public/invite.$code'
 
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
@@ -44,18 +45,25 @@ const PrivateCategoriesRoute = PrivateCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
+const PublicInviteCodeRoute = PublicInviteCodeRouteImport.update({
+  id: '/invite/$code',
+  path: '/invite/$code',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/categories': typeof PrivateCategoriesRoute
   '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/': typeof PrivateIndexRoute
+  '/invite/$code': typeof PublicInviteCodeRoute
 }
 export interface FileRoutesByTo {
   '/categories': typeof PrivateCategoriesRoute
   '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/': typeof PrivateIndexRoute
+  '/invite/$code': typeof PublicInviteCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -65,12 +73,13 @@ export interface FileRoutesById {
   '/_private/settings': typeof PrivateSettingsRoute
   '/_public/login': typeof PublicLoginRoute
   '/_private/': typeof PrivateIndexRoute
+  '/_public/invite/$code': typeof PublicInviteCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/categories' | '/settings' | '/login' | '/'
+  fullPaths: '/categories' | '/settings' | '/login' | '/' | '/invite/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/categories' | '/settings' | '/login' | '/'
+  to: '/categories' | '/settings' | '/login' | '/' | '/invite/$code'
   id:
     | '__root__'
     | '/_private'
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/_private/settings'
     | '/_public/login'
     | '/_private/'
+    | '/_public/invite/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,6 +140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateCategoriesRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
+    '/_public/invite/$code': {
+      id: '/_public/invite/$code'
+      path: '/invite/$code'
+      fullPath: '/invite/$code'
+      preLoaderRoute: typeof PublicInviteCodeRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
   }
 }
 
@@ -151,10 +168,12 @@ const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
 
 interface PublicRouteRouteChildren {
   PublicLoginRoute: typeof PublicLoginRoute
+  PublicInviteCodeRoute: typeof PublicInviteCodeRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicLoginRoute: PublicLoginRoute,
+  PublicInviteCodeRoute: PublicInviteCodeRoute,
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(

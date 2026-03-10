@@ -13,3 +13,29 @@ export const accountsListResponseItem = zod.object({
   createdAt: zod.iso.datetime({}),
 });
 export const accountsListResponse = zod.array(accountsListResponseItem);
+
+export const accountsRedeemInvitationBody = zod.object({
+  code: zod.string(),
+});
+
+export const accountsRedeemInvitationResponse = zod.object({
+  id: zod.number().min(1),
+  code: zod.string(),
+  accountId: zod.number().min(1),
+  expiresAt: zod.iso.datetime({}),
+  usedAt: zod.iso.datetime({}).optional(),
+  usedBy: zod.number().min(1).optional(),
+});
+
+export const accountsCreateInvitationParams = zod.object({
+  accountId: zod.number(),
+});
+
+export const accountsCreateInvitationResponse = zod.object({
+  id: zod.number().min(1),
+  code: zod.string(),
+  accountId: zod.number().min(1),
+  expiresAt: zod.iso.datetime({}),
+  usedAt: zod.iso.datetime({}).optional(),
+  usedBy: zod.number().min(1).optional(),
+});

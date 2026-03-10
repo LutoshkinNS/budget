@@ -39,3 +39,11 @@ export const authMeResponse = zod.object({
 export const authRefreshResponse = zod.object({
   success: zod.boolean(),
 });
+
+export const authSwitchAccountBody = zod.object({
+  accountId: zod.number().min(1),
+});
+
+export const authSwitchAccountResponse = zod.object({
+  success: zod.boolean(),
+});
