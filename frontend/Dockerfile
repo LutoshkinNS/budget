@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 COPY --from=openapi /app/generated/@typespec/openapi3/openapi.json ./openapi.json
 COPY frontend/ .
 ARG VITE_API_URL
-RUN OPENAPI_PATH=./openapi.json npm run build
+RUN OPENAPI_PATH=./openapi.json npm run build:prod
 
 FROM nginxinc/nginx-unprivileged:alpine AS runner
 COPY frontend/nginx.conf /etc/nginx/nginx.conf
