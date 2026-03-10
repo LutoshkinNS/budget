@@ -16,5 +16,9 @@ export const AUTH_ERRORS = {
   NO_ACCOUNT: {
     code: 'NO_ACCOUNT',
     message: 'У пользователя нет связанных аккаунтов'
+  },
+  FORBIDDEN: {
+    code: 'FORBIDDEN',
+    message: 'Нет доступа к этому аккаунту'
   }
 } as const;

@@ -31,6 +31,8 @@ git-info.json
 
 # server
 /server/generated/**
+/server/prisma/*.db
+/server/prisma/*.db-journal
 
 # client
 .tanstak

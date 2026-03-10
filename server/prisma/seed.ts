@@ -6,6 +6,7 @@ export async function main() {
   // Создаём пользователя с личным аккаунтом
   const user = await prisma.user.create({
     data: {
+      id: BigInt(1),
       ownedAccounts: {
         create: {
           name: 'Личный бюджет'

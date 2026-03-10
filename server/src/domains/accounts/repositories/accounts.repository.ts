@@ -6,7 +6,7 @@ import type { PrismaClient } from '#generated/prisma/index.js';
  */
 export async function getAccountsList(prisma: PrismaClient, userId: number) {
   const user = await prisma.user.findUniqueOrThrow({
-    where: { id: userId },
+    where: { id: BigInt(userId) },
     include: {
       ownedAccounts: true,
       accounts: {
@@ -28,6 +28,7 @@ export async function getAccountsList(prisma: PrismaClient, userId: number) {
 
   return allAccounts.map((acc) => ({
     ...acc,
+    ownerId: Number(acc.ownerId),
     createdAt: acc.createdAt.toISOString()
   }));
 }

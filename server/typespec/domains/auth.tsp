@@ -70,6 +70,11 @@ model NoAccountResponse {
   @body error: NoAccountError;
 }
 
+model SwitchAccountRequest {
+  @minValue(1)
+  accountId: integer;
+}
+
 model SuccessResponse {
   success: boolean;
 }

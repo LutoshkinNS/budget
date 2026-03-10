@@ -5,7 +5,7 @@ import type { PrismaClient } from '#generated/prisma/index.js';
  */
 export async function findUserWithAccounts(
   prisma: PrismaClient,
-  userId: number
+  userId: bigint
 ) {
   return prisma.user.findUnique({
     where: { id: userId },
@@ -23,7 +23,7 @@ export async function findUserWithAccounts(
  */
 export async function createUserWithAccount(
   prisma: PrismaClient,
-  userId: number
+  userId: bigint
 ) {
   return prisma.user.create({
     data: {
@@ -44,9 +44,9 @@ export async function createUserWithAccount(
 }
 
 /**
- * Находит или создаёт пользователя
+ * Находит или создаёт пользователя по Telegram ID
  */
-export async function findOrCreateUser(prisma: PrismaClient, userId: number) {
+export async function findOrCreateUser(prisma: PrismaClient, userId: bigint) {
   let user = await findUserWithAccounts(prisma, userId);
 
   if (!user) {
@@ -75,7 +75,7 @@ export async function getUserInfo(
   currentAccountId: number
 ) {
   const user = await prisma.user.findUniqueOrThrow({
-    where: { id: userId },
+    where: { id: BigInt(userId) },
     include: {
       ownedAccounts: true,
       accounts: {
@@ -98,7 +98,7 @@ export async function getUserInfo(
   ];
 
   return {
-    userId: user.id,
+    userId,
     currentAccountId,
     accounts
   };

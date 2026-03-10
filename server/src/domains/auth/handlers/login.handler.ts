@@ -36,10 +36,10 @@ export async function loginHandler(
     return reply.code(401).send(AUTH_ERRORS.AUTH_DATA_EXPIRED);
   }
 
-  const userId = req.body.id;
+  const telegramId = BigInt(req.body.id);
 
-  // Ищем или создаём пользователя
-  const user = await findOrCreateUser(this.prisma, userId);
+  // Ищем или создаём пользователя по Telegram ID
+  const user = await findOrCreateUser(this.prisma, telegramId);
 
   // Определяем первый доступный accountId
   const accountId = getFirstAccountId(user);
@@ -47,6 +47,9 @@ export async function loginHandler(
   if (!accountId) {
     return reply.code(409).send(AUTH_ERRORS.NO_ACCOUNT);
   }
+
+  // BigInt → Number для JWT (Telegram ID < 2^53, точность не теряется)
+  const userId = Number(user.id);
 
   const accessToken = await reply.accessJwtSign({ userId, accountId });
   const refreshToken = await reply.refreshJwtSign({

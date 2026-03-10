@@ -9,8 +9,8 @@ generator client {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  createdAt  DateTime  @default(now())
+  id        BigInt    @id
+  createdAt DateTime  @default(now())
 
   ownedAccounts Account[]     @relation("AccountOwner")
   accounts      AccountUser[]
@@ -19,17 +19,29 @@ model User {
 model Account {
   id        Int      @id @default(autoincrement())
   name      String
-  ownerId   Int
+  ownerId   BigInt
   owner     User     @relation("AccountOwner", fields: [ownerId], references: [id])
   createdAt DateTime @default(now())
 
-  users      AccountUser[]
-  categories Category[]
-  expenses   Expense[]
+  users       AccountUser[]
+  categories  Category[]
+  expenses    Expense[]
+  invitations AccountInvitation[]
+}
+
+model AccountInvitation {
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  accountId Int
+  account   Account   @relation(fields: [accountId], references: [id])
+  createdBy BigInt
+  expiresAt DateTime
+  usedAt    DateTime?
+  usedBy    BigInt?
 }
 
 model AccountUser {
-  userId    Int
+  userId    BigInt
   user      User     @relation(fields: [userId], references: [id])
   accountId Int
   account   Account  @relation(fields: [accountId], references: [id])

@@ -21,6 +21,16 @@ model idObj{
 @tag("Accounts")
 interface Accounts {
   @get list(): Account[] | AccountNotFoundResponse | InternalServerErrorResponse;
+
+  @route("/{accountId}/invitations")
+  @post createInvitation(
+    @path accountId: integer
+  ): AccountInvitation | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+
+  @route("/invitations/redeem")
+  @post redeemInvitation(
+    @body body: RedeemInvitationRequest
+  ): AccountInvitation | InvitationNotFoundResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
 }
 
 @route("/categories")
@@ -97,4 +107,9 @@ interface Auth {
 
   @route("/me")
   @get op me(): UserInfo | AuthUnauthorizedResponse | InternalServerErrorResponse;
+
+  @route("/switch-account")
+  @post op switchAccount(
+    @body body: SwitchAccountRequest
+  ): SuccessResponse | AuthUnauthorizedResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 }
