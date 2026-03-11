@@ -10,11 +10,13 @@ export function useMe() {
 
   useEffect(() => {
     if (isError) {
-      addNotification({
-        id: "useMeError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
+      if (error?.statusCode !== 401) {
+        addNotification({
+          id: "useMeError",
+          title: error?.code || "Error",
+          message: error?.message,
+        });
+      }
       return;
     }
 

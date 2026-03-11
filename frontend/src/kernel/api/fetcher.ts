@@ -20,7 +20,7 @@ export const fetcher = async <T>(
       });
 
       if (!refreshRes.ok) {
-        throw new Error("Failed to refresh token");
+        throw { code: "UNAUTHORIZED", message: "Failed to refresh token", statusCode: 401 };
       }
 
       res = await fetch(`${BASE_URL}${url}`, {
