@@ -23,7 +23,9 @@ import type {
 
 import type {
   AccountDTO,
+  AccountIdDTO,
   AccountInvitationDTO,
+  AccountUpdateDTO,
   ForbiddenErrorDTO,
   InternalServerErrorDTO,
   InvitationNotFoundErrorDTO,
@@ -269,6 +271,94 @@ export const useAccountsRedeemInvitation = <
   TContext
 > => {
   const mutationOptions = getAccountsRedeemInvitationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const getAccountsUpdateUrl = (accountId: AccountIdDTO) => {
+  return `/api/v1/accounts/${accountId}`;
+};
+
+export const accountsUpdate = async (
+  accountId: AccountIdDTO,
+  accountUpdateDTO: AccountUpdateDTO,
+  options?: RequestInit,
+): Promise<AccountDTO> => {
+  return fetcher<AccountDTO>(getAccountsUpdateUrl(accountId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(accountUpdateDTO),
+  });
+};
+
+export const getAccountsUpdateMutationOptions = <
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof accountsUpdate>>,
+    TError,
+    { accountId: AccountIdDTO; data: AccountUpdateDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof accountsUpdate>>,
+  TError,
+  { accountId: AccountIdDTO; data: AccountUpdateDTO },
+  TContext
+> => {
+  const mutationKey = ["accountsUpdate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof accountsUpdate>>,
+    { accountId: AccountIdDTO; data: AccountUpdateDTO }
+  > = (props) => {
+    const { accountId, data } = props ?? {};
+
+    return accountsUpdate(accountId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AccountsUpdateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof accountsUpdate>>
+>;
+export type AccountsUpdateMutationBody = AccountUpdateDTO;
+export type AccountsUpdateMutationError =
+  | UnauthorizedErrorDTO
+  | ForbiddenErrorDTO
+  | InternalServerErrorDTO;
+
+export const useAccountsUpdate = <
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof accountsUpdate>>,
+      TError,
+      { accountId: AccountIdDTO; data: AccountUpdateDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof accountsUpdate>>,
+  TError,
+  { accountId: AccountIdDTO; data: AccountUpdateDTO },
+  TContext
+> => {
+  const mutationOptions = getAccountsUpdateMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

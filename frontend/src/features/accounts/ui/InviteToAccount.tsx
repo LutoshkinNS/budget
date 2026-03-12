@@ -46,6 +46,7 @@ export function InviteToAccount() {
               {account.name} -{">"}
             </span>
             <button
+              type="button"
               onClick={() => mutate({ accountId: account.id })}
               disabled={isPending}
             >
@@ -55,7 +56,9 @@ export function InviteToAccount() {
             {inviteLink && (
               <div>
                 <span>{inviteLink}</span>
-                <button onClick={handleCopy}>Копировать ссылку</button>
+                <button type="button" onClick={handleCopy}>
+                  Копировать ссылку
+                </button>
                 <p>Действительна 72 часа</p>
               </div>
             )}

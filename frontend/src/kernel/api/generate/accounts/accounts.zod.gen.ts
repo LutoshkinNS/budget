@@ -27,6 +27,21 @@ export const accountsRedeemInvitationResponse = zod.object({
   usedBy: zod.number().min(1).optional(),
 });
 
+export const accountsUpdateParams = zod.object({
+  accountId: zod.number().min(1),
+});
+
+export const accountsUpdateBody = zod.object({
+  name: zod.string().min(1).optional(),
+});
+
+export const accountsUpdateResponse = zod.object({
+  id: zod.number().min(1),
+  name: zod.string().min(1),
+  ownerId: zod.number().min(1),
+  createdAt: zod.iso.datetime({}),
+});
+
 export const accountsCreateInvitationParams = zod.object({
   accountId: zod.number(),
 });

@@ -31,6 +31,12 @@ interface Accounts {
   @post redeemInvitation(
     @body body: RedeemInvitationRequest
   ): AccountInvitation | InvitationNotFoundResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+
+  @route("/{accountId}")
+  @patch update(
+    @path accountId: AccountId,
+    @body body: AccountUpdate,
+  ): Account | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
 }
 
 @route("/categories")

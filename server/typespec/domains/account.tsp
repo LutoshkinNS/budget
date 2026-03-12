@@ -20,12 +20,19 @@ model AccountCreate {
   name: string;
 }
 
+model AccountUpdate {
+  @minLength(1)
+  name?: string;
+}
+
+@minValue(1)
+scalar AccountId extends int64;
+
 model AccountUser {
   @minValue(1)
   userId: integer;
 
-  @minValue(1)
-  accountId: integer;
+  accountId: AccountId;
 
   joinedAt: utcDateTime;
 }

@@ -6,8 +6,10 @@
  */
 
 export * from "./accountDTO";
+export * from "./accountIdDTO";
 export * from "./accountInfoDTO";
 export * from "./accountInvitationDTO";
+export * from "./accountUpdateDTO";
 export * from "./categoryCreateDTO";
 export * from "./categoryDTO";
 export * from "./expenseCreateDTO";
