@@ -3,8 +3,8 @@ import {
   getAccountsListQueryKey,
   useAccountsUpdate,
 } from "@/kernel/api/generate/accounts/accounts.gen.ts";
-import type { AccountUpdateDTO } from "@/kernel/api/generate/model";
 import { getAuthMeQueryKey } from "@/kernel/api/generate/authentication/authentication.gen.ts";
+import type { AccountUpdateDTO } from "@/kernel/api/generate/model";
 import { useNotifications } from "@/shared/lib/notifications";
 
 export function useUpdateAccount() {
