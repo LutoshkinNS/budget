@@ -1,4 +1,5 @@
 import { useMe, useSwitchAccount } from "@/entities/user";
+import { FormBlock } from "@/shared/ui/form-block";
 
 const IDS = {
   SELECT: "select",
@@ -23,8 +24,7 @@ export function AccountsSelect() {
   };
 
   return (
-    <div>
-      <label htmlFor={IDS.SELECT}>Аккаунт</label>
+    <FormBlock legend={"Текущий аккаунт"}>
       <select
         name={FIELD_VALUES.ACCOUNT_ID}
         id={IDS.SELECT}
@@ -41,6 +41,6 @@ export function AccountsSelect() {
           </option>
         ))}
       </select>
-    </div>
+    </FormBlock>
   );
 }

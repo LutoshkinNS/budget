@@ -1,13 +1,13 @@
 import { useState } from "react";
 
+import { useMe } from "@/entities/user";
 import { useAccountsCreateInvitation } from "@/kernel/api/generate/accounts/accounts.gen.ts";
 import { useNotifications } from "@/shared/lib/notifications";
+import { FormBlock } from "@/shared/ui/form-block";
 
-type InviteToAccountProps = {
-  accountId: number;
-};
-
-export function InviteToAccount({ accountId }: InviteToAccountProps) {
+export function InviteToAccount() {
+  const { data: me } = useMe();
+  const ownedAccounts = me?.accounts.filter((a) => a.isOwner) ?? [];
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const { addNotification } = useNotifications();
 
@@ -38,21 +38,30 @@ export function InviteToAccount({ accountId }: InviteToAccountProps) {
   };
 
   return (
-    <div>
-      <button
-        onClick={() => mutate({ accountId })}
-        disabled={isPending}
-      >
-        Пригласить
-      </button>
+    ownedAccounts.length > 0 && (
+      <FormBlock legend={"Пригласить в аккаунт"}>
+        {ownedAccounts.map((account) => (
+          <div key={account.id}>
+            <span>
+              {account.name} -{">"}
+            </span>
+            <button
+              onClick={() => mutate({ accountId: account.id })}
+              disabled={isPending}
+            >
+              Пригласить
+            </button>
 
-      {inviteLink && (
-        <div>
-          <span>{inviteLink}</span>
-          <button onClick={handleCopy}>Копировать ссылку</button>
-          <p>Действительна 72 часа</p>
-        </div>
-      )}
-    </div>
+            {inviteLink && (
+              <div>
+                <span>{inviteLink}</span>
+                <button onClick={handleCopy}>Копировать ссылку</button>
+                <p>Действительна 72 часа</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </FormBlock>
+    )
   );
 }
