@@ -1,4 +1,4 @@
-import { ByTelegram } from "@/features/auth";
+import { ByTelegram } from "@/modules/auth";
 
 import s from "./login.module.css";
 

@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 
-import { useMe } from "@/entities/user";
+import { useMe } from "@/modules/user";
 
 const Space = () => {
   return " ";

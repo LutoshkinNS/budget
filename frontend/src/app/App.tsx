@@ -3,9 +3,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
-import { Notifications } from "@/shared/lib/notifications";
-
-import { queryClient } from "../kernel/api/appQuery";
+import { queryClient } from "@/common/api/appQuery";
+import { Notifications } from "@/common/lib/notifications";
 
 // Import the generated route tree
 import { routeTree } from "./routes/routeTree.gen";

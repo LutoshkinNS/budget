@@ -2,7 +2,7 @@ import {
   AccountsSelect,
   InviteToAccount,
   RenameAccount,
-} from "@/features/accounts";
+} from "@/modules/accounts";
 
 export function Settings() {
   return (

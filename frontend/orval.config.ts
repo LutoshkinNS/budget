@@ -9,8 +9,8 @@ export default defineConfig({
     input: openapiPath,
     output: {
       mode: "tags-split",
-      target: "src/kernel/api/generate",
-      schemas: "src/kernel/api/generate/model",
+      target: "src/common/api/generate",
+      schemas: "src/common/api/generate/model",
       fileExtension: ".gen.ts",
       client: "react-query",
       mock: false,
@@ -18,7 +18,7 @@ export default defineConfig({
       propertySortOrder: "Alphabetical",
       override: {
         mutator: {
-          path: "./src/kernel/api/fetcher.ts",
+          path: "./src/common/api/fetcher.ts",
           name: "fetcher",
         },
         query: {
@@ -42,7 +42,7 @@ export default defineConfig({
     output: {
       mode: "tags-split",
       client: "zod",
-      target: "src/kernel/api/generate",
+      target: "src/common/api/generate",
       fileExtension: ".zod.gen.ts",
       prettier: true,
     },

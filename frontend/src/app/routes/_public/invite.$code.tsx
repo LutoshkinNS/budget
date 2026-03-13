@@ -1,10 +1,10 @@
 import { useLayoutEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { useRedeemInvitation } from "@/entities/accounts";
-import { useMe } from "@/entities/user";
-import { INVITE_CODE_KEY } from "@/features/auth";
-import { useNotifications } from "@/shared/lib/notifications";
+import { useNotifications } from "@/common/lib/notifications";
+import { useRedeemInvitation } from "@/modules/accounts";
+import { INVITE_CODE_KEY } from "@/modules/auth";
+import { useMe } from "@/modules/user";
 
 function InvitePage() {
   const { code } = Route.useParams();

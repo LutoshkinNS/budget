@@ -1,5 +1,5 @@
-import { CategoriesSelect } from "@/features/categories";
-import { CreateExpense, ExpenseList } from "@/features/expenses";
+import { CategoriesSelect } from "@/modules/categories";
+import { CreateExpense, ExpenseList } from "@/modules/expenses";
 
 export function Main() {
   return (

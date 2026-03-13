@@ -2,7 +2,7 @@ import {
   CategoriesList,
   CreateCategory,
   DeleteCategory,
-} from "@/features/categories";
+} from "@/modules/categories";
 
 export function Categories() {
   return (
