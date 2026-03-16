@@ -1,6 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 
+import { Loader } from "@/common/ui/loader/Loader.tsx";
 import { useMe } from "@/modules/user";
 
 const Space = () => {
@@ -18,7 +19,7 @@ export function PrivateLayout() {
   }, [error, navigate]);
 
   if (isLoading || error?.statusCode === 401) {
-    return <div>Загрузка данных о пользователе...</div>;
+    return <Loader />;
   }
 
   return (
