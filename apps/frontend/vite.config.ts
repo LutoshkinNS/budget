@@ -79,6 +79,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
+    publicDir: path.resolve(__dirname, "./src/app/public"),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
