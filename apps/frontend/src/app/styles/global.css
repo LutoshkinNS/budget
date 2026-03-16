@@ -14,7 +14,7 @@ body {
 }
 
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: Inter, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
@@ -30,7 +30,7 @@ body {
 
 @media (prefers-color-scheme: light) {
     :root {
-        /*color: #213547;*/
-        /*background-color: #ffffff;*/
+        color: #242229;
+        background-color: #F4F4F4;
     }
 }
