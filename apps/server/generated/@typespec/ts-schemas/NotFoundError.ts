@@ -1,0 +1,28 @@
+const NotFoundError = {
+  "type": "object",
+  "required": [
+    "code",
+    "message",
+    "statusCode"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "NOT_FOUND"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "statusCode": {
+      "type": "number",
+      "enum": [
+        404
+      ]
+    }
+  },
+  "additionalProperties": false
+} as const;
+
+export default NotFoundError;

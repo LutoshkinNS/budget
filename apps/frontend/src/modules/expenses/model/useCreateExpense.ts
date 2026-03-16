@@ -1,0 +1,52 @@
+import z from "zod";
+
+import { useExpensesCreate } from "@/common/api/generate/expenses/expenses.gen.ts";
+import { ExpensesCreateBody } from "@/common/api/generate/expenses/expenses.zod.gen.ts";
+import type { ExpenseCreateDTO } from "@/common/api/generate/model";
+import { useNotifications } from "@/common/lib/notifications";
+
+import { useInvalidateExpensesList } from "../useExpenses.ts";
+
+export function useCreateExpense() {
+  const invalidateExpensesList = useInvalidateExpensesList();
+  const { addNotification } = useNotifications();
+
+  const mutation = useExpensesCreate({
+    mutation: {
+      onError: () => {},
+      onSuccess: async () => {
+        await invalidateExpensesList();
+      },
+    },
+  });
+
+  const createExpense = (data: ExpenseCreateDTO) => {
+    const validation = ExpensesCreateBody.safeParse(data);
+
+    if (!validation.success) {
+      addNotification({
+        id: "createExpenseValidation",
+        title: "Некорректные данные",
+        message: z.prettifyError(validation.error),
+      });
+      return Promise.reject(validation.error);
+    }
+
+    const { date, description, ...rest } = validation.data;
+
+    return mutation.mutateAsync({
+      data: {
+        ...rest,
+        ...(!!date && { date }),
+        ...(!!description && { description }),
+      },
+    });
+  };
+
+  return {
+    createExpense,
+    isLoading: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
+  };
+}

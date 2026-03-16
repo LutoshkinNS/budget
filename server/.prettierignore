@@ -1,5 +1,0 @@
-node_modules
-dist
-generated
-*.gen.ts
-prisma/dev.db

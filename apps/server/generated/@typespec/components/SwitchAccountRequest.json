@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "required": [
+    "accountId"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false
+}

@@ -31,9 +31,10 @@ coverage
 git-info.json
 
 # server
-/server/generated/**
-/server/prisma/*.db
-/server/prisma/*.db-journal
+/apps/server/generated/**
+/apps/server/prisma/*.db
+/apps/server/prisma/*.db-journal
+/packages/api-contracts/generated/**
 
 # client
 .tanstak

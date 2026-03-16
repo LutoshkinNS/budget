@@ -1,0 +1,20 @@
+const SubcategoryCreate = {
+  "type": "object",
+  "required": [
+    "categoryId",
+    "name"
+  ],
+  "properties": {
+    "categoryId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+} as const;
+
+export default SubcategoryCreate;

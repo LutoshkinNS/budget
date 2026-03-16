@@ -1,0 +1,44 @@
+const UnauthorizedError = {
+  "type": "object",
+  "required": [
+    "code",
+    "message",
+    "statusCode"
+  ],
+  "properties": {
+    "code": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "UNAUTHORIZED"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_TOKEN"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "MISSING_TOKEN"
+          ]
+        }
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "statusCode": {
+      "type": "number",
+      "enum": [
+        401
+      ]
+    }
+  },
+  "additionalProperties": false
+} as const;
+
+export default UnauthorizedError;

@@ -1,0 +1,80 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./../generated/prisma"
+}
+
+model User {
+  id        BigInt    @id
+  createdAt DateTime  @default(now())
+
+  ownedAccounts Account[]     @relation("AccountOwner")
+  accounts      AccountUser[]
+}
+
+model Account {
+  id        Int      @id @default(autoincrement())
+  name      String
+  ownerId   BigInt
+  owner     User     @relation("AccountOwner", fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+
+  users       AccountUser[]
+  categories  Category[]
+  expenses    Expense[]
+  invitations AccountInvitation[]
+}
+
+model AccountInvitation {
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  accountId Int
+  account   Account   @relation(fields: [accountId], references: [id])
+  createdBy BigInt
+  expiresAt DateTime
+  usedAt    DateTime?
+  usedBy    BigInt?
+}
+
+model AccountUser {
+  userId    BigInt
+  user      User     @relation(fields: [userId], references: [id])
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id])
+  joinedAt  DateTime @default(now())
+
+  @@id([userId, accountId])
+}
+
+model Category {
+  id            Int           @id @default(autoincrement())
+  accountId     Int
+  account       Account       @relation(fields: [accountId], references: [id])
+  name          String
+  deletedAt     DateTime?
+  expenses      Expense[]
+  subcategories Subcategory[]
+}
+
+model Subcategory {
+  id         Int       @id @default(autoincrement())
+  categoryId Int
+  category   Category  @relation(fields: [categoryId], references: [id])
+  name       String
+  deletedAt  DateTime?
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  accountId   Int
+  account     Account  @relation(fields: [accountId], references: [id])
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  amount      Float
+  description String?
+  date        DateTime
+}

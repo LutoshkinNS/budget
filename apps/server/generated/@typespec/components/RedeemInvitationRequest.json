@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": [
+    "code"
+  ],
+  "properties": {
+    "code": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

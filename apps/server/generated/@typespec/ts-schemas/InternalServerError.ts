@@ -1,0 +1,28 @@
+const InternalServerError = {
+  "type": "object",
+  "required": [
+    "code",
+    "message",
+    "statusCode"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "INTERNAL_SERVER_ERROR"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "statusCode": {
+      "type": "number",
+      "enum": [
+        500
+      ]
+    }
+  },
+  "additionalProperties": false
+} as const;
+
+export default InternalServerError;

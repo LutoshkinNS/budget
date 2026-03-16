@@ -1,0 +1,14 @@
+{
+  "name": "@budget/api-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "typespec:generate": "tsp compile ./typespec",
+    "typespec:generate:watch": "tsp compile ./typespec --watch"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "^1.5.0",
+    "@typespec/http": "^1.5.0",
+    "@typespec/openapi3": "^1.5.0"
+  }
+}

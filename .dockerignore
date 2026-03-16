@@ -6,22 +6,22 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build outputs
-frontend/dist
-server/dist
-server/generated/prisma
+apps/frontend/dist
+apps/server/dist
+apps/server/generated/prisma
 
 # Database
-server/data
-server/prisma/dev.db
-server/prisma/dev.db-journal
+apps/server/data
+apps/server/prisma/dev.db
+apps/server/prisma/dev.db-journal
 *.db
 *.db-journal
 
 # Environment files
 .env
 .env.*
-server/.env
-frontend/.env
+apps/server/.env
+apps/frontend/.env
 
 # Git
 .git

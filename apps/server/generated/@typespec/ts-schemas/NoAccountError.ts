@@ -1,0 +1,28 @@
+const NoAccountError = {
+  "type": "object",
+  "required": [
+    "code",
+    "message",
+    "statusCode"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "NO_ACCOUNT"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "statusCode": {
+      "type": "number",
+      "enum": [
+        409
+      ]
+    }
+  },
+  "additionalProperties": false
+} as const;
+
+export default NoAccountError;

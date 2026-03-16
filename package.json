@@ -1,10 +1,16 @@
 {
+  "private": true,
   "scripts": {
-    "client": "cd frontend && npm run dev",
-    "server": "cd server && npm run dev",
-    "dev": "concurrently \"npm run client\" \"npm run server\""
+    "client": "pnpm --filter @budget/frontend dev",
+    "server": "pnpm --filter @budget/server dev",
+    "dev": "concurrently \"pnpm run client\" \"pnpm run server\""
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "engines": { "pnpm": ">=9" },
+  "packageManager": "pnpm@10.26.2",
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "esbuild", "prisma"]
   }
 }

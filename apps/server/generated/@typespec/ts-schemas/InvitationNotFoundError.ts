@@ -1,0 +1,28 @@
+const InvitationNotFoundError = {
+  "type": "object",
+  "required": [
+    "code",
+    "message",
+    "statusCode"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "INVITATION_NOT_FOUND"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "statusCode": {
+      "type": "number",
+      "enum": [
+        404
+      ]
+    }
+  },
+  "additionalProperties": false
+} as const;
+
+export default InvitationNotFoundError;
