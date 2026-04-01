@@ -1,12 +1,9 @@
 import { useLayoutEffect } from "react";
-import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { Outlet, useNavigate } from "@tanstack/react-router";
 
 import { Loader } from "@/common/ui/loader/Loader.tsx";
+import { Navigation } from "@/common/ui/navigation/Navigation.tsx";
 import { useMe } from "@/modules/user";
-
-const Space = () => {
-  return " ";
-};
 
 export function PrivateLayout() {
   const { isLoading, error } = useMe();
@@ -24,17 +21,7 @@ export function PrivateLayout() {
 
   return (
     <div>
-      <div>
-        <Link to="/login">Login</Link>
-        <Space />
-        <Link to="/">Home</Link>
-        <Space />
-        <Link to="/categories">Categories</Link>
-        <Space />
-        <Link to="/settings">Settings</Link>
-        <Space />
-      </div>
-      <hr />
+      <Navigation />
       <Outlet />
     </div>
   );

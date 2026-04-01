@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 html,
 body {
     margin: 0;
@@ -30,6 +34,11 @@ body {
 
 @media (prefers-color-scheme: light) {
     :root {
+        --primary-color: #FDFDFD;
+        --primary-text-color: #242229;
+        --secondary-color: #333334;
+        --secondary-text-color: #F3F3F3;
+
         color: #242229;
         background-color: #F4F4F4;
     }
