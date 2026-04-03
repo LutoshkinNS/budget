@@ -5,6 +5,8 @@ import { Loader } from "@/common/ui/loader/Loader.tsx";
 import { Navigation } from "@/common/ui/navigation/Navigation.tsx";
 import { useMe } from "@/modules/user";
 
+import s from "./private.module.css";
+
 export function PrivateLayout() {
   const { isLoading, error } = useMe();
   const navigate = useNavigate();
@@ -20,9 +22,9 @@ export function PrivateLayout() {
   }
 
   return (
-    <div>
+    <main className={s.main}>
       <Navigation />
       <Outlet />
-    </div>
+    </main>
   );
 }

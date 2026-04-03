@@ -1,0 +1,44 @@
+.keyboardContainer {
+    user-select: none;
+}
+
+.display {
+    text-align: center;
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 1.2;
+    padding: 8px 16px 16px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+.key {
+    height: 44px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    font-size: 24px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: opacity 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.key:active {
+    opacity: 0.6;
+}
+
+.keyTransparent {
+    background: transparent;
+}

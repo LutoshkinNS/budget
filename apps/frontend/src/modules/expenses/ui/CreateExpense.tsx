@@ -1,6 +1,10 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+
+import { NumericKeyboard } from "@/modules/expenses/modules/numeric-keyboard";
 
 import { useCreateExpense } from "../model/useCreateExpense";
+
+import s from "./create-expense.module.css";
 
 type TCreateExpense = {
   CategoriesSlot: React.ReactNode;
@@ -23,6 +27,8 @@ const FIELD_VALUES = {
 } as const;
 
 export function CreateExpense({ CategoriesSlot }: TCreateExpense) {
+  const [amount, setAmount] = useState("0");
+
   const { createExpense } = useCreateExpense();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -45,34 +51,43 @@ export function CreateExpense({ CategoriesSlot }: TCreateExpense) {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} noValidate>
-      <fieldset>
-        <legend>Добавление траты</legend>
-        <p>
-          <label htmlFor={IDS.EXPENSE.VALUE}>Сумма</label>
-          <input
-            type="number"
-            name={FIELD_VALUES.AMOUNT}
-            id={IDS.EXPENSE.VALUE}
-          />
-        </p>
-        <p>{CategoriesSlot}</p>
-        <p>
-          <label htmlFor={IDS.EXPENSE.DATE}>Дата</label>
-          <input type="date" name={FIELD_VALUES.DATE} id={IDS.EXPENSE.DATE} />
-        </p>
-        <p>
-          <label htmlFor={IDS.EXPENSE.DESCRIPTION}>Описание</label>
-          <input
-            type="text"
-            name={FIELD_VALUES.DESCRIPTION}
-            id={IDS.EXPENSE.DESCRIPTION}
-          />
-        </p>
-        <p>
-          <button type="submit">Добавить</button>
-        </p>
-      </fieldset>
-    </form>
+    <div>
+      <h3 className={s.title}>внести расход</h3>
+      <NumericKeyboard
+        value={amount}
+        onChange={(value) => {
+          setAmount(value);
+        }}
+      />
+      <form ref={formRef} onSubmit={handleSubmit} noValidate>
+        <fieldset>
+          <legend>Добавление траты</legend>
+          {/*<p>*/}
+          {/*  <label htmlFor={IDS.EXPENSE.VALUE}>Сумма</label>*/}
+          {/*  <input*/}
+          {/*    type="number"*/}
+          {/*    name={FIELD_VALUES.AMOUNT}*/}
+          {/*    id={IDS.EXPENSE.VALUE}*/}
+          {/*  />*/}
+          {/*</p>*/}
+          <p>{CategoriesSlot}</p>
+          <p>
+            <label htmlFor={IDS.EXPENSE.DATE}>Дата</label>
+            <input type="date" name={FIELD_VALUES.DATE} id={IDS.EXPENSE.DATE} />
+          </p>
+          <p>
+            <label htmlFor={IDS.EXPENSE.DESCRIPTION}>Описание</label>
+            <input
+              type="text"
+              name={FIELD_VALUES.DESCRIPTION}
+              id={IDS.EXPENSE.DESCRIPTION}
+            />
+          </p>
+          <p>
+            <button type="submit">Добавить</button>
+          </p>
+        </fieldset>
+      </form>
+    </div>
   );
 }
