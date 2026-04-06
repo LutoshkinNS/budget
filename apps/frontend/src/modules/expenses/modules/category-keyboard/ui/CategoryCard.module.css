@@ -1,0 +1,35 @@
+.card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--primary-color);
+    color: var(--primary-text-color);
+    font-size: 16px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: opacity 0.1s, border-color 0.15s, background 0.15s;
+    width: max-content;
+    text-align: left;
+}
+
+.card:active {
+    opacity: 0.6;
+}
+
+.selected {
+    border-color: var(--primary-text-color);
+    background: color-mix(in srgb, var(--primary-text-color) 8%, var(--primary-color));
+}
+
+.emoji {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.label {
+    white-space: nowrap;
+}

@@ -1,0 +1,23 @@
+.scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px;
+  user-select: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}

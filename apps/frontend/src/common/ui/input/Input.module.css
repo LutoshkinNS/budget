@@ -1,0 +1,34 @@
+.input {
+    background: transparent;
+    color: var(--primary-text-color);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 20px;
+    outline: none;
+    border: 1.5px solid var(--secondary-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    transition: border-color 0.15s;
+}
+
+.input::placeholder {
+    color: color-mix(in srgb, var(--primary-text-color) 40%, transparent);
+}
+
+.input:focus {
+    border-color: var(--primary-text-color);
+}
+
+.borderless {
+    border-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.borderless:focus {
+    border-color: transparent;
+}
+
+.fullWidth {
+    width: 100%;
+}
