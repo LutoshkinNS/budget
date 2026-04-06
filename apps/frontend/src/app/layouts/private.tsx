@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Outlet, useNavigate } from "@tanstack/react-router";
 
-import { Loader } from "@/common/ui/loader/Loader.tsx";
+import { GlobalLoader, Loader } from "@/common/ui/loader/Loader.tsx";
 import { Navigation } from "@/common/ui/navigation/Navigation.tsx";
 import { useMe } from "@/modules/user";
 
@@ -23,6 +23,7 @@ export function PrivateLayout() {
 
   return (
     <main className={s.main}>
+      <GlobalLoader />
       <Navigation />
       <Outlet />
     </main>
