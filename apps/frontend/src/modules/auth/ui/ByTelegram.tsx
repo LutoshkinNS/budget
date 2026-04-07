@@ -80,5 +80,17 @@ export function ByTelegram() {
     };
   }, [login, addNotification, navigate]);
 
-  return <div ref={containerRef} />;
+  async function handleDevLogin() {
+    await fetch("/api/v1/auth/dev-login", { credentials: "include" });
+    await navigate({ to: "/" });
+  }
+
+  return (
+    <>
+      <div ref={containerRef} />
+      {import.meta.env.DEV && (
+        <button onClick={handleDevLogin}>Dev login</button>
+      )}
+    </>
+  );
 }

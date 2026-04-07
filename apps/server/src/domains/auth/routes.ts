@@ -6,6 +6,7 @@ import UnauthorizedError from '#s/UnauthorizedError.js';
 import UserInfo from '#s/UserInfo.js';
 import type { FastifyApp } from '#src/appInit.js';
 
+import { devLoginHandler } from './handlers/devLogin.handler.js';
 import { loginHandler } from './handlers/login.handler.js';
 import { logoutHandler } from './handlers/logout.handler.js';
 import { meHandler } from './handlers/me.handler.js';
@@ -13,6 +14,10 @@ import { refreshHandler } from './handlers/refresh.handler.js';
 import { switchAccountHandler } from './handlers/switchAccount.handler.js';
 
 export default async function authRoutes(app: FastifyApp) {
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/dev-login', devLoginHandler);
+  }
+
   app.post(
     '/login',
     {
