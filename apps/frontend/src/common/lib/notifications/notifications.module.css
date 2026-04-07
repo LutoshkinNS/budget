@@ -6,3 +6,14 @@
     flex-direction: column;
     gap: 8px;
 }
+
+.title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.message {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-top: 2px;
+}

@@ -50,15 +50,9 @@ export const Notifications = ({ children }: { children: React.ReactNode }) => {
               variant={notification.type ?? "error"}
               onClose={() => deleteNotifications(notification.id)}
             >
-              <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                {notification.title}
-              </div>
+              <div className={s.title}>{notification.title}</div>
               {notification.message && (
-                <div
-                  style={{ fontSize: "13px", opacity: 0.8, marginTop: "2px" }}
-                >
-                  {notification.message}
-                </div>
+                <div className={s.message}>{notification.message}</div>
               )}
             </Notification>
           );
