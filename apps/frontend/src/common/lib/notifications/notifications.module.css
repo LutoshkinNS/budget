@@ -1,0 +1,8 @@
+.notificationsContainer {
+    position: fixed;
+    bottom: 100px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 
+import { Notification } from "../../ui/notification/Notification";
+
 import { NotificationProps } from "./types";
 import { NotificationsContext } from "./useNotifications";
+
+import s from "./notifications.module.css";
 
 export const Notifications = ({ children }: { children: React.ReactNode }) => {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
@@ -38,13 +42,25 @@ export const Notifications = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       {children}
-      <div style={{ position: "fixed", bottom: "100px", left: "100px" }}>
+      <div className={s.notificationsContainer}>
         {notifications.map((notification) => {
           return (
-            <p key={notification.id}>
-              <b>{notification.title}</b>
-              {notification.message ? `: ${notification.message}` : null}
-            </p>
+            <Notification
+              key={notification.id}
+              variant={notification.type ?? "error"}
+              onClose={() => deleteNotifications(notification.id)}
+            >
+              <div style={{ fontWeight: 600, fontSize: "14px" }}>
+                {notification.title}
+              </div>
+              {notification.message && (
+                <div
+                  style={{ fontSize: "13px", opacity: 0.8, marginTop: "2px" }}
+                >
+                  {notification.message}
+                </div>
+              )}
+            </Notification>
           );
         })}
       </div>
