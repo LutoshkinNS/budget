@@ -21,7 +21,8 @@ export default async function appInit() {
   await app.register(envPlugin);
   await app.register(fastifyCors, {
     origin: app.envs.FRONTEND_URL,
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   });
   await app.register(fastifyCookie);
   await app.register(prismaPlugin);
