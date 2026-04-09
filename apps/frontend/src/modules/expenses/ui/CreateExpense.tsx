@@ -1,7 +1,9 @@
 import { useState } from "react";
 
+import { AccountAvatar } from "@/common/ui/account-avatar/AccountAvatar";
 import { Input } from "@/common/ui/input/Input";
 import { CategoriesKeyboard } from "@/modules/categories";
+import { useMe } from "@/modules/user";
 
 import { useCreateExpense } from "../model/useCreateExpense";
 import { NumericKeyboard } from "../modules/numeric-keyboard";
@@ -19,6 +21,10 @@ export function CreateExpense() {
   const [description, setDescription] = useState("");
 
   const { createExpense } = useCreateExpense();
+  const { data: me } = useMe();
+  const currentAccount = me?.accounts.find(
+    (a) => a.id === me.currentAccountId,
+  );
 
   const handleSubmit = async (selectedCategoryId: number) => {
     await createExpense({
@@ -33,7 +39,10 @@ export function CreateExpense() {
 
   return (
     <div>
-      <h3 className={s.title}>внести расход</h3>
+      <div className={s.header}>
+        <h3 className={s.title}>внести расход</h3>
+        {currentAccount && <AccountAvatar name={currentAccount.name} />}
+      </div>
       <NumericKeyboard
         value={amount}
         onChange={(value) => {
