@@ -43,3 +43,10 @@ body {
         background-color: #F4F4F4;
     }
 }
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: #4e4e4e;
+        --secondary-color: #bfbfbf;
+    }
+}
