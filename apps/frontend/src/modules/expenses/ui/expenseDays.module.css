@@ -17,6 +17,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px 0;
+    cursor: pointer;
+    user-select: none;
 }
 
 .dayLabel {
@@ -42,6 +44,7 @@
     width: 20px;
     height: 20px;
     opacity: 0.5;
+    transition: transform 0.2s ease;
 }
 
 .expenseItem {
@@ -70,4 +73,8 @@
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
+}
+
+.arrowCollapsed {
+    transform: rotate(-180deg);
 }
