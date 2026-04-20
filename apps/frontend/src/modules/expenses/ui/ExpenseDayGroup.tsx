@@ -17,7 +17,7 @@ export function ExpenseDayGroup({ isoDate, label, total, expenses }: ExpenseDayG
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div key={isoDate} className={s.dayGroup}>
+    <div className={s.dayGroup}>
       <ExpenseDayHeader
         label={label}
         total={total}

@@ -1,8 +1,7 @@
 import { Loader } from "@/common/ui/loader/Loader.tsx";
 
 import { useExpenses } from "../useExpenses.ts";
-import { ExpenseDayHeader } from "./ExpenseDayHeader.tsx";
-import { ExpenseDayItem } from "./ExpenseDayItem.tsx";
+import { ExpenseDayGroup } from "./ExpenseDayGroup.tsx";
 import s from "./expenseDays.module.css";
 
 export function ExpensesByDays() {
@@ -15,12 +14,13 @@ export function ExpensesByDays() {
   return (
     <div className={s.container}>
       {groups.map((group) => (
-        <div key={group.isoDate} className={s.dayGroup}>
-          <ExpenseDayHeader label={group.label} total={group.total} />
-          {group.expenses.map((expense) => (
-            <ExpenseDayItem key={expense.id} expense={expense} />
-          ))}
-        </div>
+        <ExpenseDayGroup
+          key={group.isoDate}
+          isoDate={group.isoDate}
+          label={group.label}
+          total={group.total}
+          expenses={group.expenses}
+        />
       ))}
     </div>
   );
