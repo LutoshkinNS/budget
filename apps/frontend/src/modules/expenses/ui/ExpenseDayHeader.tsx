@@ -1,20 +1,24 @@
+import clsx from "clsx";
+
 import s from "./expenseDays.module.css";
 
 type ExpenseDayHeaderProps = {
   label: string;
   total: number;
+  isExpanded: boolean;
+  onToggle: () => void;
 };
 
-export function ExpenseDayHeader({ label, total }: ExpenseDayHeaderProps) {
+export function ExpenseDayHeader({ label, total, isExpanded, onToggle }: ExpenseDayHeaderProps) {
   return (
-    <div className={s.dayHeader}>
+    <div className={s.dayHeader} onClick={onToggle}>
       <span className={s.dayLabel}>{label}</span>
       <div className={s.daySumRow}>
         <span className={s.dayTotal}>
           {total.toLocaleString("ru")} ₽
         </span>
         <svg
-          className={s.arrow}
+          className={clsx(s.arrow, !isExpanded && s.arrowCollapsed)}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
