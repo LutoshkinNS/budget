@@ -1,10 +1,11 @@
 import { useState } from "react";
+import clsx from "clsx";
 
 import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
-import clsx from "clsx";
 
 import { ExpenseDayHeader } from "./ExpenseDayHeader.tsx";
 import { ExpenseDayItem } from "./ExpenseDayItem.tsx";
+
 import s from "./expenseDays.module.css";
 
 type ExpenseDayGroupProps = {

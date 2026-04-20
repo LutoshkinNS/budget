@@ -1,7 +1,9 @@
 import { Loader } from "@/common/ui/loader/Loader.tsx";
 
 import { useExpenses } from "../useExpenses.ts";
+
 import { ExpenseDayGroup } from "./ExpenseDayGroup.tsx";
+
 import s from "./expenseDays.module.css";
 
 export function ExpensesByDays() {
