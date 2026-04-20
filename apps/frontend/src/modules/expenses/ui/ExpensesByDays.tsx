@@ -16,7 +16,6 @@ export function ExpensesByDays() {
       {groups.map((group) => (
         <ExpenseDayGroup
           key={group.isoDate}
-          isoDate={group.isoDate}
           label={group.label}
           total={group.total}
           expenses={group.expenses}

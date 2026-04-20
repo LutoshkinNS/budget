@@ -78,3 +78,13 @@
 .arrowCollapsed {
     transform: rotate(-180deg);
 }
+
+.dayGroupItems {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dayGroupItemsCollapsed {
+    display: none;
+}
