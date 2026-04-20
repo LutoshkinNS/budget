@@ -10,14 +10,27 @@ export default async function expensesModule(app: FastifyApp) {
     '/',
     {
       schema: {
+        querystring: {
+          type: 'object',
+          properties: {
+            days: { type: 'integer', minimum: 1 }
+          }
+        },
         response: { 200: { type: 'array', items: Expense } }
       }
     },
     async function (req) {
+      const days = (req.query as { days?: number }).days ?? 2;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - (days - 1));
+      startDate.setHours(0, 0, 0, 0);
+
       const expenses = await this.prisma.expense.findMany({
         where: {
-          accountId: req.user.accountId
+          accountId: req.user.accountId,
+          date: { gte: startDate }
         },
+        orderBy: { date: 'desc' },
         include: {
           category: true,
           account: true

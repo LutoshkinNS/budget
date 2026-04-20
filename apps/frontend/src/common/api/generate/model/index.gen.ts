@@ -14,6 +14,7 @@ export * from "./categoryCreateDTO.gen";
 export * from "./categoryDTO.gen";
 export * from "./expenseCreateDTO.gen";
 export * from "./expenseDTO.gen";
+export * from "./expensesListParams.gen";
 export * from "./forbiddenErrorDTO.gen";
 export * from "./forbiddenErrorDTOCode.gen";
 export * from "./forbiddenErrorDTOStatusCode.gen";

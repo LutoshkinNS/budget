@@ -24,6 +24,7 @@ import type {
 import type {
   ExpenseCreateDTO,
   ExpenseDTO,
+  ExpensesListParams,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
   ValidationErrorDTO,
@@ -33,39 +34,55 @@ import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getExpensesListUrl = () => {
-  return `/api/v1/expenses`;
+export const getExpensesListUrl = (params?: ExpensesListParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/expenses?${stringifiedParams}`
+    : `/api/v1/expenses`;
 };
 
 export const expensesList = async (
+  params?: ExpensesListParams,
   options?: RequestInit,
 ): Promise<ExpenseDTO[]> => {
-  return fetcher<ExpenseDTO[]>(getExpensesListUrl(), {
+  return fetcher<ExpenseDTO[]>(getExpensesListUrl(params), {
     ...options,
     method: "GET",
   });
 };
 
-export const getExpensesListQueryKey = () => {
-  return ["expensesList"] as const;
+export const getExpensesListQueryKey = (params?: ExpensesListParams) => {
+  return ["expensesList", ...(params ? [params] : [])] as const;
 };
 
 export const getExpensesListQueryOptions = <
   TData = Awaited<ReturnType<typeof expensesList>>,
   TError = NotFoundErrorDTO,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
-  >;
-  request?: SecondParameter<typeof fetcher>;
-}) => {
+>(
+  params?: ExpensesListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getExpensesListQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getExpensesListQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof expensesList>>> = ({
     signal,
-  }) => expensesList({ signal, ...requestOptions });
+  }) => expensesList(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof expensesList>>,
@@ -83,6 +100,7 @@ export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
   TError = NotFoundErrorDTO,
 >(
+  params: undefined | ExpensesListParams,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -105,6 +123,7 @@ export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
   TError = NotFoundErrorDTO,
 >(
+  params?: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -127,6 +146,7 @@ export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
   TError = NotFoundErrorDTO,
 >(
+  params?: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -142,6 +162,7 @@ export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
   TError = NotFoundErrorDTO,
 >(
+  params?: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -152,7 +173,7 @@ export function useExpensesList<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getExpensesListQueryOptions(options);
+  const queryOptions = getExpensesListQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -164,10 +185,11 @@ export function useExpensesList<
 
 export const invalidateExpensesList = async (
   queryClient: QueryClient,
+  params?: ExpensesListParams,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getExpensesListQueryKey() },
+    { queryKey: getExpensesListQueryKey(params) },
     options,
   );
 

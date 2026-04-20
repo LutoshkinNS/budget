@@ -82,7 +82,7 @@ interface CategorySubcategories {
 @route("/expenses")
 @tag("Expenses")
 interface Expenses {
-  @get list(): Expense[] | ExpenseNotFoundResponse;
+  @get list(@query days?: integer): Expense[] | ExpenseNotFoundResponse;
 
   @get get(
     @path expenseId: integer,

@@ -6,6 +6,10 @@
  */
 import * as zod from "zod";
 
+export const ExpensesListQueryParams = zod.object({
+  days: zod.number().optional(),
+});
+
 export const expensesListResponseAmountMin = 0.01;
 
 export const ExpensesListResponseItem = zod.object({
