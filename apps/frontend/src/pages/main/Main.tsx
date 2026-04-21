@@ -1,15 +1,16 @@
-import { Suspense } from "react";
+import { makeLazy } from "@/common/ui/makeLazy";
+import { CreateExpense } from "@/modules/expenses";
 
-import { Loader } from "@/common/ui/loader/Loader.tsx";
-import { CreateExpense, ExpensesByDays } from "@/modules/expenses";
+const ExpensesByDays = makeLazy(
+  () => import("@/modules/expenses/ui/ExpensesByDays"),
+  "ExpensesByDays",
+);
 
 export function Main() {
   return (
     <>
       <CreateExpense />
-      <Suspense fallback={<Loader />}>
-        <ExpensesByDays />
-      </Suspense>
+      <ExpensesByDays />
     </>
   );
 }
