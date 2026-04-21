@@ -8,7 +8,9 @@ export function makeLazy<M, P extends object>(
 ) {
   const Component = lazy(() =>
     factory().then((m) => ({
-      default: (exportName ? m[exportName] : m) as ComponentType<P>,
+      default: (exportName
+        ? m[exportName]
+        : (m as { default: unknown }).default) as ComponentType<P>,
     })),
   );
 
