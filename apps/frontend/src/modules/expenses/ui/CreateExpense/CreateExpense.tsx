@@ -5,10 +5,10 @@ import { Input } from "@/common/ui/input/Input";
 import { CategoriesKeyboard } from "@/modules/categories";
 import { useMe } from "@/modules/user";
 
-import { useCreateExpense } from "../model/useCreateExpense";
-import { NumericKeyboard } from "../modules/numeric-keyboard";
+import { useCreateExpense } from "../../model/useCreateExpense";
+import { NumericKeyboard } from "../../modules/numeric-keyboard";
 
-import s from "./createExpense.module.css";
+import s from "./CreateExpense.module.css";
 
 const IDS = {
   EXPENSE: {

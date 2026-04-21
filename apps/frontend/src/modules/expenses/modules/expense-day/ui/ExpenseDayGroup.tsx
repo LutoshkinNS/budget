@@ -6,7 +6,7 @@ import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { ExpenseDayHeader } from "./ExpenseDayHeader.tsx";
 import { ExpenseDayItem } from "./ExpenseDayItem.tsx";
 
-import s from "./expenseDays.module.css";
+import s from "./expenseDay.module.css";
 
 type ExpenseDayGroupProps = {
   label: string;

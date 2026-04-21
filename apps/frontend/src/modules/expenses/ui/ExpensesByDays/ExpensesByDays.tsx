@@ -1,10 +1,9 @@
 import { Loader } from "@/common/ui/loader/Loader.tsx";
 
-import { useExpenses } from "../useExpenses.ts";
+import { ExpenseDayGroup } from "../../modules/expense-day";
+import { useExpenses } from "../../useExpenses.ts";
 
-import { ExpenseDayGroup } from "./ExpenseDayGroup.tsx";
-
-import s from "./expenseDays.module.css";
+import s from "./ExpensesByDays.module.css";
 
 export function ExpensesByDays() {
   const { groups, isLoading } = useExpenses();

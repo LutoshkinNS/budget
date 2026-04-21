@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-import s from "./expenseDays.module.css";
+import s from "./expenseDay.module.css";
 
 type ExpenseDayHeaderProps = {
   label: string;

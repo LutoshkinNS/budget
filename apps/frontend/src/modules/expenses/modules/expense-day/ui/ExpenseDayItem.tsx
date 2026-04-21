@@ -1,7 +1,7 @@
 import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { useCategories } from "@/modules/categories";
 
-import s from "./expenseDays.module.css";
+import s from "./expenseDay.module.css";
 
 type ExpenseDayItemProps = {
   expense: ExpenseDTO;
