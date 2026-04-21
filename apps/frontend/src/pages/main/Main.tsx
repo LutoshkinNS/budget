@@ -2,7 +2,7 @@ import { makeLazy } from "@/common/ui/makeLazy";
 import { CreateExpense } from "@/modules/expenses";
 
 const ExpensesByDays = makeLazy(
-  () => import("@/modules/expenses/ui/ExpensesByDays"),
+  () => import("@/modules/expenses/ExpensesByDays.lazy"),
   "ExpensesByDays",
 );
 
