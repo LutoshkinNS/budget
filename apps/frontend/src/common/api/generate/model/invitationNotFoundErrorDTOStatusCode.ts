@@ -8,7 +8,6 @@
 export type InvitationNotFoundErrorDTOStatusCode =
   (typeof InvitationNotFoundErrorDTOStatusCode)[keyof typeof InvitationNotFoundErrorDTOStatusCode];
 
- 
 export const InvitationNotFoundErrorDTOStatusCode = {
   NUMBER_404: 404,
 } as const;

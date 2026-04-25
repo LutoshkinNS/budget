@@ -8,7 +8,6 @@
 export type NoAccountErrorDTOStatusCode =
   (typeof NoAccountErrorDTOStatusCode)[keyof typeof NoAccountErrorDTOStatusCode];
 
- 
 export const NoAccountErrorDTOStatusCode = {
   NUMBER_409: 409,
 } as const;

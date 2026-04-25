@@ -16,4 +16,6 @@ export interface ExpenseDTO {
   description?: string | null;
   /** @minimum 1 */
   id: number;
+  /** @minimum 1 */
+  userId: number;
 }

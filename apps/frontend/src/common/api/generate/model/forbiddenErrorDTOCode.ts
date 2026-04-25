@@ -8,7 +8,6 @@
 export type ForbiddenErrorDTOCode =
   (typeof ForbiddenErrorDTOCode)[keyof typeof ForbiddenErrorDTOCode];
 
- 
 export const ForbiddenErrorDTOCode = {
   FORBIDDEN: "FORBIDDEN",
 } as const;

@@ -8,7 +8,6 @@
 export type ForbiddenErrorDTOStatusCode =
   (typeof ForbiddenErrorDTOStatusCode)[keyof typeof ForbiddenErrorDTOStatusCode];
 
- 
 export const ForbiddenErrorDTOStatusCode = {
   NUMBER_403: 403,
 } as const;

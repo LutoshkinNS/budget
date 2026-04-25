@@ -8,7 +8,6 @@
 export type UnauthorizedErrorDTOStatusCode =
   (typeof UnauthorizedErrorDTOStatusCode)[keyof typeof UnauthorizedErrorDTOStatusCode];
 
- 
 export const UnauthorizedErrorDTOStatusCode = {
   NUMBER_401: 401,
 } as const;

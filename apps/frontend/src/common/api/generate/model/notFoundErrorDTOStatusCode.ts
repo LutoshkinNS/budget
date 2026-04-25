@@ -8,7 +8,6 @@
 export type NotFoundErrorDTOStatusCode =
   (typeof NotFoundErrorDTOStatusCode)[keyof typeof NotFoundErrorDTOStatusCode];
 
- 
 export const NotFoundErrorDTOStatusCode = {
   NUMBER_404: 404,
 } as const;

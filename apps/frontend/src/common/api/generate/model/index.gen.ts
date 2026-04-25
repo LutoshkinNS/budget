@@ -9,6 +9,7 @@ export * from "./accountDTO.gen";
 export * from "./accountIdDTO.gen";
 export * from "./accountInfoDTO.gen";
 export * from "./accountInvitationDTO.gen";
+export * from "./accountMemberDTO.gen";
 export * from "./accountUpdateDTO.gen";
 export * from "./categoryCreateDTO.gen";
 export * from "./categoryDTO.gen";

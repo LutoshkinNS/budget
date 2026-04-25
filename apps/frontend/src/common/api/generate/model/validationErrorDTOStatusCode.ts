@@ -8,7 +8,6 @@
 export type ValidationErrorDTOStatusCode =
   (typeof ValidationErrorDTOStatusCode)[keyof typeof ValidationErrorDTOStatusCode];
 
- 
 export const ValidationErrorDTOStatusCode = {
   NUMBER_400: 400,
 } as const;

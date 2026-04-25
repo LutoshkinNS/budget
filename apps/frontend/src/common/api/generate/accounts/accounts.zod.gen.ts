@@ -54,3 +54,16 @@ export const AccountsCreateInvitationResponse = zod.object({
   usedAt: zod.iso.datetime({}).optional(),
   usedBy: zod.number().min(1).optional(),
 });
+
+export const AccountsListMembersParams = zod.object({
+  accountId: zod.number(),
+});
+
+export const AccountsListMembersResponseItem = zod.object({
+  userId: zod.number().min(1),
+  firstName: zod.union([zod.string(), zod.null()]).optional(),
+  photoUrl: zod.union([zod.string(), zod.null()]).optional(),
+});
+export const AccountsListMembersResponse = zod.array(
+  AccountsListMembersResponseItem,
+);

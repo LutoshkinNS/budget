@@ -8,7 +8,6 @@
 export type NoAccountErrorDTOCode =
   (typeof NoAccountErrorDTOCode)[keyof typeof NoAccountErrorDTOCode];
 
- 
 export const NoAccountErrorDTOCode = {
   NO_ACCOUNT: "NO_ACCOUNT",
 } as const;

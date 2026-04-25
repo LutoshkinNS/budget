@@ -8,7 +8,6 @@
 export type InternalServerErrorDTOStatusCode =
   (typeof InternalServerErrorDTOStatusCode)[keyof typeof InternalServerErrorDTOStatusCode];
 
- 
 export const InternalServerErrorDTOStatusCode = {
   NUMBER_500: 500,
 } as const;

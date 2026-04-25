@@ -17,6 +17,7 @@ export const ExpensesListResponseItem = zod.object({
   accountId: zod.number().min(1),
   amount: zod.number().min(expensesListResponseAmountMin),
   categoryId: zod.number().min(1),
+  userId: zod.number().min(1),
   description: zod.union([zod.string(), zod.null()]).optional(),
   date: zod.iso.datetime({}),
 });
@@ -38,6 +39,7 @@ export const ExpensesCreateResponse = zod.object({
   accountId: zod.number().min(1),
   amount: zod.number().min(expensesCreateResponseAmountMin),
   categoryId: zod.number().min(1),
+  userId: zod.number().min(1),
   description: zod.union([zod.string(), zod.null()]).optional(),
   date: zod.iso.datetime({}),
 });
@@ -53,6 +55,7 @@ export const ExpensesGetResponse = zod.object({
   accountId: zod.number().min(1),
   amount: zod.number().min(expensesGetResponseAmountMin),
   categoryId: zod.number().min(1),
+  userId: zod.number().min(1),
   description: zod.union([zod.string(), zod.null()]).optional(),
   date: zod.iso.datetime({}),
 });

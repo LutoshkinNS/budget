@@ -8,7 +8,6 @@
 export type InternalServerErrorDTOCode =
   (typeof InternalServerErrorDTOCode)[keyof typeof InternalServerErrorDTOCode];
 
- 
 export const InternalServerErrorDTOCode = {
   INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
 } as const;

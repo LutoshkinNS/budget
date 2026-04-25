@@ -8,7 +8,6 @@
 export type NotFoundErrorDTOCode =
   (typeof NotFoundErrorDTOCode)[keyof typeof NotFoundErrorDTOCode];
 
- 
 export const NotFoundErrorDTOCode = {
   NOT_FOUND: "NOT_FOUND",
 } as const;

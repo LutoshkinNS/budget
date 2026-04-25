@@ -5,7 +5,6 @@
  * OpenAPI spec version: 0.0.0
  */
 
- 
 export const UnauthorizedErrorDTOCode = {
   UNAUTHORIZED: "UNAUTHORIZED",
   INVALID_TOKEN: "INVALID_TOKEN",

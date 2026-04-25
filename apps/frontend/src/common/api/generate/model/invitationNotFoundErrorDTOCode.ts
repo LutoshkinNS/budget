@@ -8,7 +8,6 @@
 export type InvitationNotFoundErrorDTOCode =
   (typeof InvitationNotFoundErrorDTOCode)[keyof typeof InvitationNotFoundErrorDTOCode];
 
- 
 export const InvitationNotFoundErrorDTOCode = {
   INVITATION_NOT_FOUND: "INVITATION_NOT_FOUND",
 } as const;

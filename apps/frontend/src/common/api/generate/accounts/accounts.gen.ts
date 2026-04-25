@@ -25,6 +25,7 @@ import type {
   AccountDTO,
   AccountIdDTO,
   AccountInvitationDTO,
+  AccountMemberDTO,
   AccountUpdateDTO,
   ForbiddenErrorDTO,
   InternalServerErrorDTO,
@@ -447,4 +448,183 @@ export const useAccountsCreateInvitation = <
     getAccountsCreateInvitationMutationOptions(options),
     queryClient,
   );
+};
+export const getAccountsListMembersUrl = (accountId: number) => {
+  return `/api/v1/accounts/${accountId}/members`;
+};
+
+export const accountsListMembers = async (
+  accountId: number,
+  options?: RequestInit,
+): Promise<AccountMemberDTO[]> => {
+  return fetcher<AccountMemberDTO[]>(getAccountsListMembersUrl(accountId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getAccountsListMembersQueryKey = (accountId: number) => {
+  return ["accountsListMembers", ...(accountId ? [accountId] : [])] as const;
+};
+
+export const getAccountsListMembersQueryOptions = <
+  TData = Awaited<ReturnType<typeof accountsListMembers>>,
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+>(
+  accountId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof accountsListMembers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getAccountsListMembersQueryKey(accountId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof accountsListMembers>>
+  > = ({ signal }) =>
+    accountsListMembers(accountId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!accountId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof accountsListMembers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AccountsListMembersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof accountsListMembers>>
+>;
+export type AccountsListMembersQueryError =
+  | UnauthorizedErrorDTO
+  | ForbiddenErrorDTO
+  | InternalServerErrorDTO;
+
+export function useAccountsListMembers<
+  TData = Awaited<ReturnType<typeof accountsListMembers>>,
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+>(
+  accountId: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof accountsListMembers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof accountsListMembers>>,
+          TError,
+          Awaited<ReturnType<typeof accountsListMembers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useAccountsListMembers<
+  TData = Awaited<ReturnType<typeof accountsListMembers>>,
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+>(
+  accountId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof accountsListMembers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof accountsListMembers>>,
+          TError,
+          Awaited<ReturnType<typeof accountsListMembers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useAccountsListMembers<
+  TData = Awaited<ReturnType<typeof accountsListMembers>>,
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+>(
+  accountId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof accountsListMembers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useAccountsListMembers<
+  TData = Awaited<ReturnType<typeof accountsListMembers>>,
+  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+>(
+  accountId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof accountsListMembers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getAccountsListMembersQueryOptions(accountId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const invalidateAccountsListMembers = async (
+  queryClient: QueryClient,
+  accountId: number,
+  options?: InvalidateOptions,
+): Promise<QueryClient> => {
+  await queryClient.invalidateQueries(
+    { queryKey: getAccountsListMembersQueryKey(accountId) },
+    options,
+  );
+
+  return queryClient;
 };
