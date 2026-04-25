@@ -8,7 +8,7 @@
 export type NoAccountErrorDTOCode =
   (typeof NoAccountErrorDTOCode)[keyof typeof NoAccountErrorDTOCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const NoAccountErrorDTOCode = {
   NO_ACCOUNT: "NO_ACCOUNT",
 } as const;

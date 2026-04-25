@@ -1,5 +1,5 @@
-import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import clsx from "clsx";
 
 import s from "./AccountAvatar.module.css";
 
@@ -24,7 +24,10 @@ export function AccountAvatar({
     if (!open) return;
 
     function handleClickOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }

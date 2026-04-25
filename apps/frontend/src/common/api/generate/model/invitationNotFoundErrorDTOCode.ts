@@ -8,7 +8,7 @@
 export type InvitationNotFoundErrorDTOCode =
   (typeof InvitationNotFoundErrorDTOCode)[keyof typeof InvitationNotFoundErrorDTOCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const InvitationNotFoundErrorDTOCode = {
   INVITATION_NOT_FOUND: "INVITATION_NOT_FOUND",
 } as const;

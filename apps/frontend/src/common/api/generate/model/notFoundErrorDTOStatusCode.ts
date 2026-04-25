@@ -8,7 +8,7 @@
 export type NotFoundErrorDTOStatusCode =
   (typeof NotFoundErrorDTOStatusCode)[keyof typeof NotFoundErrorDTOStatusCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const NotFoundErrorDTOStatusCode = {
   NUMBER_404: 404,
 } as const;

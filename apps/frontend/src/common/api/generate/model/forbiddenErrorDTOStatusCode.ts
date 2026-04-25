@@ -8,7 +8,7 @@
 export type ForbiddenErrorDTOStatusCode =
   (typeof ForbiddenErrorDTOStatusCode)[keyof typeof ForbiddenErrorDTOStatusCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const ForbiddenErrorDTOStatusCode = {
   NUMBER_403: 403,
 } as const;

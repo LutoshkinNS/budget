@@ -8,7 +8,7 @@
 export type InternalServerErrorDTOStatusCode =
   (typeof InternalServerErrorDTOStatusCode)[keyof typeof InternalServerErrorDTOStatusCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const InternalServerErrorDTOStatusCode = {
   NUMBER_500: 500,
 } as const;

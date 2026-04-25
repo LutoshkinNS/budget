@@ -8,7 +8,7 @@
 export type NoAccountErrorDTOStatusCode =
   (typeof NoAccountErrorDTOStatusCode)[keyof typeof NoAccountErrorDTOStatusCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const NoAccountErrorDTOStatusCode = {
   NUMBER_409: 409,
 } as const;

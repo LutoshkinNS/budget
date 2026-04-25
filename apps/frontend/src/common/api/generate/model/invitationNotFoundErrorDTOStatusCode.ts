@@ -8,7 +8,7 @@
 export type InvitationNotFoundErrorDTOStatusCode =
   (typeof InvitationNotFoundErrorDTOStatusCode)[keyof typeof InvitationNotFoundErrorDTOStatusCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const InvitationNotFoundErrorDTOStatusCode = {
   NUMBER_404: 404,
 } as const;

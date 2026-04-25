@@ -8,7 +8,7 @@
 export type ForbiddenErrorDTOCode =
   (typeof ForbiddenErrorDTOCode)[keyof typeof ForbiddenErrorDTOCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const ForbiddenErrorDTOCode = {
   FORBIDDEN: "FORBIDDEN",
 } as const;

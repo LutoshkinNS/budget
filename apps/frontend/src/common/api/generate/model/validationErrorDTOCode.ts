@@ -8,7 +8,7 @@
 export type ValidationErrorDTOCode =
   (typeof ValidationErrorDTOCode)[keyof typeof ValidationErrorDTOCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const ValidationErrorDTOCode = {
   VALIDATION_ERROR: "VALIDATION_ERROR",
 } as const;

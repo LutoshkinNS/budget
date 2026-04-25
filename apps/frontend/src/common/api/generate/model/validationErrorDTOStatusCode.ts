@@ -8,7 +8,7 @@
 export type ValidationErrorDTOStatusCode =
   (typeof ValidationErrorDTOStatusCode)[keyof typeof ValidationErrorDTOStatusCode];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const ValidationErrorDTOStatusCode = {
   NUMBER_400: 400,
 } as const;
