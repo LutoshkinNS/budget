@@ -10,6 +10,9 @@ export function Navigation() {
           <Link to="/">Расходы</Link>
         </li>
         <li className={s.navItem}>
+          <Link to="/dashboard">Дашборд</Link>
+        </li>
+        <li className={s.navItem}>
           <Link to="/categories">Категории</Link>
         </li>
         <li className={s.navItem}>
