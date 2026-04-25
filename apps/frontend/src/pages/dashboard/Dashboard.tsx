@@ -7,12 +7,14 @@ import {
   PeriodSummary,
   periodToDays,
 } from "@/modules/expenses/modules/period-summary";
+import { UserFilter } from "@/modules/expenses/modules/user-filter";
 
 import s from "./Dashboard.module.css";
 
 export function Dashboard() {
   const [period, setPeriod] = useState<Period>("week");
   const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const days = periodToDays(period);
 
   return (
@@ -21,14 +23,18 @@ export function Dashboard() {
       <PeriodSummary
         days={days}
         categoryId={categoryId}
+        userId={userId}
         period={period}
         onPeriodChange={setPeriod}
       />
       <CategoryFilter value={categoryId} onChange={setCategoryId} />
+      <UserFilter value={userId} onChange={setUserId} />
       <ExpensesByDays
         days={days}
         categoryId={categoryId}
+        userId={userId}
         onResetCategory={() => setCategoryId(null)}
+        onResetUser={() => setUserId(null)}
       />
     </div>
   );
