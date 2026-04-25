@@ -12,7 +12,7 @@ export function EmptyState({ variant, onReset }: EmptyStateProps) {
 
   return (
     <div className={s.emptyState}>
-      <p className={s.emptyStateText}>В этой категории трат за период нет</p>
+      <p className={s.emptyStateText}>По выбранным фильтрам трат за период нет</p>
       {onReset && (
         <button type="button" className={s.resetLink} onClick={onReset}>
           показать все
