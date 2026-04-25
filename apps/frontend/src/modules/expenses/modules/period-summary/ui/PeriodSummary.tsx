@@ -1,8 +1,6 @@
 import { useMemo } from "react";
 import clsx from "clsx";
 
-import { Loader } from "@/common/ui/loader/Loader.tsx";
-
 import { useExpenses } from "../../../useExpenses.ts";
 import type { Period } from "../model/types.ts";
 
@@ -55,7 +53,7 @@ export function PeriodSummary({
         ))}
       </div>
       <div className={s.amount}>
-        {isLoading ? <Loader /> : `${total.toLocaleString("ru")} ₽`}
+        {isLoading ? "—" : `${total.toLocaleString("ru")} ₽`}
       </div>
     </div>
   );

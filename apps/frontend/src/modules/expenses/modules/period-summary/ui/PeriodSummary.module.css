@@ -33,9 +33,6 @@
 .amount {
     font-size: 32px;
     font-weight: 500;
+    line-height: 1.2;
     color: var(--primary-text-color);
-    min-height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
