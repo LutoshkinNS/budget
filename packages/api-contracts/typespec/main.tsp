@@ -22,6 +22,11 @@ model idObj{
 interface Accounts {
   @get list(): Account[] | AccountNotFoundResponse | InternalServerErrorResponse;
 
+  @route("/{accountId}/members")
+  @get listMembers(
+    @path accountId: integer
+  ): AccountMember[] | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+
   @route("/{accountId}/invitations")
   @post createInvitation(
     @path accountId: integer

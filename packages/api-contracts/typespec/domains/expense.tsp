@@ -15,6 +15,9 @@ model Expense {
   @minValue(1)
   categoryId: integer;
 
+  @minValue(1)
+  userId: integer;
+
   description?: string | null;
   date: utcDateTime;
 }
