@@ -38,6 +38,7 @@ export default async function expensesModule(app: FastifyApp) {
       });
       return expenses.map((expense) => ({
         ...expense,
+        userId: Number(expense.userId),
         date: expense.date.toISOString()
       }));
     }
@@ -64,6 +65,7 @@ export default async function expensesModule(app: FastifyApp) {
       });
       return {
         ...expense,
+        userId: Number(expense.userId),
         date: expense.date.toISOString()
       };
     }
@@ -86,7 +88,8 @@ export default async function expensesModule(app: FastifyApp) {
           categoryId: req.body.categoryId,
           description: req.body.description ?? null,
           date: req.body.date ?? new Date(),
-          accountId
+          accountId,
+          userId: BigInt(req.user.userId)
         },
         include: {
           category: true,
@@ -95,6 +98,7 @@ export default async function expensesModule(app: FastifyApp) {
       });
       return {
         ...result,
+        userId: Number(result.userId),
         date: result.date.toISOString()
       };
     }
