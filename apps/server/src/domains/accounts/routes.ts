@@ -1,5 +1,6 @@
 import Account from '#s/Account.js';
 import AccountInvitation from '#s/AccountInvitation.js';
+import AccountMember from '#s/AccountMember.js';
 import AccountUpdate from '#s/AccountUpdate.js';
 import RedeemInvitationRequest from '#s/RedeemInvitationRequest.js';
 import UnauthorizedError from '#s/UnauthorizedError.js';
@@ -7,6 +8,7 @@ import type { FastifyApp } from '#src/appInit.js';
 
 import { accountsHandler } from './handlers/accounts.handler.js';
 import { createInvitationHandler } from './handlers/createInvitation.handler.js';
+import { listMembersHandler } from './handlers/listMembers.handler.js';
 import { redeemInvitationHandler } from './handlers/redeemInvitation.handler.js';
 import {
   updateAccountHandler,
@@ -27,6 +29,25 @@ export default async function accountsRoutes(app: FastifyApp) {
       }
     },
     accountsHandler
+  );
+
+  app.get<{ Params: { accountId: number } }>(
+    '/:accountId/members',
+    {
+      preHandler: [app.authenticate],
+      schema: {
+        params: {
+          type: 'object',
+          properties: { accountId: { type: 'integer' } },
+          required: ['accountId']
+        },
+        response: {
+          200: { type: 'array', items: AccountMember },
+          401: UnauthorizedError
+        }
+      }
+    },
+    listMembersHandler
   );
 
   app.post(
