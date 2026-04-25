@@ -9,6 +9,7 @@ import s from "./PeriodSummary.module.css";
 type PeriodSummaryProps = {
   days: number;
   categoryId: number | null;
+  userId: number | null;
   period: Period;
   onPeriodChange: (p: Period) => void;
 };
@@ -24,6 +25,7 @@ const PERIODS: Period[] = ["day", "week", "month"];
 export function PeriodSummary({
   days,
   categoryId,
+  userId,
   period,
   onPeriodChange,
 }: PeriodSummaryProps) {
@@ -33,8 +35,9 @@ export function PeriodSummary({
     return groups
       .flatMap((g) => g.expenses)
       .filter((e) => categoryId == null || e.categoryId === categoryId)
+      .filter((e) => userId == null || e.userId === userId)
       .reduce((sum, e) => sum + e.amount, 0);
-  }, [groups, categoryId]);
+  }, [groups, categoryId, userId]);
 
   return (
     <div className={s.summary}>
