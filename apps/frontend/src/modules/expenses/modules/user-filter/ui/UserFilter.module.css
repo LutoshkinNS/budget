@@ -1,0 +1,22 @@
+.chips {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    background: var(--surface-color);
+    color: var(--primary-text-color);
+    border: none;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.chipActive {
+    background-color: var(--accent-color);
+    color: var(--accent-text-color);
+}
