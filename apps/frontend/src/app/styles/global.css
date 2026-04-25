@@ -39,6 +39,12 @@ body {
         --secondary-color: #333334;
         --secondary-text-color: #F3F3F3;
 
+        --accent-color: #4F46E5;
+        --accent-text-color: #FFFFFF;
+        --muted-text-color: #8A8A90;
+        --surface-color: #FFFFFF;
+        --divider-color: #E8E8EA;
+
         color: #242229;
         background-color: #F4F4F4;
     }
@@ -48,5 +54,13 @@ body {
     :root {
         --primary-color: #4e4e4e;
         --secondary-color: #bfbfbf;
+
+        --primary-text-color: #F3F3F3;
+        --secondary-text-color: #242229;
+        --accent-color: #818CF8;
+        --accent-text-color: #1A1A1F;
+        --muted-text-color: #B0B0B5;
+        --surface-color: #3A3A3A;
+        --divider-color: #5A5A5A;
     }
 }
