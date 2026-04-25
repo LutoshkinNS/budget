@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+docs
 
 node_modules
 dist
@@ -38,3 +39,9 @@ git-info.json
 
 # client
 .tanstak
+
+# Claude Code workspace artifacts
+.claude/
+.playwright-mcp/
+.mcp.json
+nul

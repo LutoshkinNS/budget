@@ -135,3 +135,7 @@ Soft deletes are used for Categories and Subcategories via `deletedAt` field.
 - **Russian language**: Some UI text and comments are in Russian
 - **FSD methodology**: Follow Feature-Sliced Design patterns when adding frontend code
 - **Error handling**: Frontend entity hooks validate responses with Zod and show notifications on errors
+
+## Working with Claude Code
+
+- **Не коммить артефакты разработки через Claude.** Содержимое `docs/` (включая `docs/superpowers/`: планы, спецификации, brainstorming-черновики, ретроспективы) и любые промежуточные файлы, созданные в процессе работы Claude (`.claude/`, `.playwright-mcp/`, `.mcp.json` и т.п.), не должны попадать в коммиты. Эти артефакты — рабочее пространство Claude, а не часть кодовой базы. Храни локально, но не пушь в репозиторий.
