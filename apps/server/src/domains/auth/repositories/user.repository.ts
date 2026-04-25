@@ -44,6 +44,39 @@ export async function createUserWithAccount(
 }
 
 /**
+ * Upsert пользователя по Telegram payload — обновляет firstName/photoUrl
+ * на каждом login.
+ */
+export async function upsertUserFromTelegram(
+  prisma: PrismaClient,
+  payload: { id: bigint; first_name: string; photo_url?: string | undefined }
+) {
+  return prisma.user.upsert({
+    where: { id: payload.id },
+    update: {
+      firstName: payload.first_name,
+      photoUrl: payload.photo_url ?? null
+    },
+    create: {
+      id: payload.id,
+      firstName: payload.first_name,
+      photoUrl: payload.photo_url ?? null,
+      ownedAccounts: {
+        create: {
+          name: `Account #${payload.id}`
+        }
+      }
+    },
+    include: {
+      ownedAccounts: true,
+      accounts: {
+        include: { account: true }
+      }
+    }
+  });
+}
+
+/**
  * Находит или создаёт пользователя по Telegram ID
  */
 export async function findOrCreateUser(prisma: PrismaClient, userId: bigint) {

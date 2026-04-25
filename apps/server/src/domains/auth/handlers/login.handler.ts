@@ -11,8 +11,8 @@ import {
   REFRESH_TOKEN_MAX_AGE_SECONDS
 } from '../constants.js';
 import {
-  findOrCreateUser,
-  getFirstAccountId
+  getFirstAccountId,
+  upsertUserFromTelegram
 } from '../repositories/user.repository.js';
 import { validateTelegramAuth } from '../validateTelegramAuth.js';
 
@@ -38,8 +38,12 @@ export async function loginHandler(
 
   const telegramId = BigInt(req.body.id);
 
-  // Ищем или создаём пользователя по Telegram ID
-  const user = await findOrCreateUser(this.prisma, telegramId);
+  // Upsert пользователя — обновляем firstName/photoUrl на каждом login
+  const user = await upsertUserFromTelegram(this.prisma, {
+    id: telegramId,
+    first_name: req.body.first_name,
+    photo_url: req.body.photo_url
+  });
 
   // Определяем первый доступный accountId
   const accountId = getFirstAccountId(user);
