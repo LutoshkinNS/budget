@@ -5,11 +5,11 @@ import {
   getExpensesListQueryKey,
   useExpensesList,
 } from "@/common/api/generate/expenses/expenses.gen.ts";
-import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { ExpensesListResponse } from "@/common/api/generate/expenses/expenses.zod.gen.ts";
+import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
 
-const DAYS_TO_SHOW = 2;
+const DEFAULT_DAYS = 2;
 
 export type ExpenseDayGroup = {
   label: string;
@@ -52,9 +52,9 @@ function groupByDay(expenses: ExpenseDTO[]): ExpenseDayGroup[] {
     }));
 }
 
-export function useExpenses() {
+export function useExpenses(days: number = DEFAULT_DAYS) {
   const { data, isError, error, isLoading } = useExpensesList({
-    days: DAYS_TO_SHOW,
+    days,
   });
   const { addNotification } = useNotifications();
 
