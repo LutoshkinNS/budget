@@ -1,7 +1,10 @@
 import Category from '#s/Category.js';
 import CategoryCreate from '#s/CategoryCreate.js';
+import ConflictError from '#s/ConflictError.js';
 import idObj from '#s/idObj.js';
 import { FastifyApp } from '#src/appInit.js';
+
+import { normalizeCategoryName } from './categoryName.js';
 
 export default async function categoriesModule(app: FastifyApp) {
   app.addHook('preHandler', app.authenticate);
@@ -47,15 +50,34 @@ export default async function categoriesModule(app: FastifyApp) {
     {
       schema: {
         body: CategoryCreate,
-        response: { 200: Category }
+        response: { 200: Category, 409: ConflictError }
       }
     },
-    async function (req) {
+    async function (req, reply) {
       const accountId = req.user.accountId;
+      const name = req.body.name.trim();
+      const normalizedName = normalizeCategoryName(req.body.name);
+
+      const existingCategory = await this.prisma.category.findFirst({
+        where: {
+          accountId,
+          deletedAt: null,
+          nameNormalized: normalizedName
+        }
+      });
+
+      if (existingCategory) {
+        return reply.code(409).send({
+          code: 'CATEGORY_ALREADY_EXISTS',
+          message: 'Category already exists',
+          statusCode: 409
+        });
+      }
 
       return await this.prisma.category.create({
         data: {
-          name: req.body.name,
+          name,
+          nameNormalized: normalizedName,
           accountId
         }
       });

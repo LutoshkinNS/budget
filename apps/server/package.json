@@ -21,6 +21,8 @@
     "typespec": "pnpm run typespec:generate && pnpm run typespec:generateTsSchemas",
     "prisma:generate": "prisma generate",
     "prisma:studio": "npx prisma studio",
+    "categories:merge-duplicates:dry-run": "tsx scripts/mergeDuplicateCategories.ts --dry-run",
+    "categories:merge-duplicates": "tsx scripts/mergeDuplicateCategories.ts",
     "prisma:seed": "npx prisma db seed"
   },
   "keywords": [],

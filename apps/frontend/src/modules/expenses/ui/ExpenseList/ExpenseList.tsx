@@ -4,15 +4,16 @@ import { useCategories } from "@/modules/categories";
 import { useExpenses } from "../../useExpenses.ts";
 
 export function ExpenseList() {
-  const { data } = useExpenses();
+  const { groups } = useExpenses();
   const { data: categories } = useCategories();
 
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+  const expenses = groups.flatMap((group) => group.expenses);
 
   return (
     <FormBlock legend={"Список трат"}>
       <ul>
-        {data.map((expense) => (
+        {expenses.map((expense) => (
           <li key={expense.id}>
             {expense.amount}
             {categoryMap.get(expense.categoryId)

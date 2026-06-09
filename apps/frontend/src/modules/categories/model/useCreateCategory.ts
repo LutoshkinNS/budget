@@ -8,6 +8,30 @@ import { useInvalidateCategories } from "../useCategories.ts";
 
 export type CategoryCreateData = z.infer<typeof CategoriesCreateBody>;
 
+function getCreateCategoryErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+
+    if (code === "CATEGORY_ALREADY_EXISTS") {
+      return "Категория с таким названием уже существует";
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+
+    if (typeof message === "string") {
+      return message;
+    }
+  }
+
+  return undefined;
+}
+
 export function useCreateCategory() {
   const invalidateCategory = useInvalidateCategories();
 
@@ -28,11 +52,22 @@ export function useCreateCategory() {
       return;
     }
 
-    return await mutation.mutateAsync({ data: validateResult.data });
+    try {
+      return await mutation.mutateAsync({ data: validateResult.data });
+    } catch (error) {
+      const errorMessage = getCreateCategoryErrorMessage(error);
+
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      }
+
+      throw error;
+    }
   };
 
   return {
     createCategory,
+    errorMessage: getCreateCategoryErrorMessage(mutation.error),
     ...mutation,
   };
 }

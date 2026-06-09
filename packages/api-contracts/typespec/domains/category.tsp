@@ -23,6 +23,11 @@ model CategoryErrorResponse {
   ...Body<ValidationError>;
 }
 
+model CategoryConflictResponse {
+  @statusCode statusCode: 409;
+  @body error: ConflictError;
+}
+
 model CategoryNotFoundResponse {
   ...NotFoundResponse;
   ...Body<NotFoundError>;

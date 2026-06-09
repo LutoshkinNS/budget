@@ -12,7 +12,8 @@ enum ErrorCode {
   INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
   INVITATION_NOT_FOUND: "INVITATION_NOT_FOUND",
   ALREADY_MEMBER: "ALREADY_MEMBER",
-  FORBIDDEN: "FORBIDDEN"
+  FORBIDDEN: "FORBIDDEN",
+  CATEGORY_ALREADY_EXISTS: "CATEGORY_ALREADY_EXISTS"
 }
 
 @error
@@ -39,4 +40,11 @@ model InternalServerError {
 model InternalServerErrorResponse {
   @statusCode statusCode: 500;
   @body error: InternalServerError;
+}
+
+@error
+model ConflictError {
+  code: ErrorCode.CATEGORY_ALREADY_EXISTS;
+  message: string;
+  statusCode: 409;
 }

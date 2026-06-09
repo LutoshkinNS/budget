@@ -16,7 +16,8 @@ const FIELD_NAMES = {
 } as const;
 
 export function CreateCategory() {
-  const { createCategory, isPending, isError, error } = useCreateCategory();
+  const { createCategory, isPending, isError, errorMessage } =
+    useCreateCategory();
 
   const [formState, setFormState] = useState<CreateCategoryFormData>({
     name: "",
@@ -30,7 +31,13 @@ export function CreateCategory() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    await createCategory(formState);
+    const validationResult = createCategoryFormDataSchema.safeParse(formState);
+
+    if (!validationResult.success) {
+      return;
+    }
+
+    await createCategory(validationResult.data);
   };
 
   return (
@@ -58,10 +65,10 @@ export function CreateCategory() {
         </p>
         {isError && (
           <SimpleError>
-            Ошибка: {error?.message || "Не удалось создать категорию"}
+            Ошибка: {errorMessage || "Не удалось создать категорию"}
           </SimpleError>
         )}
-        <button type="submit" disabled={isPending}>
+        <button type="submit" disabled={isPending || !validationResult.success}>
           {isPending ? "Создание..." : "Создать"}
         </button>
       </fieldset>

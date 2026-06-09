@@ -1,4 +1,5 @@
 import idObj from '#s/idObj.js';
+import NotFoundError from '#s/NotFoundError.js';
 import Subcategory from '#s/Subcategory.js';
 import SubcategoryCreate from '#s/SubcategoryCreate.js';
 import { FastifyApp } from '#src/appInit.js';
@@ -51,7 +52,7 @@ export default async function subcategoriesModule(app: FastifyApp) {
     {
       schema: {
         body: SubcategoryCreate,
-        response: { 200: Subcategory }
+        response: { 200: Subcategory, 404: NotFoundError }
       }
     },
     async function (req, reply) {
@@ -65,9 +66,10 @@ export default async function subcategoriesModule(app: FastifyApp) {
       });
 
       if (!category) {
-        return (reply as any).code(404).send({
+        return reply.code(404).send({
           code: 'NOT_FOUND',
-          message: 'Category not found or access denied'
+          message: 'Category not found or access denied',
+          statusCode: 404
         });
       }
 

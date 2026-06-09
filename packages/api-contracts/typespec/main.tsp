@@ -55,7 +55,7 @@ interface Categories {
 
   @post create(
     @body category: CategoryCreate,
-  ): Category | CategoryErrorResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | CategoryConflictResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer): {
     @statusCode statusCode: 204;

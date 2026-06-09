@@ -9,7 +9,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig([
-  globalIgnores(["dist", "**/*.gen.ts"]),
+  globalIgnores(["dist", "dev-dist", "**/*.gen.ts"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [

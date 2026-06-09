@@ -152,6 +152,7 @@ exports.Prisma.CategoryScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
   name: 'name',
+  nameNormalized: 'nameNormalized',
   deletedAt: 'deletedAt'
 };
 

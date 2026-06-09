@@ -24,6 +24,7 @@ import type {
 import type {
   CategoryCreateDTO,
   CategoryDTO,
+  ConflictErrorDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
   ValidationErrorDTO,
@@ -193,7 +194,7 @@ export const categoriesCreate = async (
 };
 
 export const getCategoriesCreateMutationOptions = <
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ConflictErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -236,10 +237,11 @@ export type CategoriesCreateMutationResult = NonNullable<
 export type CategoriesCreateMutationBody = CategoryCreateDTO;
 export type CategoriesCreateMutationError =
   | ValidationErrorDTO
+  | ConflictErrorDTO
   | InternalServerErrorDTO;
 
 export const useCategoriesCreate = <
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ConflictErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {

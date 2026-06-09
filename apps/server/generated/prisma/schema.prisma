@@ -54,13 +54,16 @@ model AccountUser {
 }
 
 model Category {
-  id            Int           @id @default(autoincrement())
-  accountId     Int
-  account       Account       @relation(fields: [accountId], references: [id])
-  name          String
-  deletedAt     DateTime?
-  expenses      Expense[]
-  subcategories Subcategory[]
+  id             Int           @id @default(autoincrement())
+  accountId      Int
+  account        Account       @relation(fields: [accountId], references: [id])
+  name           String
+  nameNormalized String
+  deletedAt      DateTime?
+  expenses       Expense[]
+  subcategories  Subcategory[]
+
+  @@index([accountId, nameNormalized])
 }
 
 model Subcategory {
