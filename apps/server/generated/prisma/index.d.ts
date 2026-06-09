@@ -1409,11 +1409,13 @@ export namespace Prisma {
   export type UserCountOutputType = {
     ownedAccounts: number
     accounts: number
+    expenses: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     ownedAccounts?: boolean | UserCountOutputTypeCountOwnedAccountsArgs
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs
+    expenses?: boolean | UserCountOutputTypeCountExpensesArgs
   }
 
   // Custom InputTypes
@@ -1439,6 +1441,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AccountUserWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountExpensesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseWhereInput
   }
 
 
@@ -1566,16 +1575,22 @@ export namespace Prisma {
 
   export type UserMinAggregateOutputType = {
     id: bigint | null
+    firstName: string | null
+    photoUrl: string | null
     createdAt: Date | null
   }
 
   export type UserMaxAggregateOutputType = {
     id: bigint | null
+    firstName: string | null
+    photoUrl: string | null
     createdAt: Date | null
   }
 
   export type UserCountAggregateOutputType = {
     id: number
+    firstName: number
+    photoUrl: number
     createdAt: number
     _all: number
   }
@@ -1591,16 +1606,22 @@ export namespace Prisma {
 
   export type UserMinAggregateInputType = {
     id?: true
+    firstName?: true
+    photoUrl?: true
     createdAt?: true
   }
 
   export type UserMaxAggregateInputType = {
     id?: true
+    firstName?: true
+    photoUrl?: true
     createdAt?: true
   }
 
   export type UserCountAggregateInputType = {
     id?: true
+    firstName?: true
+    photoUrl?: true
     createdAt?: true
     _all?: true
   }
@@ -1693,6 +1714,8 @@ export namespace Prisma {
 
   export type UserGroupByOutputType = {
     id: bigint
+    firstName: string | null
+    photoUrl: string | null
     createdAt: Date
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
@@ -1717,31 +1740,41 @@ export namespace Prisma {
 
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    firstName?: boolean
+    photoUrl?: boolean
     createdAt?: boolean
     ownedAccounts?: boolean | User$ownedAccountsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
+    expenses?: boolean | User$expensesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    firstName?: boolean
+    photoUrl?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    firstName?: boolean
+    photoUrl?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
     id?: boolean
+    firstName?: boolean
+    photoUrl?: boolean
     createdAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "photoUrl" | "createdAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     ownedAccounts?: boolean | User$ownedAccountsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
+    expenses?: boolean | User$expensesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1752,9 +1785,12 @@ export namespace Prisma {
     objects: {
       ownedAccounts: Prisma.$AccountPayload<ExtArgs>[]
       accounts: Prisma.$AccountUserPayload<ExtArgs>[]
+      expenses: Prisma.$ExpensePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: bigint
+      firstName: string | null
+      photoUrl: string | null
       createdAt: Date
     }, ExtArgs["result"]["user"]>
     composites: {}
@@ -2152,6 +2188,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     ownedAccounts<T extends User$ownedAccountsArgs<ExtArgs> = {}>(args?: Subset<T, User$ownedAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    expenses<T extends User$expensesArgs<ExtArgs> = {}>(args?: Subset<T, User$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2182,6 +2219,8 @@ export namespace Prisma {
    */
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'BigInt'>
+    readonly firstName: FieldRef<"User", 'String'>
+    readonly photoUrl: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
   }
     
@@ -2614,6 +2653,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AccountUserScalarFieldEnum | AccountUserScalarFieldEnum[]
+  }
+
+  /**
+   * User.expenses
+   */
+  export type User$expensesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Expense
+     */
+    select?: ExpenseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Expense
+     */
+    omit?: ExpenseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExpenseInclude<ExtArgs> | null
+    where?: ExpenseWhereInput
+    orderBy?: ExpenseOrderByWithRelationInput | ExpenseOrderByWithRelationInput[]
+    cursor?: ExpenseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExpenseScalarFieldEnum | ExpenseScalarFieldEnum[]
   }
 
   /**
@@ -8270,6 +8333,7 @@ export namespace Prisma {
     id: number | null
     accountId: number | null
     categoryId: number | null
+    userId: number | null
     amount: number | null
   }
 
@@ -8277,6 +8341,7 @@ export namespace Prisma {
     id: number | null
     accountId: number | null
     categoryId: number | null
+    userId: bigint | null
     amount: number | null
   }
 
@@ -8284,6 +8349,7 @@ export namespace Prisma {
     id: number | null
     accountId: number | null
     categoryId: number | null
+    userId: bigint | null
     amount: number | null
     description: string | null
     date: Date | null
@@ -8293,6 +8359,7 @@ export namespace Prisma {
     id: number | null
     accountId: number | null
     categoryId: number | null
+    userId: bigint | null
     amount: number | null
     description: string | null
     date: Date | null
@@ -8302,6 +8369,7 @@ export namespace Prisma {
     id: number
     accountId: number
     categoryId: number
+    userId: number
     amount: number
     description: number
     date: number
@@ -8313,6 +8381,7 @@ export namespace Prisma {
     id?: true
     accountId?: true
     categoryId?: true
+    userId?: true
     amount?: true
   }
 
@@ -8320,6 +8389,7 @@ export namespace Prisma {
     id?: true
     accountId?: true
     categoryId?: true
+    userId?: true
     amount?: true
   }
 
@@ -8327,6 +8397,7 @@ export namespace Prisma {
     id?: true
     accountId?: true
     categoryId?: true
+    userId?: true
     amount?: true
     description?: true
     date?: true
@@ -8336,6 +8407,7 @@ export namespace Prisma {
     id?: true
     accountId?: true
     categoryId?: true
+    userId?: true
     amount?: true
     description?: true
     date?: true
@@ -8345,6 +8417,7 @@ export namespace Prisma {
     id?: true
     accountId?: true
     categoryId?: true
+    userId?: true
     amount?: true
     description?: true
     date?: true
@@ -8441,6 +8514,7 @@ export namespace Prisma {
     id: number
     accountId: number
     categoryId: number
+    userId: bigint
     amount: number
     description: string | null
     date: Date
@@ -8469,56 +8543,66 @@ export namespace Prisma {
     id?: boolean
     accountId?: boolean
     categoryId?: boolean
+    userId?: boolean
     amount?: boolean
     description?: boolean
     date?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
     category?: boolean | CategoryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["expense"]>
 
   export type ExpenseSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     accountId?: boolean
     categoryId?: boolean
+    userId?: boolean
     amount?: boolean
     description?: boolean
     date?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
     category?: boolean | CategoryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["expense"]>
 
   export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     accountId?: boolean
     categoryId?: boolean
+    userId?: boolean
     amount?: boolean
     description?: boolean
     date?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
     category?: boolean | CategoryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["expense"]>
 
   export type ExpenseSelectScalar = {
     id?: boolean
     accountId?: boolean
     categoryId?: boolean
+    userId?: boolean
     amount?: boolean
     description?: boolean
     date?: boolean
   }
 
-  export type ExpenseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountId" | "categoryId" | "amount" | "description" | "date", ExtArgs["result"]["expense"]>
+  export type ExpenseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountId" | "categoryId" | "userId" | "amount" | "description" | "date", ExtArgs["result"]["expense"]>
   export type ExpenseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     category?: boolean | CategoryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     category?: boolean | CategoryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type ExpenseIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     category?: boolean | CategoryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $ExpensePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8526,11 +8610,13 @@ export namespace Prisma {
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
       category: Prisma.$CategoryPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       accountId: number
       categoryId: number
+      userId: bigint
       amount: number
       description: string | null
       date: Date
@@ -8930,6 +9016,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     category<T extends CategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CategoryDefaultArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8962,6 +9049,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Expense", 'Int'>
     readonly accountId: FieldRef<"Expense", 'Int'>
     readonly categoryId: FieldRef<"Expense", 'Int'>
+    readonly userId: FieldRef<"Expense", 'BigInt'>
     readonly amount: FieldRef<"Expense", 'Float'>
     readonly description: FieldRef<"Expense", 'String'>
     readonly date: FieldRef<"Expense", 'DateTime'>
@@ -9390,6 +9478,8 @@ export namespace Prisma {
 
   export const UserScalarFieldEnum: {
     id: 'id',
+    firstName: 'firstName',
+    photoUrl: 'photoUrl',
     createdAt: 'createdAt'
   };
 
@@ -9452,6 +9542,7 @@ export namespace Prisma {
     id: 'id',
     accountId: 'accountId',
     categoryId: 'categoryId',
+    userId: 'userId',
     amount: 'amount',
     description: 'description',
     date: 'date'
@@ -9489,6 +9580,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'String'
+   */
+  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -9499,13 +9597,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
-   * Reference to a field of type 'String'
-   */
-  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
     
 
 
@@ -9524,16 +9615,22 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     id?: BigIntFilter<"User"> | bigint | number
+    firstName?: StringNullableFilter<"User"> | string | null
+    photoUrl?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     ownedAccounts?: AccountListRelationFilter
     accounts?: AccountUserListRelationFilter
+    expenses?: ExpenseListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
+    firstName?: SortOrderInput | SortOrder
+    photoUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     ownedAccounts?: AccountOrderByRelationAggregateInput
     accounts?: AccountUserOrderByRelationAggregateInput
+    expenses?: ExpenseOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -9541,13 +9638,18 @@ export namespace Prisma {
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
+    firstName?: StringNullableFilter<"User"> | string | null
+    photoUrl?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     ownedAccounts?: AccountListRelationFilter
     accounts?: AccountUserListRelationFilter
+    expenses?: ExpenseListRelationFilter
   }, "id">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
+    firstName?: SortOrderInput | SortOrder
+    photoUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
@@ -9561,6 +9663,8 @@ export namespace Prisma {
     OR?: UserScalarWhereWithAggregatesInput[]
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: BigIntWithAggregatesFilter<"User"> | bigint | number
+    firstName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    photoUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
@@ -9863,22 +9967,26 @@ export namespace Prisma {
     id?: IntFilter<"Expense"> | number
     accountId?: IntFilter<"Expense"> | number
     categoryId?: IntFilter<"Expense"> | number
+    userId?: BigIntFilter<"Expense"> | bigint | number
     amount?: FloatFilter<"Expense"> | number
     description?: StringNullableFilter<"Expense"> | string | null
     date?: DateTimeFilter<"Expense"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type ExpenseOrderByWithRelationInput = {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
     description?: SortOrderInput | SortOrder
     date?: SortOrder
     account?: AccountOrderByWithRelationInput
     category?: CategoryOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
   }
 
   export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
@@ -9888,17 +9996,20 @@ export namespace Prisma {
     NOT?: ExpenseWhereInput | ExpenseWhereInput[]
     accountId?: IntFilter<"Expense"> | number
     categoryId?: IntFilter<"Expense"> | number
+    userId?: BigIntFilter<"Expense"> | bigint | number
     amount?: FloatFilter<"Expense"> | number
     description?: StringNullableFilter<"Expense"> | string | null
     date?: DateTimeFilter<"Expense"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
 
   export type ExpenseOrderByWithAggregationInput = {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
     description?: SortOrderInput | SortOrder
     date?: SortOrder
@@ -9916,6 +10027,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Expense"> | number
     accountId?: IntWithAggregatesFilter<"Expense"> | number
     categoryId?: IntWithAggregatesFilter<"Expense"> | number
+    userId?: BigIntWithAggregatesFilter<"Expense"> | bigint | number
     amount?: FloatWithAggregatesFilter<"Expense"> | number
     description?: StringNullableWithAggregatesFilter<"Expense"> | string | null
     date?: DateTimeWithAggregatesFilter<"Expense"> | Date | string
@@ -9923,44 +10035,62 @@ export namespace Prisma {
 
   export type UserCreateInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     ownedAccounts?: AccountCreateNestedManyWithoutOwnerInput
     accounts?: AccountUserCreateNestedManyWithoutUserInput
+    expenses?: ExpenseCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     ownedAccounts?: AccountUncheckedCreateNestedManyWithoutOwnerInput
     accounts?: AccountUserUncheckedCreateNestedManyWithoutUserInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownedAccounts?: AccountUpdateManyWithoutOwnerNestedInput
     accounts?: AccountUserUpdateManyWithoutUserNestedInput
+    expenses?: ExpenseUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownedAccounts?: AccountUncheckedUpdateManyWithoutOwnerNestedInput
     accounts?: AccountUserUncheckedUpdateManyWithoutUserNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
   }
 
   export type UserUpdateManyMutationInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserUncheckedUpdateManyInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10235,12 +10365,14 @@ export namespace Prisma {
     date: Date | string
     account: AccountCreateNestedOneWithoutExpensesInput
     category: CategoryCreateNestedOneWithoutExpensesInput
+    user: UserCreateNestedOneWithoutExpensesInput
   }
 
   export type ExpenseUncheckedCreateInput = {
     id?: number
     accountId: number
     categoryId: number
+    userId: bigint | number
     amount: number
     description?: string | null
     date: Date | string
@@ -10252,12 +10384,14 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     account?: AccountUpdateOneRequiredWithoutExpensesNestedInput
     category?: CategoryUpdateOneRequiredWithoutExpensesNestedInput
+    user?: UserUpdateOneRequiredWithoutExpensesNestedInput
   }
 
   export type ExpenseUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     accountId?: IntFieldUpdateOperationsInput | number
     categoryId?: IntFieldUpdateOperationsInput | number
+    userId?: BigIntFieldUpdateOperationsInput | bigint | number
     amount?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10267,6 +10401,7 @@ export namespace Prisma {
     id?: number
     accountId: number
     categoryId: number
+    userId: bigint | number
     amount: number
     description?: string | null
     date: Date | string
@@ -10282,6 +10417,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     accountId?: IntFieldUpdateOperationsInput | number
     categoryId?: IntFieldUpdateOperationsInput | number
+    userId?: BigIntFieldUpdateOperationsInput | bigint | number
     amount?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10296,6 +10432,20 @@ export namespace Prisma {
     gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
     gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
     not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -10321,6 +10471,17 @@ export namespace Prisma {
     none?: AccountUserWhereInput
   }
 
+  export type ExpenseListRelationFilter = {
+    every?: ExpenseWhereInput
+    some?: ExpenseWhereInput
+    none?: ExpenseWhereInput
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
   export type AccountOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -10329,8 +10490,14 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type ExpenseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
+    firstName?: SortOrder
+    photoUrl?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -10340,11 +10507,15 @@ export namespace Prisma {
 
   export type UserMaxOrderByAggregateInput = {
     id?: SortOrder
+    firstName?: SortOrder
+    photoUrl?: SortOrder
     createdAt?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
+    firstName?: SortOrder
+    photoUrl?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -10366,6 +10537,23 @@ export namespace Prisma {
     _sum?: NestedBigIntFilter<$PrismaModel>
     _min?: NestedBigIntFilter<$PrismaModel>
     _max?: NestedBigIntFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -10418,12 +10606,6 @@ export namespace Prisma {
     none?: CategoryWhereInput
   }
 
-  export type ExpenseListRelationFilter = {
-    every?: ExpenseWhereInput
-    some?: ExpenseWhereInput
-    none?: ExpenseWhereInput
-  }
-
   export type AccountInvitationListRelationFilter = {
     every?: AccountInvitationWhereInput
     some?: AccountInvitationWhereInput
@@ -10431,10 +10613,6 @@ export namespace Prisma {
   }
 
   export type CategoryOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ExpenseOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -10531,11 +10709,6 @@ export namespace Prisma {
   export type AccountScalarRelationFilter = {
     is?: AccountWhereInput
     isNot?: AccountWhereInput
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type AccountInvitationCountOrderByAggregateInput = {
@@ -10733,24 +10906,11 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type ExpenseCountOrderByAggregateInput = {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
     description?: SortOrder
     date?: SortOrder
@@ -10760,6 +10920,7 @@ export namespace Prisma {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
   }
 
@@ -10767,6 +10928,7 @@ export namespace Prisma {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
     description?: SortOrder
     date?: SortOrder
@@ -10776,6 +10938,7 @@ export namespace Prisma {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
     description?: SortOrder
     date?: SortOrder
@@ -10785,6 +10948,7 @@ export namespace Prisma {
     id?: SortOrder
     accountId?: SortOrder
     categoryId?: SortOrder
+    userId?: SortOrder
     amount?: SortOrder
   }
 
@@ -10804,23 +10968,6 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type AccountCreateNestedManyWithoutOwnerInput = {
     create?: XOR<AccountCreateWithoutOwnerInput, AccountUncheckedCreateWithoutOwnerInput> | AccountCreateWithoutOwnerInput[] | AccountUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutOwnerInput | AccountCreateOrConnectWithoutOwnerInput[]
@@ -10833,6 +10980,13 @@ export namespace Prisma {
     connectOrCreate?: AccountUserCreateOrConnectWithoutUserInput | AccountUserCreateOrConnectWithoutUserInput[]
     createMany?: AccountUserCreateManyUserInputEnvelope
     connect?: AccountUserWhereUniqueInput | AccountUserWhereUniqueInput[]
+  }
+
+  export type ExpenseCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExpenseCreateWithoutUserInput, ExpenseUncheckedCreateWithoutUserInput> | ExpenseCreateWithoutUserInput[] | ExpenseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExpenseCreateOrConnectWithoutUserInput | ExpenseCreateOrConnectWithoutUserInput[]
+    createMany?: ExpenseCreateManyUserInputEnvelope
+    connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
   }
 
   export type AccountUncheckedCreateNestedManyWithoutOwnerInput = {
@@ -10849,12 +11003,23 @@ export namespace Prisma {
     connect?: AccountUserWhereUniqueInput | AccountUserWhereUniqueInput[]
   }
 
+  export type ExpenseUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExpenseCreateWithoutUserInput, ExpenseUncheckedCreateWithoutUserInput> | ExpenseCreateWithoutUserInput[] | ExpenseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExpenseCreateOrConnectWithoutUserInput | ExpenseCreateOrConnectWithoutUserInput[]
+    createMany?: ExpenseCreateManyUserInputEnvelope
+    connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+  }
+
   export type BigIntFieldUpdateOperationsInput = {
     set?: bigint | number
     increment?: bigint | number
     decrement?: bigint | number
     multiply?: bigint | number
     divide?: bigint | number
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -10889,6 +11054,20 @@ export namespace Prisma {
     deleteMany?: AccountUserScalarWhereInput | AccountUserScalarWhereInput[]
   }
 
+  export type ExpenseUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExpenseCreateWithoutUserInput, ExpenseUncheckedCreateWithoutUserInput> | ExpenseCreateWithoutUserInput[] | ExpenseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExpenseCreateOrConnectWithoutUserInput | ExpenseCreateOrConnectWithoutUserInput[]
+    upsert?: ExpenseUpsertWithWhereUniqueWithoutUserInput | ExpenseUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExpenseCreateManyUserInputEnvelope
+    set?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    disconnect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    delete?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    update?: ExpenseUpdateWithWhereUniqueWithoutUserInput | ExpenseUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExpenseUpdateManyWithWhereWithoutUserInput | ExpenseUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
+  }
+
   export type AccountUncheckedUpdateManyWithoutOwnerNestedInput = {
     create?: XOR<AccountCreateWithoutOwnerInput, AccountUncheckedCreateWithoutOwnerInput> | AccountCreateWithoutOwnerInput[] | AccountUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutOwnerInput | AccountCreateOrConnectWithoutOwnerInput[]
@@ -10915,6 +11094,20 @@ export namespace Prisma {
     update?: AccountUserUpdateWithWhereUniqueWithoutUserInput | AccountUserUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: AccountUserUpdateManyWithWhereWithoutUserInput | AccountUserUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: AccountUserScalarWhereInput | AccountUserScalarWhereInput[]
+  }
+
+  export type ExpenseUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExpenseCreateWithoutUserInput, ExpenseUncheckedCreateWithoutUserInput> | ExpenseCreateWithoutUserInput[] | ExpenseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExpenseCreateOrConnectWithoutUserInput | ExpenseCreateOrConnectWithoutUserInput[]
+    upsert?: ExpenseUpsertWithWhereUniqueWithoutUserInput | ExpenseUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExpenseCreateManyUserInputEnvelope
+    set?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    disconnect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    delete?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+    update?: ExpenseUpdateWithWhereUniqueWithoutUserInput | ExpenseUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExpenseUpdateManyWithWhereWithoutUserInput | ExpenseUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutOwnedAccountsInput = {
@@ -11289,16 +11482,18 @@ export namespace Prisma {
     connect?: CategoryWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutExpensesInput = {
+    create?: XOR<UserCreateWithoutExpensesInput, UserUncheckedCreateWithoutExpensesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutExpensesInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type FloatFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type AccountUpdateOneRequiredWithoutExpensesNestedInput = {
@@ -11317,6 +11512,14 @@ export namespace Prisma {
     update?: XOR<XOR<CategoryUpdateToOneWithWhereWithoutExpensesInput, CategoryUpdateWithoutExpensesInput>, CategoryUncheckedUpdateWithoutExpensesInput>
   }
 
+  export type UserUpdateOneRequiredWithoutExpensesNestedInput = {
+    create?: XOR<UserCreateWithoutExpensesInput, UserUncheckedCreateWithoutExpensesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutExpensesInput
+    upsert?: UserUpsertWithoutExpensesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutExpensesInput, UserUpdateWithoutExpensesInput>, UserUncheckedUpdateWithoutExpensesInput>
+  }
+
   export type NestedBigIntFilter<$PrismaModel = never> = {
     equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
     in?: bigint[] | number[]
@@ -11326,6 +11529,20 @@ export namespace Prisma {
     gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
     gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
     not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -11375,6 +11592,34 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -11474,17 +11719,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedBigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
     in?: bigint[] | number[] | null
@@ -11512,20 +11746,6 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[]
@@ -11540,23 +11760,6 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
-  }
-
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type AccountCreateWithoutOwnerInput = {
@@ -11604,6 +11807,32 @@ export namespace Prisma {
 
   export type AccountUserCreateManyUserInputEnvelope = {
     data: AccountUserCreateManyUserInput | AccountUserCreateManyUserInput[]
+  }
+
+  export type ExpenseCreateWithoutUserInput = {
+    amount: number
+    description?: string | null
+    date: Date | string
+    account: AccountCreateNestedOneWithoutExpensesInput
+    category: CategoryCreateNestedOneWithoutExpensesInput
+  }
+
+  export type ExpenseUncheckedCreateWithoutUserInput = {
+    id?: number
+    accountId: number
+    categoryId: number
+    amount: number
+    description?: string | null
+    date: Date | string
+  }
+
+  export type ExpenseCreateOrConnectWithoutUserInput = {
+    where: ExpenseWhereUniqueInput
+    create: XOR<ExpenseCreateWithoutUserInput, ExpenseUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExpenseCreateManyUserInputEnvelope = {
+    data: ExpenseCreateManyUserInput | ExpenseCreateManyUserInput[]
   }
 
   export type AccountUpsertWithWhereUniqueWithoutOwnerInput = {
@@ -11657,16 +11886,51 @@ export namespace Prisma {
     joinedAt?: DateTimeFilter<"AccountUser"> | Date | string
   }
 
+  export type ExpenseUpsertWithWhereUniqueWithoutUserInput = {
+    where: ExpenseWhereUniqueInput
+    update: XOR<ExpenseUpdateWithoutUserInput, ExpenseUncheckedUpdateWithoutUserInput>
+    create: XOR<ExpenseCreateWithoutUserInput, ExpenseUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExpenseUpdateWithWhereUniqueWithoutUserInput = {
+    where: ExpenseWhereUniqueInput
+    data: XOR<ExpenseUpdateWithoutUserInput, ExpenseUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ExpenseUpdateManyWithWhereWithoutUserInput = {
+    where: ExpenseScalarWhereInput
+    data: XOR<ExpenseUpdateManyMutationInput, ExpenseUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ExpenseScalarWhereInput = {
+    AND?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
+    OR?: ExpenseScalarWhereInput[]
+    NOT?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
+    id?: IntFilter<"Expense"> | number
+    accountId?: IntFilter<"Expense"> | number
+    categoryId?: IntFilter<"Expense"> | number
+    userId?: BigIntFilter<"Expense"> | bigint | number
+    amount?: FloatFilter<"Expense"> | number
+    description?: StringNullableFilter<"Expense"> | string | null
+    date?: DateTimeFilter<"Expense"> | Date | string
+  }
+
   export type UserCreateWithoutOwnedAccountsInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     accounts?: AccountUserCreateNestedManyWithoutUserInput
+    expenses?: ExpenseCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOwnedAccountsInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     accounts?: AccountUserUncheckedCreateNestedManyWithoutUserInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutOwnedAccountsInput = {
@@ -11722,11 +11986,13 @@ export namespace Prisma {
     description?: string | null
     date: Date | string
     category: CategoryCreateNestedOneWithoutExpensesInput
+    user: UserCreateNestedOneWithoutExpensesInput
   }
 
   export type ExpenseUncheckedCreateWithoutAccountInput = {
     id?: number
     categoryId: number
+    userId: bigint | number
     amount: number
     description?: string | null
     date: Date | string
@@ -11780,14 +12046,20 @@ export namespace Prisma {
 
   export type UserUpdateWithoutOwnedAccountsInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUserUpdateManyWithoutUserNestedInput
+    expenses?: ExpenseUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOwnedAccountsInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUserUncheckedUpdateManyWithoutUserNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AccountUserUpsertWithWhereUniqueWithoutAccountInput = {
@@ -11846,18 +12118,6 @@ export namespace Prisma {
   export type ExpenseUpdateManyWithWhereWithoutAccountInput = {
     where: ExpenseScalarWhereInput
     data: XOR<ExpenseUpdateManyMutationInput, ExpenseUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type ExpenseScalarWhereInput = {
-    AND?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
-    OR?: ExpenseScalarWhereInput[]
-    NOT?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
-    id?: IntFilter<"Expense"> | number
-    accountId?: IntFilter<"Expense"> | number
-    categoryId?: IntFilter<"Expense"> | number
-    amount?: FloatFilter<"Expense"> | number
-    description?: StringNullableFilter<"Expense"> | string | null
-    date?: DateTimeFilter<"Expense"> | Date | string
   }
 
   export type AccountInvitationUpsertWithWhereUniqueWithoutAccountInput = {
@@ -11945,14 +12205,20 @@ export namespace Prisma {
 
   export type UserCreateWithoutAccountsInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     ownedAccounts?: AccountCreateNestedManyWithoutOwnerInput
+    expenses?: ExpenseCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
     id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     ownedAccounts?: AccountUncheckedCreateNestedManyWithoutOwnerInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -11997,14 +12263,20 @@ export namespace Prisma {
 
   export type UserUpdateWithoutAccountsInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownedAccounts?: AccountUpdateManyWithoutOwnerNestedInput
+    expenses?: ExpenseUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
     id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownedAccounts?: AccountUncheckedUpdateManyWithoutOwnerNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AccountUpsertWithoutUsersInput = {
@@ -12066,11 +12338,13 @@ export namespace Prisma {
     description?: string | null
     date: Date | string
     account: AccountCreateNestedOneWithoutExpensesInput
+    user: UserCreateNestedOneWithoutExpensesInput
   }
 
   export type ExpenseUncheckedCreateWithoutCategoryInput = {
     id?: number
     accountId: number
+    userId: bigint | number
     amount: number
     description?: string | null
     date: Date | string
@@ -12267,6 +12541,29 @@ export namespace Prisma {
     create: XOR<CategoryCreateWithoutExpensesInput, CategoryUncheckedCreateWithoutExpensesInput>
   }
 
+  export type UserCreateWithoutExpensesInput = {
+    id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    ownedAccounts?: AccountCreateNestedManyWithoutOwnerInput
+    accounts?: AccountUserCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutExpensesInput = {
+    id: bigint | number
+    firstName?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    ownedAccounts?: AccountUncheckedCreateNestedManyWithoutOwnerInput
+    accounts?: AccountUserUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutExpensesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutExpensesInput, UserUncheckedCreateWithoutExpensesInput>
+  }
+
   export type AccountUpsertWithoutExpensesInput = {
     update: XOR<AccountUpdateWithoutExpensesInput, AccountUncheckedUpdateWithoutExpensesInput>
     create: XOR<AccountCreateWithoutExpensesInput, AccountUncheckedCreateWithoutExpensesInput>
@@ -12323,6 +12620,35 @@ export namespace Prisma {
     subcategories?: SubcategoryUncheckedUpdateManyWithoutCategoryNestedInput
   }
 
+  export type UserUpsertWithoutExpensesInput = {
+    update: XOR<UserUpdateWithoutExpensesInput, UserUncheckedUpdateWithoutExpensesInput>
+    create: XOR<UserCreateWithoutExpensesInput, UserUncheckedCreateWithoutExpensesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutExpensesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutExpensesInput, UserUncheckedUpdateWithoutExpensesInput>
+  }
+
+  export type UserUpdateWithoutExpensesInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ownedAccounts?: AccountUpdateManyWithoutOwnerNestedInput
+    accounts?: AccountUserUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutExpensesInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ownedAccounts?: AccountUncheckedUpdateManyWithoutOwnerNestedInput
+    accounts?: AccountUserUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type AccountCreateManyOwnerInput = {
     id?: number
     name: string
@@ -12332,6 +12658,15 @@ export namespace Prisma {
   export type AccountUserCreateManyUserInput = {
     accountId: number
     joinedAt?: Date | string
+  }
+
+  export type ExpenseCreateManyUserInput = {
+    id?: number
+    accountId: number
+    categoryId: number
+    amount: number
+    description?: string | null
+    date: Date | string
   }
 
   export type AccountUpdateWithoutOwnerInput = {
@@ -12374,6 +12709,32 @@ export namespace Prisma {
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExpenseUpdateWithoutUserInput = {
+    amount?: FloatFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutExpensesNestedInput
+    category?: CategoryUpdateOneRequiredWithoutExpensesNestedInput
+  }
+
+  export type ExpenseUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    accountId?: IntFieldUpdateOperationsInput | number
+    categoryId?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    accountId?: IntFieldUpdateOperationsInput | number
+    categoryId?: IntFieldUpdateOperationsInput | number
+    amount?: FloatFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AccountUserCreateManyAccountInput = {
     userId: bigint | number
     joinedAt?: Date | string
@@ -12388,6 +12749,7 @@ export namespace Prisma {
   export type ExpenseCreateManyAccountInput = {
     id?: number
     categoryId: number
+    userId: bigint | number
     amount: number
     description?: string | null
     date: Date | string
@@ -12443,11 +12805,13 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutExpensesNestedInput
+    user?: UserUpdateOneRequiredWithoutExpensesNestedInput
   }
 
   export type ExpenseUncheckedUpdateWithoutAccountInput = {
     id?: IntFieldUpdateOperationsInput | number
     categoryId?: IntFieldUpdateOperationsInput | number
+    userId?: BigIntFieldUpdateOperationsInput | bigint | number
     amount?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12456,6 +12820,7 @@ export namespace Prisma {
   export type ExpenseUncheckedUpdateManyWithoutAccountInput = {
     id?: IntFieldUpdateOperationsInput | number
     categoryId?: IntFieldUpdateOperationsInput | number
+    userId?: BigIntFieldUpdateOperationsInput | bigint | number
     amount?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12490,6 +12855,7 @@ export namespace Prisma {
   export type ExpenseCreateManyCategoryInput = {
     id?: number
     accountId: number
+    userId: bigint | number
     amount: number
     description?: string | null
     date: Date | string
@@ -12506,11 +12872,13 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     account?: AccountUpdateOneRequiredWithoutExpensesNestedInput
+    user?: UserUpdateOneRequiredWithoutExpensesNestedInput
   }
 
   export type ExpenseUncheckedUpdateWithoutCategoryInput = {
     id?: IntFieldUpdateOperationsInput | number
     accountId?: IntFieldUpdateOperationsInput | number
+    userId?: BigIntFieldUpdateOperationsInput | bigint | number
     amount?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12519,6 +12887,7 @@ export namespace Prisma {
   export type ExpenseUncheckedUpdateManyWithoutCategoryInput = {
     id?: IntFieldUpdateOperationsInput | number
     accountId?: IntFieldUpdateOperationsInput | number
+    userId?: BigIntFieldUpdateOperationsInput | bigint | number
     amount?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     date?: DateTimeFieldUpdateOperationsInput | Date | string

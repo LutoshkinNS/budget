@@ -10,10 +10,13 @@ generator client {
 
 model User {
   id        BigInt   @id
+  firstName String?
+  photoUrl  String?
   createdAt DateTime @default(now())
 
   ownedAccounts Account[]     @relation("AccountOwner")
   accounts      AccountUser[]
+  expenses      Expense[]
 }
 
 model Account {
@@ -74,6 +77,8 @@ model Expense {
   account     Account  @relation(fields: [accountId], references: [id])
   categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id])
+  userId      BigInt
+  user        User     @relation(fields: [userId], references: [id])
   amount      Float
   description String?
   date        DateTime

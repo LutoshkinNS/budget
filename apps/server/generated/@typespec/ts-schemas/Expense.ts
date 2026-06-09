@@ -5,6 +5,7 @@ const Expense = {
     "accountId",
     "amount",
     "categoryId",
+    "userId",
     "date"
   ],
   "properties": {
@@ -22,6 +23,10 @@ const Expense = {
       "minimum": 0.01
     },
     "categoryId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "userId": {
       "type": "integer",
       "minimum": 1
     },
