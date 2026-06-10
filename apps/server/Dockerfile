@@ -1,13 +1,20 @@
-FROM node:23-alpine AS builder
+# syntax=docker/dockerfile:1.7
 
-RUN corepack enable
+FROM node:23-alpine AS base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+
+FROM base AS builder
 
 WORKDIR /repo
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/api-contracts/package.json ./packages/api-contracts/
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=budget-pnpm,target=/pnpm/store,sharing=locked pnpm install --frozen-lockfile
 
 COPY packages/api-contracts/ ./packages/api-contracts/
 COPY apps/server/ ./apps/server/
@@ -20,16 +27,14 @@ RUN pnpm exec prisma generate
 RUN pnpm run build
 RUN cp -r ./generated/prisma ./dist/generated/prisma
 
-FROM node:23-alpine AS runner
-
-RUN corepack enable
+FROM base AS runner
 
 WORKDIR /repo
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/api-contracts/package.json ./packages/api-contracts/
-RUN pnpm install --frozen-lockfile --prod
+RUN --mount=type=cache,id=budget-pnpm,target=/pnpm/store,sharing=locked pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /repo/apps/server/dist/src /repo/apps/server/src
 COPY --from=builder /repo/apps/server/dist/generated /repo/apps/server/generated

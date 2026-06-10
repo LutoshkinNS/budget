@@ -1,3 +1,12 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:23-alpine AS base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+
 FROM node:23-alpine AS openapi
 WORKDIR /app
 COPY packages/api-contracts/package.json ./
@@ -6,16 +15,14 @@ COPY packages/api-contracts/tspconfig.yaml ./
 COPY packages/api-contracts/typespec/ ./typespec/
 RUN npx tsp compile ./typespec
 
-FROM node:23-alpine AS builder
-
-RUN corepack enable
+FROM base AS builder
 
 WORKDIR /repo
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/api-contracts/package.json ./packages/api-contracts/
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=budget-pnpm,target=/pnpm/store,sharing=locked pnpm install --frozen-lockfile
 
 COPY --from=openapi /app/generated/@typespec/openapi3/openapi.json ./openapi.json
 COPY apps/frontend/ ./apps/frontend/

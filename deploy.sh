@@ -3,6 +3,9 @@ set -euo pipefail
 
 cd /opt/budget
 
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 echo "==> [1/7] git pull"
 git pull --ff-only origin master
 
@@ -26,7 +29,7 @@ docker compose --env-file .env up -d --no-deps frontend
 
 echo "==> Final cleanup"
 docker image prune -f
-docker builder prune -f --filter "until=24h"
+docker builder prune -f --filter "until=168h"
 
 echo "==> Deploy complete"
 docker compose ps
