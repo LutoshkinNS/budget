@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: budget-server
+    image: ${SERVER_IMAGE:-ghcr.io/lutoshkinns/budget-server:latest}
     container_name: budget_server
     restart: always
     ports:
@@ -26,6 +26,7 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}
         VITE_TELEGRAM_BOT_NAME: ${VITE_TELEGRAM_BOT_NAME}
+    image: ${FRONTEND_IMAGE:-ghcr.io/lutoshkinns/budget-frontend:latest}
     container_name: budget_frontend
     restart: always
     ports:

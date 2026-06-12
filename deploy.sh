@@ -3,38 +3,43 @@ set -euo pipefail
 
 cd /opt/budget
 
-export DOCKER_BUILDKIT=1
-export COMPOSE_DOCKER_CLI_BUILD=1
+if [ -f .env ]; then
+  set -a
+  . ./.env
+  set +a
+fi
 
-echo "==> [1/9] Pre-build cleanup"
+echo "==> [1/8] Disk before cleanup"
+df -h
+timeout 30s docker system df -v || true
+
+echo "==> [2/8] Pre-deploy cleanup"
 docker container prune -f
 docker image prune -af
 docker builder prune -af
 
-echo "==> [2/9] git pull"
+echo "==> [3/8] git pull"
 git pull --ff-only origin master
 
-echo "==> [3/9] Build server"
-docker compose --env-file .env build server
+if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
+  echo "==> [4/8] Login to GHCR"
+  echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+else
+  echo "==> [4/8] Skip GHCR login (GHCR_USERNAME/GHCR_TOKEN not set)"
+fi
 
-echo "==> [4/9] Restart server (--no-deps keeps frontend alive)"
-docker compose --env-file .env up -d --no-deps --force-recreate server
+echo "==> [5/8] Pull images"
+docker compose --env-file .env pull
 
-echo "==> [5/9] Mid-build cleanup (free disk before frontend)"
+echo "==> [6/8] Restart services"
+docker compose --env-file .env up -d --no-build --force-recreate
+
+echo "==> [7/8] Final cleanup"
 docker container prune -f
 docker image prune -af
 docker builder prune -af
 
-echo "==> [6/9] Build frontend"
-docker compose --env-file .env build frontend
-
-echo "==> [7/9] Restart frontend"
-docker compose --env-file .env up -d --no-deps --force-recreate frontend
-
-echo "==> [8/9] Final cleanup"
-docker container prune -f
-docker image prune -af
-docker builder prune -af
-
-echo "==> [9/9] Deploy complete"
+echo "==> [8/8] Deploy complete"
+df -h
+timeout 30s docker system df -v || true
 docker compose ps
