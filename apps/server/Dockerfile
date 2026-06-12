@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 FROM node:23-alpine AS base
 
 ENV PNPM_HOME="/pnpm"
@@ -14,7 +12,7 @@ WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/api-contracts/package.json ./packages/api-contracts/
-RUN --mount=type=cache,id=budget-pnpm,target=/pnpm/store,sharing=locked pnpm install --filter @budget/server... --frozen-lockfile
+RUN pnpm install --filter @budget/server... --frozen-lockfile
 
 COPY packages/api-contracts/ ./packages/api-contracts/
 COPY apps/server/ ./apps/server/
@@ -34,7 +32,7 @@ WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/api-contracts/package.json ./packages/api-contracts/
-RUN --mount=type=cache,id=budget-pnpm,target=/pnpm/store,sharing=locked pnpm install --filter @budget/server --frozen-lockfile --prod
+RUN pnpm install --filter @budget/server --frozen-lockfile --prod
 
 COPY --from=builder /repo/apps/server/dist/src /repo/apps/server/src
 COPY --from=builder /repo/apps/server/dist/generated /repo/apps/server/generated
