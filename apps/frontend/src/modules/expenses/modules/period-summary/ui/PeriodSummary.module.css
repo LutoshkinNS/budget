@@ -30,6 +30,21 @@
     color: var(--secondary-text-color);
 }
 
+.monthInput {
+    padding: 6px 10px;
+    border: 1.5px solid var(--secondary-color);
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: var(--primary-text-color);
+    font: inherit;
+    font-size: 14px;
+}
+
+.monthInput:focus {
+    border-color: var(--primary-text-color);
+    outline: none;
+}
+
 .amount {
     font-size: 32px;
     font-weight: 500;

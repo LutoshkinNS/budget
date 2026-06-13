@@ -3,6 +3,7 @@ import ExpenseCreate from '#s/ExpenseCreate.js';
 import ExpenseUpdate from '#s/ExpenseUpdate.js';
 import idObj from '#s/idObj.js';
 import NotFoundError from '#s/NotFoundError.js';
+import ValidationError from '#s/ValidationError.js';
 import { FastifyApp } from '#src/appInit.js';
 
 const notFound = (message: string) => ({
@@ -10,6 +11,27 @@ const notFound = (message: string) => ({
   message,
   statusCode: 404 as const
 });
+
+const validationError = (message: string) => ({
+  code: 'VALIDATION_ERROR' as const,
+  message,
+  statusCode: 400 as const
+});
+
+function parseDateRange(query: { from: string; to: string }) {
+  const from = new Date(query.from);
+  const to = new Date(query.to);
+
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    return validationError('Query parameters from and to must be valid date-time values');
+  }
+
+  if (from >= to) {
+    return validationError('Query parameter from must be earlier than to');
+  }
+
+  return { from, to };
+}
 
 export default async function expensesModule(app: FastifyApp) {
   app.addHook('preHandler', app.authenticate);
@@ -20,23 +42,27 @@ export default async function expensesModule(app: FastifyApp) {
       schema: {
         querystring: {
           type: 'object',
+          required: ['from', 'to'],
           properties: {
-            days: { type: 'integer', minimum: 1 }
-          }
+            from: { type: 'string', format: 'date-time' },
+            to: { type: 'string', format: 'date-time' }
+          },
+          additionalProperties: false
         },
-        response: { 200: { type: 'array', items: Expense } }
+        response: { 200: { type: 'array', items: Expense }, 400: ValidationError }
       }
     },
-    async function (req) {
-      const days = (req.query as { days?: number }).days ?? 2;
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - (days - 1));
-      startDate.setHours(0, 0, 0, 0);
+    async function (req, reply) {
+      const dateRange = parseDateRange(req.query);
+
+      if ('statusCode' in dateRange) {
+        return reply.code(400).send(dateRange);
+      }
 
       const expenses = await this.prisma.expense.findMany({
         where: {
           accountId: req.user.accountId,
-          date: { gte: startDate }
+          date: { gte: dateRange.from, lt: dateRange.to }
         },
         orderBy: { date: 'desc' },
         include: {

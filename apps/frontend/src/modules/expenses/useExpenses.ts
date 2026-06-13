@@ -10,7 +10,10 @@ import { ExpensesListResponse } from "@/common/api/generate/expenses/expenses.zo
 import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
 
-const DEFAULT_DAYS = 2;
+import {
+  type ExpenseDateRange,
+  getExpenseDateRange,
+} from "./modules/period-summary/model/types.ts";
 
 export type ExpenseDayGroup = {
   label: string;
@@ -53,10 +56,10 @@ function groupByDay(expenses: ExpenseDTO[]): ExpenseDayGroup[] {
     }));
 }
 
-export function useExpenses(days: number = DEFAULT_DAYS) {
-  const { data, isError, error, isLoading } = useExpensesList({
-    days,
-  });
+export function useExpenses(
+  range: ExpenseDateRange = getExpenseDateRange("day"),
+) {
+  const { data, isError, error, isLoading } = useExpensesList(range);
   const { addNotification } = useNotifications();
 
   useEffect(() => {

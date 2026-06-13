@@ -35,7 +35,7 @@ import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getExpensesListUrl = (params?: ExpensesListParams) => {
+export const getExpensesListUrl = (params: ExpensesListParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -52,7 +52,7 @@ export const getExpensesListUrl = (params?: ExpensesListParams) => {
 };
 
 export const expensesList = async (
-  params?: ExpensesListParams,
+  params: ExpensesListParams,
   options?: RequestInit,
 ): Promise<ExpenseDTO[]> => {
   return fetcher<ExpenseDTO[]>(getExpensesListUrl(params), {
@@ -67,9 +67,9 @@ export const getExpensesListQueryKey = (params?: ExpensesListParams) => {
 
 export const getExpensesListQueryOptions = <
   TData = Awaited<ReturnType<typeof expensesList>>,
-  TError = NotFoundErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
-  params?: ExpensesListParams,
+  params: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -95,13 +95,16 @@ export const getExpensesListQueryOptions = <
 export type ExpensesListQueryResult = NonNullable<
   Awaited<ReturnType<typeof expensesList>>
 >;
-export type ExpensesListQueryError = NotFoundErrorDTO;
+export type ExpensesListQueryError =
+  | ValidationErrorDTO
+  | NotFoundErrorDTO
+  | InternalServerErrorDTO;
 
 export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
-  TError = NotFoundErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
-  params: undefined | ExpensesListParams,
+  params: ExpensesListParams,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -122,9 +125,9 @@ export function useExpensesList<
 };
 export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
-  TError = NotFoundErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
-  params?: ExpensesListParams,
+  params: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -145,9 +148,9 @@ export function useExpensesList<
 };
 export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
-  TError = NotFoundErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
-  params?: ExpensesListParams,
+  params: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -161,9 +164,9 @@ export function useExpensesList<
 
 export function useExpensesList<
   TData = Awaited<ReturnType<typeof expensesList>>,
-  TError = NotFoundErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
-  params?: ExpensesListParams,
+  params: ExpensesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof expensesList>>, TError, TData>
@@ -186,7 +189,7 @@ export function useExpensesList<
 
 export const invalidateExpensesList = async (
   queryClient: QueryClient,
-  params?: ExpensesListParams,
+  params: ExpensesListParams,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(

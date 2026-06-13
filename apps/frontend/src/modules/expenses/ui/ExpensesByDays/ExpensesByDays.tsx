@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Loader } from "@/common/ui/loader/Loader.tsx";
 
 import { ExpenseDayGroup } from "../../modules/expense-day";
+import type { ExpenseDateRange } from "../../modules/period-summary";
 import { useExpenses } from "../../useExpenses.ts";
 
 import { EmptyState } from "./EmptyState.tsx";
@@ -10,7 +11,7 @@ import { EmptyState } from "./EmptyState.tsx";
 import s from "./ExpensesByDays.module.css";
 
 type ExpensesByDaysProps = {
-  days?: number;
+  range?: ExpenseDateRange;
   categoryId?: number | null;
   userId?: number | null;
   onResetCategory?: () => void;
@@ -34,13 +35,13 @@ function pickResetHandler(args: {
 }
 
 export function ExpensesByDays({
-  days,
+  range,
   categoryId = null,
   userId = null,
   onResetCategory,
   onResetUser,
 }: ExpensesByDaysProps = {}) {
-  const { groups, isLoading } = useExpenses(days);
+  const { groups, isLoading } = useExpenses(range);
 
   const filtered = useMemo(() => {
     if (categoryId == null && userId == null) return groups;

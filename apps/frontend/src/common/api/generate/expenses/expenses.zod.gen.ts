@@ -7,7 +7,8 @@
 import * as zod from "zod";
 
 export const ExpensesListQueryParams = zod.object({
-  days: zod.number().optional(),
+  from: zod.iso.datetime({}),
+  to: zod.iso.datetime({}),
 });
 
 export const expensesListResponseAmountMin = 0.01;

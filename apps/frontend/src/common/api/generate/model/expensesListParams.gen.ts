@@ -6,5 +6,6 @@
  */
 
 export type ExpensesListParams = {
-  days?: number;
+  from: string;
+  to: string;
 };

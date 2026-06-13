@@ -2,34 +2,36 @@ import { useMemo } from "react";
 import clsx from "clsx";
 
 import { useExpenses } from "../../../useExpenses.ts";
-import type { Period } from "../model/types.ts";
+import {
+  type ExpenseDateRange,
+  getCurrentMonthValue,
+  type Period,
+  PERIOD_LABELS,
+  PERIODS,
+} from "../model/types.ts";
 
 import s from "./PeriodSummary.module.css";
 
 type PeriodSummaryProps = {
-  days: number;
+  range: ExpenseDateRange;
   categoryId: number | null;
   userId: number | null;
   period: Period;
+  month: string;
   onPeriodChange: (p: Period) => void;
+  onMonthChange: (month: string) => void;
 };
-
-const PERIOD_LABELS: Record<Period, string> = {
-  day: "день",
-  week: "неделя",
-  month: "месяц",
-};
-
-const PERIODS: Period[] = ["day", "week", "month"];
 
 export function PeriodSummary({
-  days,
+  range,
   categoryId,
   userId,
   period,
+  month,
   onPeriodChange,
+  onMonthChange,
 }: PeriodSummaryProps) {
-  const { groups, isLoading } = useExpenses(days);
+  const { groups, isLoading } = useExpenses(range);
 
   const total = useMemo(() => {
     return groups
@@ -55,6 +57,16 @@ export function PeriodSummary({
           </button>
         ))}
       </div>
+      {period === "month" && (
+        <input
+          className={s.monthInput}
+          type="month"
+          value={month}
+          max={getCurrentMonthValue()}
+          aria-label="Месяц"
+          onChange={(event) => onMonthChange(event.target.value)}
+        />
+      )}
       <div className={s.amount}>
         {isLoading ? "—" : `${total.toLocaleString("ru")} ₽`}
       </div>
