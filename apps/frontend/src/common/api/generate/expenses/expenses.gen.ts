@@ -24,6 +24,7 @@ import type {
 import type {
   ExpenseCreateDTO,
   ExpenseDTO,
+  ExpenseUpdateDTO,
   ExpensesListParams,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
@@ -213,7 +214,7 @@ export const expensesCreate = async (
 };
 
 export const getExpensesCreateMutationOptions = <
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -256,10 +257,11 @@ export type ExpensesCreateMutationResult = NonNullable<
 export type ExpensesCreateMutationBody = ExpenseCreateDTO;
 export type ExpensesCreateMutationError =
   | ValidationErrorDTO
+  | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export const useExpensesCreate = <
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
@@ -435,6 +437,92 @@ export const invalidateExpensesGet = async (
   return queryClient;
 };
 
+export const getExpensesUpdateUrl = (expenseId: number) => {
+  return `/api/v1/expenses/${expenseId}`;
+};
+
+export const expensesUpdate = async (
+  expenseId: number,
+  expenseUpdateDTO: ExpenseUpdateDTO,
+  options?: RequestInit,
+): Promise<ExpenseDTO> => {
+  return fetcher<ExpenseDTO>(getExpensesUpdateUrl(expenseId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(expenseUpdateDTO),
+  });
+};
+
+export const getExpensesUpdateMutationOptions = <
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof expensesUpdate>>,
+    TError,
+    { expenseId: number; data: ExpenseUpdateDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof expensesUpdate>>,
+  TError,
+  { expenseId: number; data: ExpenseUpdateDTO },
+  TContext
+> => {
+  const mutationKey = ["expensesUpdate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof expensesUpdate>>,
+    { expenseId: number; data: ExpenseUpdateDTO }
+  > = (props) => {
+    const { expenseId, data } = props ?? {};
+
+    return expensesUpdate(expenseId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ExpensesUpdateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof expensesUpdate>>
+>;
+export type ExpensesUpdateMutationBody = ExpenseUpdateDTO;
+export type ExpensesUpdateMutationError =
+  | ValidationErrorDTO
+  | NotFoundErrorDTO
+  | InternalServerErrorDTO;
+
+export const useExpensesUpdate = <
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof expensesUpdate>>,
+      TError,
+      { expenseId: number; data: ExpenseUpdateDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof expensesUpdate>>,
+  TError,
+  { expenseId: number; data: ExpenseUpdateDTO },
+  TContext
+> => {
+  return useMutation(getExpensesUpdateMutationOptions(options), queryClient);
+};
 export const getExpensesDeleteUrl = (expenseId: number) => {
   return `/api/v1/expenses/${expenseId}`;
 };

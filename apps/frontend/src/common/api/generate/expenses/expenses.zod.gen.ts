@@ -60,6 +60,31 @@ export const ExpensesGetResponse = zod.object({
   date: zod.iso.datetime({}),
 });
 
+export const ExpensesUpdateParams = zod.object({
+  expenseId: zod.number(),
+});
+
+export const expensesUpdateBodyAmountMin = 0.01;
+
+export const ExpensesUpdateBody = zod.object({
+  amount: zod.number().min(expensesUpdateBodyAmountMin),
+  categoryId: zod.number().min(1),
+  description: zod.union([zod.string(), zod.null()]).optional(),
+  date: zod.iso.datetime({}),
+});
+
+export const expensesUpdateResponseAmountMin = 0.01;
+
+export const ExpensesUpdateResponse = zod.object({
+  id: zod.number().min(1),
+  accountId: zod.number().min(1),
+  amount: zod.number().min(expensesUpdateResponseAmountMin),
+  categoryId: zod.number().min(1),
+  userId: zod.number().min(1),
+  description: zod.union([zod.string(), zod.null()]).optional(),
+  date: zod.iso.datetime({}),
+});
+
 export const ExpensesDeleteParams = zod.object({
   expenseId: zod.number(),
 });

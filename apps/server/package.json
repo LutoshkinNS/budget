@@ -23,7 +23,6 @@
     "prisma:studio": "npx prisma studio",
     "categories:merge-duplicates:dry-run": "tsx scripts/mergeDuplicateCategories.ts --dry-run",
     "categories:merge-duplicates": "tsx scripts/mergeDuplicateCategories.ts",
-    "migration:repair-category-name-normalized": "node src/scripts/repairCategoryNameNormalizedMigration.js",
     "prisma:seed": "npx prisma db seed"
   },
   "keywords": [],

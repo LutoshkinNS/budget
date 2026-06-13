@@ -285,6 +285,11 @@ VITE_TELEGRAM_BOT_NAME=ВАШ_BOT_USERNAME
 # URL API для фронтенда (встраивается в сборку фронтенда)
 VITE_API_URL=http://YOUR_VPS_IP:3000
 
+# Опционально: доступ к GHCR для docker pull приватных образов.
+# Если образы публичные, можно не задавать.
+GHCR_USERNAME=ВАШ_GITHUB_USERNAME
+GHCR_TOKEN=ВАШ_GITHUB_TOKEN_С_READ_PACKAGES
+
 Генерация безопасного JWT секрета:                                                                                                                                                                         
 openssl rand -base64 32                                                                                                                                                                                    
 Зачем: openssl rand генерирует криптографически безопасную случайную строку. Это защищает токены авторизации от подделки.
@@ -303,21 +308,47 @@ chmod 755 apps/server/data   # Установить права доступа
  ---                                                                                                                                                                                                        
 Фаза 3: Развертывание
 
-**3.1 Сборка и запуск**
+**3.1 Сборка образов**
 
-# Собираем оба образа (параллельно, порядок не важен)
-docker compose build
+Основной production-процесс: образы собираются не на VPS, а в GitHub Actions.
+
+Workflow `.github/workflows/deploy.yml` при push в `master`:
+- собирает server image из `apps/server/Dockerfile`
+- собирает frontend image из `apps/frontend/Dockerfile`
+- публикует образы в GHCR:
+  - `ghcr.io/lutoshkinns/budget-server:latest`
+  - `ghcr.io/lutoshkinns/budget-frontend:latest`
+- подключается к VPS по SSH и запускает `/opt/budget/deploy.sh`
+
+Зачем:
+- VPS не тратит CPU/RAM/диск на сборку Docker-образов
+- frontend получает `VITE_API_URL` и `VITE_TELEGRAM_BOT_NAME` на этапе сборки в Actions
+- сервер только скачивает готовые images и пересоздаёт контейнеры
+
+**3.2 Первичный запуск на VPS**
+
+Если images уже опубликованы в GHCR:
+
+cd /opt/budget
+docker compose --env-file .env pull
 
 # Запускаем контейнеры
 docker compose --env-file .env up -d
 
 Зачем:
 - docker compose — управление несколькими контейнерами
-- docker compose build — собирает оба образа. Контекст сборки — корень монорепо (там лежит pnpm-workspace.yaml и pnpm-lock.yaml). Frontend самостоятельно компилирует TypeSpec в отдельном Docker-стейдже, поэтому порядок сборки не важен
-- --env-file .env — использовать наши секреты (VITE_API_URL и VITE_TELEGRAM_BOT_NAME передаются как build args)
+- docker compose pull — скачивает готовые images из GHCR
+- --env-file .env — использовать production-переменные окружения
 - up -d — запустить в фоне, не блокируя терминал
 
-**3.2 Проверка статуса**
+Если GHCR недоступен или нужен аварийный fallback, можно собрать на VPS:
+
+docker compose --env-file .env build
+docker compose --env-file .env up -d
+
+Это запасной вариант, а не основной production flow.
+
+**3.3 Проверка статуса**
 
 # Показать запущенные контейнеры
 docker compose ps                                                                                                                                                                                          
@@ -330,7 +361,7 @@ docker compose logs -f server
 # Смотреть логи фронтенда
 docker compose logs -f frontend
 
-**3.3 Проверка работоспособности**
+**3.4 Проверка работоспособности**
 
 - Открыть в браузере: http://YOUR_VPS_IP:3001 — должен загрузиться React UI
 - Проверить API: http://YOUR_VPS_IP:3000 — должен ответить сервер
@@ -340,22 +371,39 @@ docker compose logs -f frontend
 
 **Обновление после изменений в коде**
 
+Обычный путь обновления — push в `master`.
+
+После push GitHub Actions:
+1. Собирает и публикует Docker images в GHCR.
+2. Подключается к VPS.
+3. Запускает `/opt/budget/deploy.sh`.
+
+`deploy.sh` на сервере делает:
+
 cd /opt/budget
-git pull                                    # Загрузить новый код
+git pull --ff-only origin master
+docker compose --env-file .env pull
+docker compose --env-file .env up -d --no-build --force-recreate
 
-# Обновить только фронтенд (рекомендуется — не затрагивает сервер)
-docker compose build --no-cache frontend
-docker compose up -d --no-deps frontend
+Зачем:
+- git pull обновляет docker-compose.yml, deploy.sh и остальные файлы на VPS
+- docker compose pull скачивает готовые images, собранные в Actions
+- --no-build гарантирует, что VPS не будет собирать images локально
+- --force-recreate пересоздаёт контейнеры на новых images
 
-# Обновить только сервер
-docker compose build --no-cache server
-docker compose up -d --no-deps server
+Ручной запуск deploy, если workflow не дошёл до SSH-шагa:
 
-# Обновить всё сразу (может нагружать VPS)
-docker compose build --no-cache
-docker compose --env-file .env up -d
+cd /opt/budget
+bash ./deploy.sh
 
-Зачем: git pull скачивает изменения из репозитория. --no-deps предотвращает перезапуск зависимых сервисов. Сборка по одному сервису снижает нагрузку на VPS.
+Fallback при проблемах с GHCR или Docker Hub:
+
+cd /opt/budget
+git pull --ff-only origin master
+docker compose --env-file .env build server
+docker compose --env-file .env up -d --no-deps server
+
+Использовать fallback только временно: основная схема — сборка в Actions и pull готовых images на VPS.
 
 **Остановка приложения**
 
@@ -546,15 +594,24 @@ VITE_API_URL=https://api.budget-best.ru
 
 Зачем:
 - FRONTEND_URL используется для CORS — теперь API будет принимать запросы с https://budget-best.ru
-- VITE_API_URL встраивается в сборку фронтенда как build arg при docker compose build
+- VITE_API_URL встраивается в сборку фронтенда в GitHub Actions через build args
 - VITE_TELEGRAM_BOT_NAME также встраивается в сборку — не требует изменений если имя бота не менялось
+
+Важно: после перехода на GitHub Actions значения `VITE_API_URL` и `VITE_TELEGRAM_BOT_NAME` должны быть заданы в GitHub repository variables/secrets, потому что frontend image собирается в Actions, а не на VPS.
 
 **5.6 Пересборка и перезапуск приложения**
 
+Сделайте push в `master` или вручную запустите workflow `Deploy to VPS` в GitHub Actions.
+
+Actions соберёт новые images с актуальными frontend build args и запустит `/opt/budget/deploy.sh` на VPS.
+
+Если нужно вручную перезапустить уже опубликованные images:
+
 cd /opt/budget
-docker compose build
-docker compose --env-file .env up -d
-Зачем: Пересборка нужна, т.к. VITE_API_URL встраивается в фронтенд при сборке.
+docker compose --env-file .env pull
+docker compose --env-file .env up -d --no-build --force-recreate
+
+Зачем: frontend-переменные встраиваются на этапе сборки image, поэтому менять только `.env` на VPS недостаточно для `VITE_API_URL`; нужен новый frontend image из Actions.
 
 **5.7 Обновление firewall**
 
@@ -622,12 +679,14 @@ df -h
 
 | Действие   | Команда                                                                      |
 |------------|------------------------------------------------------------------------------|
-| Собрать    | docker compose build                                                        |
+| Собрать    | GitHub Actions: push в master или workflow_dispatch                         |
 | Запустить  | docker compose --env-file .env up -d                                         |
 | Остановить | docker compose down                                                          |
 | Логи       | docker compose logs -f                                                       |
 | Статус     | docker compose ps                                                            |
-| Обновить   | git pull && docker compose build && docker compose --env-file .env up -d    |
+| Обновить   | bash /opt/budget/deploy.sh                                                   |
+| Pull images | docker compose --env-file .env pull                                         |
+| Fallback build | docker compose --env-file .env build server                              |
 | Бэкап БД   | cp apps/server/data/budget.db apps/server/data/budget.db.bak                 |
  ---                                                                                                                                                                                                        
 Файлы проекта

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { queryClient } from "@/common/api/appQuery";
 import {
+  getExpensesGetQueryKey,
   getExpensesListQueryKey,
   useExpensesList,
 } from "@/common/api/generate/expenses/expenses.gen.ts";
@@ -90,5 +91,12 @@ export function useInvalidateExpensesList() {
   return () =>
     queryClient.invalidateQueries({
       queryKey: getExpensesListQueryKey(),
+    });
+}
+
+export function useInvalidateExpense() {
+  return (expenseId: number) =>
+    queryClient.invalidateQueries({
+      queryKey: getExpensesGetQueryKey(expenseId),
     });
 }

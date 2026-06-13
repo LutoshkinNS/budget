@@ -95,7 +95,12 @@ interface Expenses {
 
   @post create(
     @body expense: ExpenseCreate,
-  ): Expense | ExpenseErrorResponse | InternalServerErrorResponse;
+  ): Expense | ExpenseErrorResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
+
+  @patch update(
+    @path expenseId: integer,
+    @body expense: ExpenseUpdate,
+  ): Expense | ExpenseErrorResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
 
   @delete delete(@path expenseId: integer): {
     @statusCode statusCode: 204;

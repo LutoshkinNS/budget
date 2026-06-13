@@ -34,6 +34,18 @@ model ExpenseCreate {
   date?: utcDateTime;
 }
 
+model ExpenseUpdate {
+  @minValue(0.01)
+  amount: float64;
+
+  @minValue(1)
+  categoryId: integer;
+
+  description?: string | null;
+
+  date: utcDateTime;
+}
+
 model ExpenseErrorResponse {
   ...BadRequestResponse;
   ...Body<ValidationError>;

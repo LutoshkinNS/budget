@@ -17,6 +17,7 @@ import { Route as PrivateSettingsRouteImport } from './_private/settings'
 import { Route as PrivateDashboardRouteImport } from './_private/dashboard'
 import { Route as PrivateCategoriesRouteImport } from './_private/categories'
 import { Route as PublicInviteCodeRouteImport } from './_public/invite.$code'
+import { Route as PrivateExpensesExpenseIdEditRouteImport } from './_private/expenses.$expenseId.edit'
 
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
@@ -56,6 +57,12 @@ const PublicInviteCodeRoute = PublicInviteCodeRouteImport.update({
   path: '/invite/$code',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PrivateExpensesExpenseIdEditRoute =
+  PrivateExpensesExpenseIdEditRouteImport.update({
+    id: '/expenses/$expenseId/edit',
+    path: '/expenses/$expenseId/edit',
+    getParentRoute: () => PrivateRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PrivateIndexRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/invite/$code': typeof PublicInviteCodeRoute
+  '/expenses/$expenseId/edit': typeof PrivateExpensesExpenseIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PrivateIndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/invite/$code': typeof PublicInviteCodeRoute
+  '/expenses/$expenseId/edit': typeof PrivateExpensesExpenseIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,6 +92,7 @@ export interface FileRoutesById {
   '/_public/login': typeof PublicLoginRoute
   '/_private/': typeof PrivateIndexRoute
   '/_public/invite/$code': typeof PublicInviteCodeRoute
+  '/_private/expenses/$expenseId/edit': typeof PrivateExpensesExpenseIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -93,6 +103,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/login'
     | '/invite/$code'
+    | '/expenses/$expenseId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -101,6 +112,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/login'
     | '/invite/$code'
+    | '/expenses/$expenseId/edit'
   id:
     | '__root__'
     | '/_private'
@@ -111,6 +123,7 @@ export interface FileRouteTypes {
     | '/_public/login'
     | '/_private/'
     | '/_public/invite/$code'
+    | '/_private/expenses/$expenseId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicInviteCodeRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_private/expenses/$expenseId/edit': {
+      id: '/_private/expenses/$expenseId/edit'
+      path: '/expenses/$expenseId/edit'
+      fullPath: '/expenses/$expenseId/edit'
+      preLoaderRoute: typeof PrivateExpensesExpenseIdEditRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
   }
 }
 
@@ -184,6 +204,7 @@ interface PrivateRouteRouteChildren {
   PrivateDashboardRoute: typeof PrivateDashboardRoute
   PrivateSettingsRoute: typeof PrivateSettingsRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
+  PrivateExpensesExpenseIdEditRoute: typeof PrivateExpensesExpenseIdEditRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
@@ -191,6 +212,7 @@ const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateDashboardRoute: PrivateDashboardRoute,
   PrivateSettingsRoute: PrivateSettingsRoute,
   PrivateIndexRoute: PrivateIndexRoute,
+  PrivateExpensesExpenseIdEditRoute: PrivateExpensesExpenseIdEditRoute,
 }
 
 const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(

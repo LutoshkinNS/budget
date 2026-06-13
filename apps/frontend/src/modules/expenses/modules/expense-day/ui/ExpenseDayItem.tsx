@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
+
 import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { useCategories } from "@/modules/categories";
 
@@ -8,11 +10,21 @@ type ExpenseDayItemProps = {
 };
 
 export function ExpenseDayItem({ expense }: ExpenseDayItemProps) {
+  const navigate = useNavigate();
   const { data: categories } = useCategories();
   const categoryName = categories.find((c) => c.id === expense.categoryId)?.name;
 
   return (
-    <div className={s.expenseItem}>
+    <button
+      type="button"
+      className={s.expenseItem}
+      onClick={() =>
+        navigate({
+          to: "/expenses/$expenseId/edit",
+          params: { expenseId: String(expense.id) },
+        })
+      }
+    >
       <div className={s.expenseCategory}>
         <span>{categoryName ?? "—"}</span>
         {expense.description && (
@@ -22,6 +34,6 @@ export function ExpenseDayItem({ expense }: ExpenseDayItemProps) {
       <span className={s.expenseAmount}>
         {expense.amount.toLocaleString("ru")} ₽
       </span>
-    </div>
+    </button>
   );
 }

@@ -59,10 +59,21 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
     padding: 6px 8px;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
     font-size: 14px;
+    text-align: left;
     color: var(--primary-text-color);
     opacity: 0.85;
+    cursor: pointer;
+}
+
+.expenseItem:focus-visible {
+    outline: 1.5px solid var(--primary-text-color);
+    outline-offset: 2px;
 }
 
 .expenseCategory {
