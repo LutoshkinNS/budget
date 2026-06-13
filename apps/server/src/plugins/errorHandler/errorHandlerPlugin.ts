@@ -1,4 +1,4 @@
-import type { FastifyError } from 'fastify';
+import type { FastifyError, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
 import { FastifyApp } from '#src/appInit.js';
@@ -16,8 +16,46 @@ type ErrorResponse = {
   statusCode: number;
 };
 
+function sanitizeUrl(url: string) {
+  try {
+    const parsed = new URL(url, 'http://localhost');
+    const queryKeys = Array.from(parsed.searchParams.keys());
+    const query = queryKeys.length > 0 ? `?${queryKeys.join('&')}` : '';
+
+    return `${parsed.pathname}${query}`;
+  } catch {
+    return url.split('?')[0] || url;
+  }
+}
+
+function sanitizeReferer(referer: string | undefined) {
+  if (!referer) return undefined;
+
+  try {
+    const parsed = new URL(referer);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return sanitizeUrl(referer);
+  }
+}
+
+function getSafeRequestContext(request: FastifyRequest) {
+  const cookieHeader = request.headers.cookie;
+
+  return {
+    method: request.method,
+    url: sanitizeUrl(request.url),
+    userAgent: request.headers['user-agent'],
+    origin: request.headers.origin,
+    referer: sanitizeReferer(request.headers.referer),
+    hasCookieHeader: Boolean(cookieHeader),
+    hasAccessTokenCookie: Boolean(request.cookies?.accessToken),
+    hasRefreshTokenCookie: Boolean(request.cookies?.refreshToken)
+  };
+}
+
 async function errorHandlerPlugin(app: FastifyApp) {
-  app.setErrorHandler((error: FastifyError, _request, reply) => {
+  app.setErrorHandler((error: FastifyError, request, reply) => {
     const errorResponse: ErrorResponse = {
       code: error.code as CustomErrorCode, // BAD
       message: error.message,
@@ -55,10 +93,19 @@ async function errorHandlerPlugin(app: FastifyApp) {
       }
     }
 
+    const logContext = {
+      err: error,
+      request: getSafeRequestContext(request),
+      response: {
+        code: errorResponse.code,
+        statusCode: errorResponse.statusCode
+      }
+    };
+
     if (errorResponse.statusCode >= 500) {
-      app.log.error(error);
+      request.log.error(logContext, 'request_error');
     } else {
-      app.log.warn(error);
+      request.log.warn(logContext, 'request_error');
     }
 
     reply.status(errorResponse.statusCode).send(errorResponse);

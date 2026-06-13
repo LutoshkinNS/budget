@@ -26,6 +26,7 @@ export async function loginHandler(
   const isValid = validateTelegramAuth(req.body, this.envs.TELEGRAM_BOT_TOKEN);
 
   if (!isValid) {
+    req.log.warn({ event: 'auth_login_failed', reason: 'invalid_telegram_auth' });
     return reply.code(401).send(AUTH_ERRORS.INVALID_TELEGRAM_AUTH);
   }
 
@@ -33,6 +34,7 @@ export async function loginHandler(
   const authDate = req.body.auth_date;
   const currentTimestamp = Math.floor(Date.now() / 1000);
   if (currentTimestamp - authDate > AUTH_DATA_MAX_AGE_SECONDS) {
+    req.log.warn({ event: 'auth_login_failed', reason: 'auth_data_expired' });
     return reply.code(401).send(AUTH_ERRORS.AUTH_DATA_EXPIRED);
   }
 
@@ -49,6 +51,7 @@ export async function loginHandler(
   const accountId = getFirstAccountId(user);
 
   if (!accountId) {
+    req.log.warn({ event: 'auth_login_failed', reason: 'no_account' });
     return reply.code(409).send(AUTH_ERRORS.NO_ACCOUNT);
   }
 
@@ -61,18 +64,28 @@ export async function loginHandler(
     accountId,
     type: 'refresh'
   });
+  const secureCookies = process.env.NODE_ENV === 'production';
+
+  req.log.info({
+    event: 'auth_login_success',
+    secureCookies,
+    accessTokenCookiePath: '/',
+    refreshTokenCookiePath: '/api/v1/auth',
+    accessTokenMaxAgeSeconds: ACCESS_TOKEN_MAX_AGE_SECONDS,
+    refreshTokenMaxAgeSeconds: REFRESH_TOKEN_MAX_AGE_SECONDS
+  });
 
   return reply
     .setCookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: secureCookies,
       sameSite: 'lax',
       path: '/',
       maxAge: ACCESS_TOKEN_MAX_AGE_SECONDS
     })
     .setCookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: secureCookies,
       sameSite: 'lax',
       path: '/api/v1/auth',
       maxAge: REFRESH_TOKEN_MAX_AGE_SECONDS
