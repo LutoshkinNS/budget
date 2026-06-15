@@ -1,0 +1,22 @@
+.container {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.fallback {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 280px;
+  text-align: center;
+}
+
+.fallback p {
+  margin: 0;
+}
+
+.fallback button {
+  min-height: 40px;
+  padding: 0 16px;
+}

@@ -13,12 +13,16 @@ export function PrivateLayout() {
 
   useLayoutEffect(() => {
     if (!!error && error.statusCode === 401) {
-      navigate({ to: "/login" });
+      void navigate({ to: "/login", replace: true });
     }
   }, [error, navigate]);
 
-  if (isLoading || error?.statusCode === 401) {
+  if (isLoading) {
     return <Loader />;
+  }
+
+  if (error?.statusCode === 401) {
+    return null;
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -8,14 +8,19 @@ import { useNotifications } from "@/common/lib/notifications";
 import { INVITE_CODE_KEY } from "../model/constants.ts";
 import { useLogin } from "../model/useLogin.ts";
 
+import s from "./ByTelegram.module.css";
+
 const telegram_widget_config = {
   botName: import.meta.env.VITE_TELEGRAM_BOT_NAME,
   src: "https://telegram.org/js/telegram-widget.js?22",
   btnSize: "large",
 };
 
+const TELEGRAM_WIDGET_TIMEOUT_MS = 20000;
+
 export function ByTelegram() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showFallback, setShowFallback] = useState(false);
   const { login } = useLogin();
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
@@ -25,6 +30,8 @@ export function ByTelegram() {
     if (!container) return;
 
     window.onTelegramAuth = async (user) => {
+      setShowFallback(false);
+
       const validateResult = AuthLoginBody.safeParse(user);
 
       if (!validateResult.success) {
@@ -63,6 +70,13 @@ export function ByTelegram() {
       }
     };
 
+    if (!telegram_widget_config.botName) {
+      setShowFallback(true);
+      return;
+    }
+
+    setShowFallback(false);
+
     const script = document.createElement("script");
     script.src = telegram_widget_config.src;
     script.async = true;
@@ -72,7 +86,12 @@ export function ByTelegram() {
 
     container.appendChild(script);
 
+    const timeoutId = window.setTimeout(() => {
+      setShowFallback(true);
+    }, TELEGRAM_WIDGET_TIMEOUT_MS);
+
     return () => {
+      window.clearTimeout(timeoutId);
       delete window.onTelegramAuth;
       if (container.contains(script)) {
         container.removeChild(script);
@@ -86,11 +105,19 @@ export function ByTelegram() {
   }
 
   return (
-    <>
+    <div className={s.container}>
       <div ref={containerRef} />
+      {showFallback && (
+        <div className={s.fallback} role="status">
+          <p>Не получается войти через Telegram?</p>
+          <button type="button" onClick={() => window.location.reload()}>
+            Обновить страницу
+          </button>
+        </div>
+      )}
       {import.meta.env.DEV && (
         <button onClick={handleDevLogin}>Dev login</button>
       )}
-    </>
+    </div>
   );
 }
