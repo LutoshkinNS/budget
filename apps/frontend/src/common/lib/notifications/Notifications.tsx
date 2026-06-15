@@ -12,7 +12,14 @@ export const Notifications = ({ children }: { children: React.ReactNode }) => {
 
   function addNotifications(notification: NotificationProps) {
     setNotifications((prevState) => {
-      if (prevState.some((n) => n.id === notification.id)) {
+      if (
+        prevState.some(
+          (n) =>
+            n.id === notification.id ||
+            (n.title === notification.title &&
+              n.message === notification.message),
+        )
+      ) {
         return prevState;
       }
       return [

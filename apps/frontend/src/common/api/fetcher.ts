@@ -2,18 +2,35 @@ let refreshPromise: Promise<void> | null = null;
 
 const BASE_URL = import.meta.env.PROD ? import.meta.env.VITE_API_URL : "";
 
+const NETWORK_ERROR = {
+  code: "Ошибка сети",
+  message:
+    "Не удалось связаться с сервером. Проверьте интернет-соединение или попробуйте обновить страницу.",
+  statusCode: 0,
+} as const;
+
+async function request(url: string, options?: RequestInit) {
+  try {
+    return await fetch(`${BASE_URL}${url}`, {
+      ...options,
+      credentials: "include",
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
+
+    throw NETWORK_ERROR;
+  }
+}
+
 async function refreshAccessToken() {
-  const refreshRes = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+  const refreshRes = await request("/api/v1/auth/refresh", {
     method: "POST",
-    credentials: "include",
   });
 
   if (!refreshRes.ok) {
-    throw {
-      code: "UNAUTHORIZED",
-      message: "Failed to refresh token",
-      statusCode: 401,
-    };
+    throw await refreshRes.json();
   }
 }
 
@@ -21,9 +38,8 @@ export const fetcher = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
-  let res = await fetch(`${BASE_URL}${url}`, {
+  let res = await request(url, {
     ...options,
-    credentials: "include",
   });
 
   if (res.status === 401 && url !== "/api/v1/auth/refresh") {
@@ -33,9 +49,8 @@ export const fetcher = async <T>(
 
     await refreshPromise;
 
-    res = await fetch(`${BASE_URL}${url}`, {
+    res = await request(url, {
       ...options,
-      credentials: "include",
     });
   }
 
