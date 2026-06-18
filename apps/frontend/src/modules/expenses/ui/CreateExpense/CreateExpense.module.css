@@ -12,6 +12,35 @@
     letter-spacing: -0.03em;
 }
 
+.typeSwitch {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-top: 16px;
+    border-radius: 12px;
+    background: var(--secondary-color);
+}
+
+.typeSwitch button {
+    min-width: 88px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--secondary-text-color);
+    font: inherit;
+    cursor: pointer;
+}
+
+.typeSwitch button:active {
+    opacity: 0.6;
+}
+
+.typeSwitch .typeSwitchActive {
+    background: var(--primary-color);
+    color: var(--primary-text-color);
+}
+
 .categories {
     margin-top: 28px;
     margin-bottom: 28px;

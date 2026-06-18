@@ -76,6 +76,11 @@
     outline-offset: 2px;
 }
 
+.expenseItem:disabled {
+    color: var(--primary-text-color);
+    cursor: default;
+}
+
 .expenseCategory {
     display: flex;
     flex-direction: column;

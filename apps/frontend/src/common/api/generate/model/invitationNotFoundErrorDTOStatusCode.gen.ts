@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type InvitationNotFoundErrorDTOStatusCode =
-  (typeof InvitationNotFoundErrorDTOStatusCode)[keyof typeof InvitationNotFoundErrorDTOStatusCode];
-
-export const InvitationNotFoundErrorDTOStatusCode = {
-  NUMBER_404: 404,
-} as const;
+export type InvitationNotFoundErrorDTOStatusCode = 404;

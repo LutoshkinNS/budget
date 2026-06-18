@@ -45,9 +45,35 @@
     outline: none;
 }
 
-.amount {
-    font-size: 32px;
+.totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+}
+
+.totalItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.totalLabel {
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--primary-text-color);
+    opacity: 0.6;
+}
+
+.totalValue {
+    font-size: 24px;
     font-weight: 500;
     line-height: 1.2;
     color: var(--primary-text-color);
+}
+
+@media (min-width: 640px) {
+    .totals {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 }

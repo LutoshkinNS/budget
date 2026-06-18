@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type NotFoundErrorDTOCode =
-  (typeof NotFoundErrorDTOCode)[keyof typeof NotFoundErrorDTOCode];
-
-export const NotFoundErrorDTOCode = {
-  NOT_FOUND: "NOT_FOUND",
-} as const;
+export type NotFoundErrorDTOCode = "NOT_FOUND";

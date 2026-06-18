@@ -9,14 +9,14 @@ generator client {
 }
 
 model User {
-  id        BigInt    @id
+  id        BigInt   @id
   firstName String?
   photoUrl  String?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   ownedAccounts Account[]     @relation("AccountOwner")
   accounts      AccountUser[]
-  expenses      Expense[]
+  transactions  Transaction[]
 }
 
 model Account {
@@ -26,10 +26,10 @@ model Account {
   owner     User     @relation("AccountOwner", fields: [ownerId], references: [id])
   createdAt DateTime @default(now())
 
-  users       AccountUser[]
-  categories  Category[]
-  expenses    Expense[]
-  invitations AccountInvitation[]
+  users                 AccountUser[]
+  transactionCategories TransactionCategory[]
+  transactions          Transaction[]
+  invitations           AccountInvitation[]
 }
 
 model AccountInvitation {
@@ -53,36 +53,44 @@ model AccountUser {
   @@id([userId, accountId])
 }
 
-model Category {
+model TransactionCategory {
   id             Int           @id @default(autoincrement())
   accountId      Int
   account        Account       @relation(fields: [accountId], references: [id])
+  // Stored as text because this project uses SQLite; valid values start with "expense".
+  type           String        @default("expense")
   name           String
   nameNormalized String
   deletedAt      DateTime?
-  expenses       Expense[]
+  transactions   Transaction[]
   subcategories  Subcategory[]
 
-  @@index([accountId, nameNormalized])
+  // Active uniqueness is enforced by a partial SQL index in migrations.
+  @@index([accountId, type, nameNormalized])
 }
 
 model Subcategory {
-  id         Int       @id @default(autoincrement())
+  id         Int                 @id @default(autoincrement())
   categoryId Int
-  category   Category  @relation(fields: [categoryId], references: [id])
+  category   TransactionCategory @relation(fields: [categoryId], references: [id])
   name       String
   deletedAt  DateTime?
 }
 
-model Expense {
-  id          Int      @id @default(autoincrement())
+model Transaction {
+  id          Int                 @id @default(autoincrement())
   accountId   Int
-  account     Account  @relation(fields: [accountId], references: [id])
+  account     Account             @relation(fields: [accountId], references: [id])
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  category    TransactionCategory @relation(fields: [categoryId], references: [id])
   userId      BigInt
-  user        User     @relation(fields: [userId], references: [id])
+  user        User                @relation(fields: [userId], references: [id])
+  // Stored as text because this project uses SQLite; existing rows migrate as "expense".
+  type        String              @default("expense")
   amount      Float
   description String?
   date        DateTime
+
+  @@index([accountId, date])
+  @@index([accountId, type, date])
 }

@@ -4,8 +4,10 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { CategoryCreateDTOType } from "./categoryCreateDTOType";
 
 export interface CategoryCreateDTO {
   /** @minLength 1 */
   name: string;
+  type: CategoryCreateDTOType;
 }

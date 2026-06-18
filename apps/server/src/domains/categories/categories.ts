@@ -6,6 +6,17 @@ import { FastifyApp } from '#src/appInit.js';
 
 import { normalizeCategoryName } from './categoryName.js';
 
+type CategoryType = 'income' | 'expense';
+
+function serializeCategory(category: { id: number; accountId: number; type: string; name: string }) {
+  return {
+    id: category.id,
+    accountId: category.accountId,
+    type: category.type as CategoryType,
+    name: category.name
+  };
+}
+
 export default async function categoriesModule(app: FastifyApp) {
   app.addHook('preHandler', app.authenticate);
 
@@ -13,16 +24,26 @@ export default async function categoriesModule(app: FastifyApp) {
     '/',
     {
       schema: {
+        querystring: {
+          type: 'object',
+          properties: {
+            type: { type: 'string', enum: ['income', 'expense'] }
+          },
+          additionalProperties: false
+        },
         response: { 200: { type: 'array', items: Category } }
       }
     },
-    function (req) {
-      return this.prisma.category.findMany({
+    async function (req) {
+      const categories = await this.prisma.transactionCategory.findMany({
         where: {
           accountId: req.user.accountId,
-          deletedAt: null
+          deletedAt: null,
+          ...(req.query.type === undefined ? {} : { type: req.query.type })
         }
       });
+
+      return categories.map(serializeCategory);
     }
   );
 
@@ -34,14 +55,16 @@ export default async function categoriesModule(app: FastifyApp) {
         response: { 200: Category }
       }
     },
-    function (req) {
-      return this.prisma.category.findFirstOrThrow({
+    async function (req) {
+      const category = await this.prisma.transactionCategory.findFirstOrThrow({
         where: {
           id: req.params.id,
           accountId: req.user.accountId,
           deletedAt: null
         }
       });
+
+      return serializeCategory(category);
     }
   );
 
@@ -58,10 +81,11 @@ export default async function categoriesModule(app: FastifyApp) {
       const name = req.body.name.trim();
       const normalizedName = normalizeCategoryName(req.body.name);
 
-      const existingCategory = await this.prisma.category.findFirst({
+      const existingCategory = await this.prisma.transactionCategory.findFirst({
         where: {
           accountId,
           deletedAt: null,
+          type: req.body.type,
           nameNormalized: normalizedName
         }
       });
@@ -74,13 +98,16 @@ export default async function categoriesModule(app: FastifyApp) {
         });
       }
 
-      return await this.prisma.category.create({
+      const category = await this.prisma.transactionCategory.create({
         data: {
           name,
           nameNormalized: normalizedName,
+          type: req.body.type,
           accountId
         }
       });
+
+      return serializeCategory(category);
     }
   );
 
@@ -93,7 +120,7 @@ export default async function categoriesModule(app: FastifyApp) {
       }
     },
     async function (req, reply) {
-      await this.prisma.category.updateMany({
+      await this.prisma.transactionCategory.updateMany({
         where: {
           id: req.params.id,
           accountId: req.user.accountId,

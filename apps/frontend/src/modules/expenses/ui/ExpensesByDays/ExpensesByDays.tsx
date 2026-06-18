@@ -1,16 +1,20 @@
 import { useMemo } from "react";
 
 import { Loader } from "@/common/ui/loader/Loader.tsx";
+import { useTransactions } from "@/modules/transactions";
 
 import { ExpenseDayGroup } from "../../modules/expense-day";
-import type { ExpenseDateRange } from "../../modules/period-summary";
-import { useExpenses } from "../../useExpenses.ts";
+import {
+  type ExpenseDateRange,
+  getExpenseDateRange,
+} from "../../modules/period-summary";
 
 import { EmptyState } from "./EmptyState.tsx";
 
 import s from "./ExpensesByDays.module.css";
 
 type ExpensesByDaysProps = {
+  mode?: "expenses" | "transactions";
   range?: ExpenseDateRange;
   categoryId?: number | null;
   userId?: number | null;
@@ -35,28 +39,41 @@ function pickResetHandler(args: {
 }
 
 export function ExpensesByDays({
+  mode = "expenses",
   range,
   categoryId = null,
   userId = null,
   onResetCategory,
   onResetUser,
 }: ExpensesByDaysProps = {}) {
-  const { groups, isLoading } = useExpenses(range);
+  const transactionRange = range ?? getExpenseDateRange("day");
+  const { groups, isLoading } = useTransactions({
+    ...transactionRange,
+    ...(mode === "expenses" ? { type: "expense" as const } : {}),
+  });
+  const showSignedAmounts = mode === "transactions";
 
   const filtered = useMemo(() => {
-    if (categoryId == null && userId == null) return groups;
+    if (categoryId == null && userId == null && !showSignedAmounts) {
+      return groups;
+    }
     return groups
       .map((g) => {
-        const expenses = g.expenses.filter(
+        const transactions = g.transactions.filter(
           (e) =>
             (categoryId == null || e.categoryId === categoryId) &&
             (userId == null || e.userId === userId),
         );
-        const total = expenses.reduce((sum, e) => sum + e.amount, 0);
-        return { ...g, expenses, total };
+        const total = transactions.reduce(
+          (sum, e) =>
+            sum +
+            (showSignedAmounts && e.type === "expense" ? -e.amount : e.amount),
+          0,
+        );
+        return { ...g, transactions, total };
       })
-      .filter((g) => g.expenses.length > 0);
-  }, [groups, categoryId, userId]);
+      .filter((g) => g.transactions.length > 0);
+  }, [groups, categoryId, userId, showSignedAmounts]);
 
   if (isLoading) return <Loader />;
 
@@ -69,7 +86,7 @@ export function ExpensesByDays({
       ...(onResetCategory ? { onResetCategory } : {}),
       ...(onResetUser ? { onResetUser } : {}),
     });
-    return <EmptyState variant={variant} {...resetProps} />;
+    return <EmptyState variant={variant} subject={mode} {...resetProps} />;
   }
 
   return (
@@ -79,7 +96,8 @@ export function ExpensesByDays({
           key={group.isoDate}
           label={group.label}
           total={group.total}
-          expenses={group.expenses}
+          expenses={group.transactions}
+          showSignedAmounts={showSignedAmounts}
         />
       ))}
     </div>

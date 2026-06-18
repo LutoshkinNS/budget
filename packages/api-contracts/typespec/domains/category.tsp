@@ -9,11 +9,15 @@ model Category {
   @minValue(1)
   accountId: integer;
 
+  type: TransactionType;
+
   @minLength(1)
   name: string;
 }
 
 model CategoryCreate {
+  type: TransactionType;
+
   @minLength(1)
   name: string;
 }

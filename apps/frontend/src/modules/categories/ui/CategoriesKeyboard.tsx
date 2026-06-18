@@ -2,14 +2,22 @@ import { CategoryKeyboard } from "@/modules/expenses/modules/category-keyboard";
 
 import { useCategories } from "../useCategories.ts";
 
+type CategoryType = "income" | "expense";
+
 interface CategoriesKeyboardProps {
   className?: string | undefined;
+  type?: CategoryType;
   value: number | null;
   onChange: (value: number | null) => void;
 }
 
-export function CategoriesKeyboard({ className, value, onChange }: CategoriesKeyboardProps) {
-  const { data: categories } = useCategories();
+export function CategoriesKeyboard({
+  className,
+  type = "expense",
+  value,
+  onChange,
+}: CategoriesKeyboardProps) {
+  const { data: categories } = useCategories({ type });
 
   const items = categories.map((cat) => ({ emoji: "", label: cat.name }));
   const selectedName = categories.find((cat) => cat.id === value)?.name ?? null;

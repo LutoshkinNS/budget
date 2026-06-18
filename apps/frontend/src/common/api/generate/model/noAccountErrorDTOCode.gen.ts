@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type NoAccountErrorDTOCode =
-  (typeof NoAccountErrorDTOCode)[keyof typeof NoAccountErrorDTOCode];
-
-export const NoAccountErrorDTOCode = {
-  NO_ACCOUNT: "NO_ACCOUNT",
-} as const;
+export type NoAccountErrorDTOCode = "NO_ACCOUNT";

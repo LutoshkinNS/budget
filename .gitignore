@@ -34,6 +34,7 @@ git-info.json
 # server
 /apps/server/generated/**
 /apps/server/prisma/*.db
+/apps/server/prisma/*.db.*
 /apps/server/prisma/*.db-journal
 /packages/api-contracts/generated/**
 
@@ -42,6 +43,7 @@ git-info.json
 
 # Claude Code workspace artifacts
 .claude/
+.codex/
 .playwright-mcp/
 .mcp.json
 nul

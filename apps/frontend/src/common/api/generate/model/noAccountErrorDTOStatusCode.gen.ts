@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type NoAccountErrorDTOStatusCode =
-  (typeof NoAccountErrorDTOStatusCode)[keyof typeof NoAccountErrorDTOStatusCode];
-
-export const NoAccountErrorDTOStatusCode = {
-  NUMBER_409: 409,
-} as const;
+export type NoAccountErrorDTOStatusCode = 409;

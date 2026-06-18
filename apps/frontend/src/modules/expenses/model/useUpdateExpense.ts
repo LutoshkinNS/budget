@@ -1,49 +1,24 @@
 import z from "zod";
 
-import { useExpensesUpdate } from "@/common/api/generate/expenses/expenses.gen.ts";
-import { ExpensesUpdateBody } from "@/common/api/generate/expenses/expenses.zod.gen.ts";
-import type { ExpenseUpdateDTO } from "@/common/api/generate/model";
+import type { TransactionUpdateDTO } from "@/common/api/generate/model";
+import { TransactionsUpdateBody } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
+import { useUpdateTransaction } from "@/modules/transactions";
 
-import {
-  useInvalidateExpense,
-  useInvalidateExpensesList,
-} from "../useExpenses.ts";
+export type ExpenseUpdateDTO = Omit<TransactionUpdateDTO, "type"> &
+  Partial<Pick<TransactionUpdateDTO, "type">>;
 
 export function useUpdateExpense(expenseId: number) {
-  const invalidateExpense = useInvalidateExpense();
-  const invalidateExpensesList = useInvalidateExpensesList();
   const { addNotification } = useNotifications();
-
-  const mutation = useExpensesUpdate({
-    mutation: {
-      onError: (error) => {
-        addNotification({
-          id: `updateExpenseError-${expenseId}`,
-          title: error?.code || "Не удалось сохранить расход",
-          message: error?.message,
-        });
-      },
-      onSuccess: async () => {
-        await Promise.all([
-          invalidateExpensesList(),
-          invalidateExpense(expenseId),
-        ]);
-        addNotification({
-          id: `updateExpenseSuccess-${expenseId}-${Date.now()}`,
-          type: "success",
-          title: "Расход сохранен",
-        });
-      },
-    },
-  });
+  const mutation = useUpdateTransaction(expenseId);
 
   const updateExpense = (data: ExpenseUpdateDTO) => {
     const normalizedData = {
       ...data,
+      type: data.type ?? "expense",
       description: data.description?.trim() || null,
     };
-    const validation = ExpensesUpdateBody.safeParse(normalizedData);
+    const validation = TransactionsUpdateBody.safeParse(normalizedData);
 
     if (!validation.success) {
       addNotification({
@@ -54,22 +29,20 @@ export function useUpdateExpense(expenseId: number) {
       return Promise.reject(validation.error);
     }
 
-    const updateData: ExpenseUpdateDTO = {
+    const updateData: TransactionUpdateDTO = {
       amount: validation.data.amount,
       categoryId: validation.data.categoryId,
       date: validation.data.date,
       description: validation.data.description ?? null,
+      type: validation.data.type,
     };
 
-    return mutation.mutateAsync({
-      expenseId,
-      data: updateData,
-    });
+    return mutation.updateTransaction(updateData);
   };
 
   return {
     updateExpense,
-    isLoading: mutation.isPending,
+    isLoading: mutation.isLoading,
     isError: mutation.isError,
     error: mutation.error,
   };

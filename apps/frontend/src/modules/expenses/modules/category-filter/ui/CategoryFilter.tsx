@@ -10,7 +10,7 @@ type CategoryFilterProps = {
 };
 
 export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
-  const { data: categories } = useCategories();
+  const { data: categories } = useCategories({ type: "expense" });
 
   return (
     <div className={s.chips} role="tablist">

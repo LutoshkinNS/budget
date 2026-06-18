@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ValidationErrorDTOStatusCode =
-  (typeof ValidationErrorDTOStatusCode)[keyof typeof ValidationErrorDTOStatusCode];
-
-export const ValidationErrorDTOStatusCode = {
-  NUMBER_400: 400,
-} as const;
+export type ValidationErrorDTOStatusCode = 400;

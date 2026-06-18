@@ -2,11 +2,14 @@ import { z } from "zod";
 
 import { useCategoriesCreate } from "@/common/api/generate/categories/categories.gen.ts";
 import { CategoriesCreateBody } from "@/common/api/generate/categories/categories.zod.gen.ts";
+import type { CategoryCreateDTO } from "@/common/api/generate/model";
 import { errorHandler } from "@/common/lib/error-handler/error-handler.ts";
 
 import { useInvalidateCategories } from "../useCategories.ts";
 
-export type CategoryCreateData = z.infer<typeof CategoriesCreateBody>;
+export type CategoryCreateData = Omit<CategoryCreateDTO, "type"> & {
+  type?: CategoryCreateDTO["type"] | undefined;
+};
 
 function getCreateCategoryErrorMessage(error: unknown) {
   if (typeof error === "object" && error !== null && "code" in error) {
@@ -44,7 +47,10 @@ export function useCreateCategory() {
   });
 
   const createCategory = async (data: CategoryCreateData) => {
-    const validateResult = CategoriesCreateBody.safeParse(data);
+    const validateResult = CategoriesCreateBody.safeParse({
+      ...data,
+      type: data.type ?? "expense",
+    });
 
     if (!validateResult.success) {
       const fieldErrors = z.prettifyError(validateResult.error);

@@ -1,4 +1,4 @@
-import { useExpensesGet } from "@/common/api/generate/expenses/expenses.gen.ts";
+import { useTransactionsGet } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
 import { EditExpenseForm } from "@/modules/expenses";
 
@@ -12,7 +12,7 @@ export function EditExpense({ expenseId }: EditExpenseProps) {
   const isValidExpenseId =
     Number.isInteger(expenseId) && Number.isFinite(expenseId) && expenseId > 0;
   const queryExpenseId = isValidExpenseId ? expenseId : 1;
-  const { data: expense, isLoading, isError, error } = useExpensesGet(
+  const { data: expense, isLoading, isError, error } = useTransactionsGet(
     queryExpenseId,
     {
       query: {
@@ -43,6 +43,14 @@ export function EditExpense({ expenseId }: EditExpenseProps) {
 
   if (!expense) {
     return <div className={s.container}>Расход не найден</div>;
+  }
+
+  if (expense.type !== "expense") {
+    return (
+      <div className={s.container}>
+        <SimpleError>Эта операция не является расходом</SimpleError>
+      </div>
+    );
   }
 
   return (

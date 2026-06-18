@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ForbiddenErrorDTOCode =
-  (typeof ForbiddenErrorDTOCode)[keyof typeof ForbiddenErrorDTOCode];
-
-export const ForbiddenErrorDTOCode = {
-  FORBIDDEN: "FORBIDDEN",
-} as const;
+export type ForbiddenErrorDTOCode = "FORBIDDEN";

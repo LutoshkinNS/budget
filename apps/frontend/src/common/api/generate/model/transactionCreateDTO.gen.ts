@@ -4,18 +4,14 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { TransactionCreateDTOType } from "./transactionCreateDTOType";
 
-export interface ExpenseDTO {
-  /** @minimum 1 */
-  accountId: number;
+export interface TransactionCreateDTO {
   /** @minimum 0.01 */
   amount: number;
   /** @minimum 1 */
   categoryId: number;
-  date: string;
-  description?: string | null;
-  /** @minimum 1 */
-  id: number;
-  /** @minimum 1 */
-  userId: number;
+  date?: string;
+  description?: string;
+  type: TransactionCreateDTOType;
 }

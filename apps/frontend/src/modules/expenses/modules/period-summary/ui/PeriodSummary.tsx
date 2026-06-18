@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import clsx from "clsx";
 
-import { useExpenses } from "../../../useExpenses.ts";
+import { useTransactionSummary } from "@/modules/transactions";
+
 import {
   type ExpenseDateRange,
   getCurrentMonthValue,
@@ -14,32 +14,25 @@ import s from "./PeriodSummary.module.css";
 
 type PeriodSummaryProps = {
   range: ExpenseDateRange;
-  categoryId: number | null;
-  userId: number | null;
   period: Period;
   month: string;
   onPeriodChange: (p: Period) => void;
   onMonthChange: (month: string) => void;
 };
 
+function formatMoney(value: number, signed = false): string {
+  const sign = signed && value > 0 ? "+" : "";
+  return `${sign}${value.toLocaleString("ru")} ₽`;
+}
+
 export function PeriodSummary({
   range,
-  categoryId,
-  userId,
   period,
   month,
   onPeriodChange,
   onMonthChange,
 }: PeriodSummaryProps) {
-  const { groups, isLoading } = useExpenses(range);
-
-  const total = useMemo(() => {
-    return groups
-      .flatMap((g) => g.expenses)
-      .filter((e) => categoryId == null || e.categoryId === categoryId)
-      .filter((e) => userId == null || e.userId === userId)
-      .reduce((sum, e) => sum + e.amount, 0);
-  }, [groups, categoryId, userId]);
+  const { data: summary, isLoading } = useTransactionSummary(range);
 
   return (
     <div className={s.summary}>
@@ -67,8 +60,35 @@ export function PeriodSummary({
           onChange={(event) => onMonthChange(event.target.value)}
         />
       )}
-      <div className={s.amount}>
-        {isLoading ? "—" : `${total.toLocaleString("ru")} ₽`}
+      <div className={s.totals}>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Доходы</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary ? "—" : formatMoney(summary.incomeTotal)}
+          </span>
+        </div>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Расходы</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary ? "—" : formatMoney(summary.expenseTotal)}
+          </span>
+        </div>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Баланс периода</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary
+              ? "—"
+              : formatMoney(summary.periodBalance, true)}
+          </span>
+        </div>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Всего накоплено</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary
+              ? "—"
+              : formatMoney(summary.totalBalance, true)}
+          </span>
+        </div>
       </div>
     </div>
   );

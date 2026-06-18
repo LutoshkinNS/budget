@@ -29,79 +29,99 @@ export async function main() {
   });
 
   // Категории для этого аккаунта
-  const categoryData: Prisma.CategoryCreateInput[] = [
+  const categoryData: Prisma.TransactionCategoryCreateInput[] = [
     {
       name: 'Продукты',
+      nameNormalized: 'продукты',
+      type: 'expense',
       account: { connect: { id: accountId } }
     },
     {
       name: 'Транспорт',
+      nameNormalized: 'транспорт',
+      type: 'expense',
       account: { connect: { id: accountId } }
     },
     {
       name: 'Развлечения',
+      nameNormalized: 'развлечения',
+      type: 'expense',
       account: { connect: { id: accountId } }
     },
     {
       name: 'Здоровье',
+      nameNormalized: 'здоровье',
+      type: 'expense',
       account: { connect: { id: accountId } }
     }
   ];
 
   const categories = [];
   for (const category of categoryData) {
-    const created = await prisma.category.create({ data: category });
+    const created = await prisma.transactionCategory.create({ data: category });
     categories.push(created);
   }
 
   // Расходы для этого аккаунта
-  const expenseData: Prisma.ExpenseCreateInput[] = [
+  const expenseData: Prisma.TransactionCreateInput[] = [
     {
       amount: 1500,
       description: 'Продукты в супермаркете',
       date: new Date('2025-11-15'),
+      type: 'expense',
       account: { connect: { id: accountId } },
-      category: { connect: { id: categories[0].id } }
+      category: { connect: { id: categories[0].id } },
+      user: { connect: { id: user.id } }
     },
     {
       amount: 250,
       description: 'Проезд на метро',
       date: new Date('2025-11-16'),
+      type: 'expense',
       account: { connect: { id: accountId } },
-      category: { connect: { id: categories[1].id } }
+      category: { connect: { id: categories[1].id } },
+      user: { connect: { id: user.id } }
     },
     {
       amount: 800,
       description: 'Билеты в кино',
       date: new Date('2025-11-17'),
+      type: 'expense',
       account: { connect: { id: accountId } },
-      category: { connect: { id: categories[2].id } }
+      category: { connect: { id: categories[2].id } },
+      user: { connect: { id: user.id } }
     },
     {
       amount: 2300,
       description: 'Покупка продуктов на неделю',
       date: new Date('2025-11-18'),
+      type: 'expense',
       account: { connect: { id: accountId } },
-      category: { connect: { id: categories[0].id } }
+      category: { connect: { id: categories[0].id } },
+      user: { connect: { id: user.id } }
     },
     {
       amount: 500,
       description: 'Такси',
       date: new Date('2025-11-19'),
+      type: 'expense',
       account: { connect: { id: accountId } },
-      category: { connect: { id: categories[1].id } }
+      category: { connect: { id: categories[1].id } },
+      user: { connect: { id: user.id } }
     },
     {
       amount: 1200,
       description: 'Аптека - лекарства',
       date: new Date('2025-11-20'),
+      type: 'expense',
       account: { connect: { id: accountId } },
-      category: { connect: { id: categories[3].id } }
+      category: { connect: { id: categories[3].id } },
+      user: { connect: { id: user.id } }
     }
   ];
 
   for (const expense of expenseData) {
-    await prisma.expense.create({ data: expense });
+    await prisma.transaction.create({ data: expense });
   }
 
   console.log(`✅ Создан пользователь с ID: ${user.id}`);

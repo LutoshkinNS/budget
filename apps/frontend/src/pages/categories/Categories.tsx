@@ -1,3 +1,6 @@
+import { useState } from "react";
+
+import type { CategoryType } from "@/modules/categories";
 import {
   CategoriesList,
   CreateCategory,
@@ -5,11 +8,30 @@ import {
 } from "@/modules/categories";
 
 export function Categories() {
+  const [type, setType] = useState<CategoryType>("expense");
+
   return (
     <div>
-      <CategoriesList />
-      <CreateCategory />
-      <DeleteCategory />
+      <fieldset>
+        <legend>Тип категорий</legend>
+        <button
+          type="button"
+          aria-pressed={type === "expense"}
+          onClick={() => setType("expense")}
+        >
+          расходы
+        </button>
+        <button
+          type="button"
+          aria-pressed={type === "income"}
+          onClick={() => setType("income")}
+        >
+          доходы
+        </button>
+      </fieldset>
+      <CategoriesList type={type} />
+      <CreateCategory type={type} />
+      <DeleteCategory type={type} />
     </div>
   );
 }

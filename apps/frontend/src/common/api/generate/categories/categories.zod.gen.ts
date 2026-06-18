@@ -6,20 +6,27 @@
  */
 import * as zod from "zod";
 
+export const CategoriesListQueryParams = zod.object({
+  type: zod.enum(["income", "expense"]).optional(),
+});
+
 export const CategoriesListResponseItem = zod.object({
   id: zod.number().min(1),
   accountId: zod.number().min(1),
+  type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
 });
 export const CategoriesListResponse = zod.array(CategoriesListResponseItem);
 
 export const CategoriesCreateBody = zod.object({
+  type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
 });
 
 export const CategoriesCreateResponse = zod.object({
   id: zod.number().min(1),
   accountId: zod.number().min(1),
+  type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
 });
 
@@ -30,6 +37,7 @@ export const CategoriesGetParams = zod.object({
 export const CategoriesGetResponse = zod.object({
   id: zod.number().min(1),
   accountId: zod.number().min(1),
+  type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
 });
 

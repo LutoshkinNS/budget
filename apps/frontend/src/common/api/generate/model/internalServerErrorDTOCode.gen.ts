@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type InternalServerErrorDTOCode =
-  (typeof InternalServerErrorDTOCode)[keyof typeof InternalServerErrorDTOCode];
-
-export const InternalServerErrorDTOCode = {
-  INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
-} as const;
+export type InternalServerErrorDTOCode = "INTERNAL_SERVER_ERROR";

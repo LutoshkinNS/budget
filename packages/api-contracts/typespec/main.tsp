@@ -1,9 +1,9 @@
 import "@typespec/http";
 import "./general.tsp";
 import "./domains/account.tsp";
+import "./domains/transaction.tsp";
 import "./domains/category.tsp";
 import "./domains/subcategory.tsp";
-import "./domains/expense.tsp";
 import "./domains/user.tsp";
 import "./domains/auth.tsp";
 
@@ -47,7 +47,9 @@ interface Accounts {
 @route("/categories")
 @tag("Categories")
 interface Categories {
-  @get list(): Category[] | CategoryNotFoundResponse | InternalServerErrorResponse;
+  @get list(
+    @query type?: TransactionType,
+  ): Category[] | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @get get(
     @path categoryId: integer,
@@ -84,28 +86,38 @@ interface CategorySubcategories {
   } | InternalServerErrorResponse;
 }
 
-@route("/expenses")
-@tag("Expenses")
-interface Expenses {
+@route("/transactions")
+@tag("Transactions")
+interface Transactions {
   @get list(
     @query from: utcDateTime,
     @query to: utcDateTime,
-  ): Expense[] | ExpenseErrorResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
+    @query type?: TransactionType,
+  ): Transaction[] | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
 
+  @route("/summary")
+  @get summary(
+    @query from: utcDateTime,
+    @query to: utcDateTime,
+  ): TransactionSummary | TransactionErrorResponse | InternalServerErrorResponse;
+
+  @route("/{transactionId}")
   @get get(
-    @path expenseId: integer,
-  ): Expense | ExpenseNotFoundResponse | InternalServerErrorResponse;
+    @path transactionId: integer,
+  ): Transaction | TransactionNotFoundResponse | InternalServerErrorResponse;
 
   @post create(
-    @body expense: ExpenseCreate,
-  ): Expense | ExpenseErrorResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
+    @body transaction: TransactionCreate,
+  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
 
+  @route("/{transactionId}")
   @patch update(
-    @path expenseId: integer,
-    @body expense: ExpenseUpdate,
-  ): Expense | ExpenseErrorResponse | ExpenseNotFoundResponse | InternalServerErrorResponse;
+    @path transactionId: integer,
+    @body transaction: TransactionUpdate,
+  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
 
-  @delete delete(@path expenseId: integer): {
+  @route("/{transactionId}")
+  @delete delete(@path transactionId: integer): {
     @statusCode statusCode: 204;
   } | InternalServerErrorResponse;
 }

@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ConflictErrorDTOStatusCode =
-  (typeof ConflictErrorDTOStatusCode)[keyof typeof ConflictErrorDTOStatusCode];
-
-export const ConflictErrorDTOStatusCode = {
-  NUMBER_409: 409,
-} as const;
+export type ConflictErrorDTOStatusCode = 409;

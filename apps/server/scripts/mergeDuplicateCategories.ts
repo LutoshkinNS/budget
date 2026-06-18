@@ -5,16 +5,16 @@ const prisma = new PrismaClient();
 const dryRun = process.argv.includes('--dry-run');
 
 async function main() {
-  const categories = await prisma.category.findMany({
+  const categories = await prisma.transactionCategory.findMany({
     where: { deletedAt: null },
-    orderBy: [{ accountId: 'asc' }, { id: 'asc' }]
+    orderBy: [{ accountId: 'asc' }, { type: 'asc' }, { id: 'asc' }]
   });
 
   const groups = new Map<string, typeof categories>();
 
   for (const category of categories) {
     const normalizedName = normalizeCategoryName(category.name);
-    const key = `${category.accountId}:${normalizedName}`;
+    const key = `${category.accountId}:${category.type}:${normalizedName}`;
     groups.set(key, [...(groups.get(key) ?? []), category]);
   }
 
@@ -35,7 +35,7 @@ async function main() {
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.expense.updateMany({
+      await tx.transaction.updateMany({
         where: { categoryId: { in: duplicateIds } },
         data: { categoryId: canonical.id }
       });
@@ -45,7 +45,7 @@ async function main() {
         data: { deletedAt: new Date() }
       });
 
-      await tx.category.updateMany({
+      await tx.transactionCategory.updateMany({
         where: { id: { in: duplicateIds } },
         data: { deletedAt: new Date() }
       });

@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type UnauthorizedErrorDTOStatusCode =
-  (typeof UnauthorizedErrorDTOStatusCode)[keyof typeof UnauthorizedErrorDTOStatusCode];
-
-export const UnauthorizedErrorDTOStatusCode = {
-  NUMBER_401: 401,
-} as const;
+export type UnauthorizedErrorDTOStatusCode = 401;

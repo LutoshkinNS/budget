@@ -15,7 +15,7 @@
       "name": "Subcategories"
     },
     {
-      "name": "Expenses"
+      "name": "Transactions"
     },
     {
       "name": "Authentication"
@@ -217,6 +217,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AccountInvitation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/api/v1/accounts/{accountId}/members": {
+      "get": {
+        "operationId": "Accounts_listMembers",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountMember"
+                  }
                 }
               }
             }
@@ -508,7 +571,21 @@
     "/api/v1/categories": {
       "get": {
         "operationId": "Categories_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "income",
+                "expense"
+              ]
+            },
+            "explode": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "The request has succeeded.",
@@ -568,6 +645,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictError"
                 }
               }
             }
@@ -887,10 +974,44 @@
         ]
       }
     },
-    "/api/v1/expenses": {
+    "/api/v1/transactions": {
       "get": {
-        "operationId": "Expenses_list",
-        "parameters": [],
+        "operationId": "Transactions_list",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "explode": false
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "explode": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "income",
+                "expense"
+              ]
+            },
+            "explode": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "The request has succeeded.",
@@ -899,8 +1020,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Expense"
+                    "$ref": "#/components/schemas/Transaction"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
                 }
               }
             }
@@ -914,14 +1045,24 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
           }
         },
         "tags": [
-          "Expenses"
+          "Transactions"
         ]
       },
       "post": {
-        "operationId": "Expenses_create",
+        "operationId": "Transactions_create",
         "parameters": [],
         "responses": {
           "200": {
@@ -929,7 +1070,89 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Expense"
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Transactions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/summary": {
+      "get": {
+        "operationId": "Transactions_summary",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "explode": false
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "explode": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionSummary"
                 }
               }
             }
@@ -956,26 +1179,16 @@
           }
         },
         "tags": [
-          "Expenses"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExpenseCreate"
-              }
-            }
-          }
-        }
+          "Transactions"
+        ]
       }
     },
-    "/api/v1/expenses/{expenseId}": {
+    "/api/v1/transactions/{transactionId}": {
       "get": {
-        "operationId": "Expenses_get",
+        "operationId": "Transactions_get",
         "parameters": [
           {
-            "name": "expenseId",
+            "name": "transactionId",
             "in": "path",
             "required": true,
             "schema": {
@@ -989,7 +1202,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Expense"
+                  "$ref": "#/components/schemas/Transaction"
                 }
               }
             }
@@ -1016,14 +1229,82 @@
           }
         },
         "tags": [
-          "Expenses"
+          "Transactions"
         ]
       },
-      "delete": {
-        "operationId": "Expenses_delete",
+      "patch": {
+        "operationId": "Transactions_update",
         "parameters": [
           {
-            "name": "expenseId",
+            "name": "transactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Transactions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionUpdate"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "Transactions_delete",
+        "parameters": [
+          {
+            "name": "transactionId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1047,7 +1328,7 @@
           }
         },
         "tags": [
-          "Expenses"
+          "Transactions"
         ]
       }
     }
@@ -1149,6 +1430,41 @@
           "not": {}
         }
       },
+      "AccountMember": {
+        "type": "object",
+        "required": [
+          "userId"
+        ],
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "firstName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "photoUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "AccountUpdate": {
         "type": "object",
         "properties": {
@@ -1166,6 +1482,7 @@
         "required": [
           "id",
           "accountId",
+          "type",
           "name"
         ],
         "properties": {
@@ -1176,6 +1493,13 @@
           "accountId": {
             "type": "integer",
             "minimum": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
           },
           "name": {
             "type": "string",
@@ -1189,9 +1513,17 @@
       "CategoryCreate": {
         "type": "object",
         "required": [
+          "type",
           "name"
         ],
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
+          },
           "name": {
             "type": "string",
             "minLength": 1
@@ -1201,74 +1533,28 @@
           "not": {}
         }
       },
-      "Expense": {
+      "ConflictError": {
         "type": "object",
         "required": [
-          "id",
-          "accountId",
-          "amount",
-          "categoryId",
-          "date"
+          "code",
+          "message",
+          "statusCode"
         ],
         "properties": {
-          "id": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "accountId": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "amount": {
-            "type": "number",
-            "format": "double",
-            "minimum": 0.01
-          },
-          "categoryId": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "code": {
+            "type": "string",
+            "enum": [
+              "CATEGORY_ALREADY_EXISTS"
             ]
           },
-          "date": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "unevaluatedProperties": {
-          "not": {}
-        }
-      },
-      "ExpenseCreate": {
-        "type": "object",
-        "required": [
-          "amount",
-          "categoryId"
-        ],
-        "properties": {
-          "amount": {
-            "type": "number",
-            "format": "double",
-            "minimum": 0.01
-          },
-          "categoryId": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "description": {
+          "message": {
             "type": "string"
           },
-          "date": {
-            "type": "string",
-            "format": "date-time"
+          "statusCode": {
+            "type": "number",
+            "enum": [
+              409
+            ]
           }
         },
         "unevaluatedProperties": {
@@ -1534,6 +1820,175 @@
           "accountId": {
             "type": "integer",
             "minimum": 1
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "amount",
+          "categoryId",
+          "userId",
+          "type",
+          "date"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "accountId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0.01
+          },
+          "categoryId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "userId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "TransactionCreate": {
+        "type": "object",
+        "required": [
+          "amount",
+          "categoryId",
+          "type"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0.01
+          },
+          "categoryId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "TransactionSummary": {
+        "type": "object",
+        "required": [
+          "incomeTotal",
+          "expenseTotal",
+          "periodBalance",
+          "totalBalance"
+        ],
+        "properties": {
+          "incomeTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "expenseTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "periodBalance": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalBalance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "TransactionUpdate": {
+        "type": "object",
+        "required": [
+          "amount",
+          "categoryId",
+          "type",
+          "date"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0.01
+          },
+          "categoryId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "unevaluatedProperties": {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
 
 import { createCategoryFormDataSchema } from "../model/schemas.ts";
-import type { CreateCategoryFormData } from "../model/types.ts";
+import type { CategoryType, CreateCategoryFormData } from "../model/types.ts";
 import { useCreateCategory } from "../model/useCreateCategory.ts";
 
 const IDS = {
@@ -15,7 +15,11 @@ const FIELD_NAMES = {
   NAME: "name",
 } as const;
 
-export function CreateCategory() {
+type CreateCategoryProps = {
+  type: CategoryType;
+};
+
+export function CreateCategory({ type }: CreateCategoryProps) {
   const { createCategory, isPending, isError, errorMessage } =
     useCreateCategory();
 
@@ -37,7 +41,7 @@ export function CreateCategory() {
       return;
     }
 
-    await createCategory(validationResult.data);
+    await createCategory({ ...validationResult.data, type });
   };
 
   return (

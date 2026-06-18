@@ -57,7 +57,7 @@ export default async function subcategoriesModule(app: FastifyApp) {
     },
     async function (req, reply) {
       // Проверяем что category принадлежит пользователю
-      const category = await this.prisma.category.findFirst({
+      const category = await this.prisma.transactionCategory.findFirst({
         where: {
           id: req.body.categoryId,
           accountId: req.user.accountId,

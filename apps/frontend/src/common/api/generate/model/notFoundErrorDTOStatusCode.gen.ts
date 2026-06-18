@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type NotFoundErrorDTOStatusCode =
-  (typeof NotFoundErrorDTOStatusCode)[keyof typeof NotFoundErrorDTOStatusCode];
-
-export const NotFoundErrorDTOStatusCode = {
-  NUMBER_404: 404,
-} as const;
+export type NotFoundErrorDTOStatusCode = 404;

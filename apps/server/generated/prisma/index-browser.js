@@ -148,9 +148,10 @@ exports.Prisma.AccountUserScalarFieldEnum = {
   joinedAt: 'joinedAt'
 };
 
-exports.Prisma.CategoryScalarFieldEnum = {
+exports.Prisma.TransactionCategoryScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
+  type: 'type',
   name: 'name',
   nameNormalized: 'nameNormalized',
   deletedAt: 'deletedAt'
@@ -163,11 +164,12 @@ exports.Prisma.SubcategoryScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.ExpenseScalarFieldEnum = {
+exports.Prisma.TransactionScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
   categoryId: 'categoryId',
   userId: 'userId',
+  type: 'type',
   amount: 'amount',
   description: 'description',
   date: 'date'
@@ -189,9 +191,9 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   AccountInvitation: 'AccountInvitation',
   AccountUser: 'AccountUser',
-  Category: 'Category',
+  TransactionCategory: 'TransactionCategory',
   Subcategory: 'Subcategory',
-  Expense: 'Expense'
+  Transaction: 'Transaction'
 };
 
 /**

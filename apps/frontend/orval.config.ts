@@ -31,6 +31,7 @@ export default defineConfig({
             suffix: "DTO",
           },
         },
+        enumGenerationType: "union",
         fetch: {
           includeHttpResponseReturnType: false,
         },

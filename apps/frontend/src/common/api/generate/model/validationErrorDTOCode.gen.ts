@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ValidationErrorDTOCode =
-  (typeof ValidationErrorDTOCode)[keyof typeof ValidationErrorDTOCode];
-
-export const ValidationErrorDTOCode = {
-  VALIDATION_ERROR: "VALIDATION_ERROR",
-} as const;
+export type ValidationErrorDTOCode = "VALIDATION_ERROR";

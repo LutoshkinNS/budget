@@ -6,10 +6,11 @@ import {
   useCategoriesList,
 } from "@/common/api/generate/categories/categories.gen.ts";
 import { CategoriesListResponse } from "@/common/api/generate/categories/categories.zod.gen.ts";
+import type { CategoriesListParams } from "@/common/api/generate/model";
 import { useNotifications } from "@/common/lib/notifications";
 
-export function useCategories() {
-  const { data, isError, error } = useCategoriesList();
+export function useCategories(params?: CategoriesListParams) {
+  const { data, isError, error } = useCategoriesList(params);
   const { addNotification } = useNotifications();
 
   useEffect(() => {
@@ -39,8 +40,8 @@ export function useCategories() {
 }
 
 export function useInvalidateCategories() {
-  return () =>
+  return (params?: CategoriesListParams) =>
     queryClient.invalidateQueries({
-      queryKey: getCategoriesListQueryKey(),
+      queryKey: getCategoriesListQueryKey(params),
     });
 }

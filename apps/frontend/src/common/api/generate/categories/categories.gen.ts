@@ -22,6 +22,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  CategoriesListParams,
   CategoryCreateDTO,
   CategoryDTO,
   ConflictErrorDTO,
@@ -34,39 +35,55 @@ import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getCategoriesListUrl = () => {
-  return `/api/v1/categories`;
+export const getCategoriesListUrl = (params?: CategoriesListParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/categories?${stringifiedParams}`
+    : `/api/v1/categories`;
 };
 
 export const categoriesList = async (
+  params?: CategoriesListParams,
   options?: RequestInit,
 ): Promise<CategoryDTO[]> => {
-  return fetcher<CategoryDTO[]>(getCategoriesListUrl(), {
+  return fetcher<CategoryDTO[]>(getCategoriesListUrl(params), {
     ...options,
     method: "GET",
   });
 };
 
-export const getCategoriesListQueryKey = () => {
-  return ["categoriesList"] as const;
+export const getCategoriesListQueryKey = (params?: CategoriesListParams) => {
+  return ["categoriesList", ...(params ? [params] : [])] as const;
 };
 
 export const getCategoriesListQueryOptions = <
   TData = Awaited<ReturnType<typeof categoriesList>>,
   TError = NotFoundErrorDTO | InternalServerErrorDTO,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
-  >;
-  request?: SecondParameter<typeof fetcher>;
-}) => {
+>(
+  params?: CategoriesListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getCategoriesListQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getCategoriesListQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof categoriesList>>> = ({
     signal,
-  }) => categoriesList({ signal, ...requestOptions });
+  }) => categoriesList(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof categoriesList>>,
@@ -86,6 +103,7 @@ export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
   TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  params: undefined | CategoriesListParams,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
@@ -108,6 +126,7 @@ export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
   TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  params?: CategoriesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
@@ -130,6 +149,7 @@ export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
   TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  params?: CategoriesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
@@ -145,6 +165,7 @@ export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
   TError = NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  params?: CategoriesListParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof categoriesList>>, TError, TData>
@@ -155,7 +176,7 @@ export function useCategoriesList<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getCategoriesListQueryOptions(options);
+  const queryOptions = getCategoriesListQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -167,10 +188,11 @@ export function useCategoriesList<
 
 export const invalidateCategoriesList = async (
   queryClient: QueryClient,
+  params?: CategoriesListParams,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getCategoriesListQueryKey() },
+    { queryKey: getCategoriesListQueryKey(params) },
     options,
   );
 

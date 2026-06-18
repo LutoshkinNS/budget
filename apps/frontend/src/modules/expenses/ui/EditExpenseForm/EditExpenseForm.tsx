@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import type { ExpenseDTO } from "@/common/api/generate/model/expenseDTO.gen.ts";
 import { Input } from "@/common/ui/input/Input";
 import { useCategories } from "@/modules/categories";
 
 import { useUpdateExpense } from "../../model/useUpdateExpense";
+import type { ExpenseDTO } from "../../useExpenses.ts";
 
 import s from "./EditExpenseForm.module.css";
 
@@ -53,7 +53,7 @@ export function EditExpenseForm({ expense }: EditExpenseFormProps) {
   const [description, setDescription] = useState(expense.description ?? "");
   const [categoryId, setCategoryId] = useState(expense.categoryId);
 
-  const { data: categories } = useCategories();
+  const { data: categories } = useCategories({ type: "expense" });
   const { updateExpense, isLoading } = useUpdateExpense(expense.id);
   const amountValue = Number(amount);
   const canSubmit = amountValue > 0 && Boolean(date) && categoryId > 0;

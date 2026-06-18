@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ConflictErrorDTOCode =
-  (typeof ConflictErrorDTOCode)[keyof typeof ConflictErrorDTOCode];
-
-export const ConflictErrorDTOCode = {
-  CATEGORY_ALREADY_EXISTS: "CATEGORY_ALREADY_EXISTS",
-} as const;
+export type ConflictErrorDTOCode = "CATEGORY_ALREADY_EXISTS";

@@ -2,7 +2,9 @@ import "./../general.tsp";
 
 using Http;
 
-model Expense {
+alias TransactionType = "income" | "expense";
+
+model Transaction {
   @minValue(1)
   id: integer;
 
@@ -18,44 +20,57 @@ model Expense {
   @minValue(1)
   userId: integer;
 
+  type: TransactionType;
+
   description?: string | null;
   date: utcDateTime;
 }
 
-model ExpenseCreate {
+model TransactionCreate {
   @minValue(0.01)
   amount: float64;
 
   @minValue(1)
   categoryId: integer;
+
+  type: TransactionType;
 
   description?: string;
 
   date?: utcDateTime;
 }
 
-model ExpenseUpdate {
+model TransactionUpdate {
   @minValue(0.01)
   amount: float64;
 
   @minValue(1)
   categoryId: integer;
 
+  type: TransactionType;
+
   description?: string | null;
 
   date: utcDateTime;
 }
 
-model ExpenseErrorResponse {
+model TransactionSummary {
+  incomeTotal: float64;
+  expenseTotal: float64;
+  periodBalance: float64;
+  totalBalance: float64;
+}
+
+model TransactionErrorResponse {
   ...BadRequestResponse;
   ...Body<ValidationError>;
 }
 
-model ExpenseNotFoundResponse {
+model TransactionNotFoundResponse {
   ...NotFoundResponse;
   ...Body<NotFoundError>;
 }
 
-model ExpenseNoContentResponse {
+model TransactionNoContentResponse {
   ...NoContentResponse;
 }

@@ -4,11 +4,10 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { UnauthorizedErrorDTOCode } from "./unauthorizedErrorDTOCode";
 import type { UnauthorizedErrorDTOStatusCode } from "./unauthorizedErrorDTOStatusCode";
 
 export interface UnauthorizedErrorDTO {
-  code: (typeof UnauthorizedErrorDTOCode)[keyof typeof UnauthorizedErrorDTOCode];
+  code: "UNAUTHORIZED" | "INVALID_TOKEN" | "MISSING_TOKEN";
   message: string;
   statusCode: UnauthorizedErrorDTOStatusCode;
 }

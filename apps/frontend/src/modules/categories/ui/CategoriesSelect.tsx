@@ -1,3 +1,4 @@
+import type { CategoryType } from "../model/types.ts";
 import { useCategories } from "../useCategories.ts";
 
 const IDS = {
@@ -8,10 +9,14 @@ const FIELD_VALUES = {
   CATEGORY_ID: "category_id",
 } as const;
 
-type CategoriesSelectProps = React.ComponentPropsWithoutRef<"select">;
+type CategoriesSelectProps = React.ComponentPropsWithoutRef<"select"> & {
+  type?: CategoryType;
+};
 
-export function CategoriesSelect(props: CategoriesSelectProps) {
-  const { data: categoriesResponse } = useCategories();
+export function CategoriesSelect({ type, ...props }: CategoriesSelectProps) {
+  const { data: categoriesResponse } = useCategories(
+    type ? { type } : undefined,
+  );
 
   return (
     <>
@@ -19,13 +24,11 @@ export function CategoriesSelect(props: CategoriesSelectProps) {
       <select
         name={FIELD_VALUES.CATEGORY_ID}
         id={IDS.CATEGORY}
-        value={
-          props.value !== undefined && categoriesResponse.length
-            ? categoriesResponse[0]?.id
-            : props.value
-        }
         {...props}
       >
+        {props.value === "" && categoriesResponse.length ? (
+          <option value="">Выберите категорию</option>
+        ) : null}
         {!categoriesResponse || !categoriesResponse.length ? (
           <option value="">Категорий не найдено</option>
         ) : null}

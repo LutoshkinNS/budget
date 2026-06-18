@@ -1,18 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { FormBlock } from "@/common/ui/form-block/FormBlock.tsx";
 
-import type { DeleteCategoryFormData } from "../model/types.ts";
+import type { CategoryType, DeleteCategoryFormData } from "../model/types.ts";
 import { useDeleteCategory } from "../model/useDeleteCategory.ts";
 
 import { CategoriesSelect } from "./CategoriesSelect.tsx";
 
-export function DeleteCategory() {
+type DeleteCategoryProps = {
+  type: CategoryType;
+};
+
+export function DeleteCategory({ type }: DeleteCategoryProps) {
   const { deleteCategory } = useDeleteCategory();
 
   const [formState, setFormState] = useState<DeleteCategoryFormData>({
     categoryId: "",
   });
+
+  useEffect(() => {
+    setFormState({ categoryId: "" });
+  }, [type]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,6 +31,7 @@ export function DeleteCategory() {
   return (
     <FormBlock legend={"Удаление категории"} onSubmit={handleSubmit}>
       <CategoriesSelect
+        type={type}
         value={formState.categoryId}
         onChange={(e) =>
           setFormState((formState) => ({

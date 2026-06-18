@@ -1,27 +1,22 @@
 import z from "zod";
 
-import { useExpensesCreate } from "@/common/api/generate/expenses/expenses.gen.ts";
-import { ExpensesCreateBody } from "@/common/api/generate/expenses/expenses.zod.gen.ts";
-import type { ExpenseCreateDTO } from "@/common/api/generate/model";
+import type { TransactionCreateDTO } from "@/common/api/generate/model";
+import { TransactionsCreateBody } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
+import { useCreateTransaction } from "@/modules/transactions";
 
-import { useInvalidateExpensesList } from "../useExpenses.ts";
+export type ExpenseCreateDTO = Omit<TransactionCreateDTO, "type"> &
+  Partial<Pick<TransactionCreateDTO, "type">>;
 
 export function useCreateExpense() {
-  const invalidateExpensesList = useInvalidateExpensesList();
   const { addNotification } = useNotifications();
-
-  const mutation = useExpensesCreate({
-    mutation: {
-      onError: () => {},
-      onSuccess: async () => {
-        await invalidateExpensesList();
-      },
-    },
-  });
+  const transactionMutation = useCreateTransaction();
 
   const createExpense = (data: ExpenseCreateDTO) => {
-    const validation = ExpensesCreateBody.safeParse(data);
+    const validation = TransactionsCreateBody.safeParse({
+      ...data,
+      type: data.type ?? "expense",
+    });
 
     if (!validation.success) {
       addNotification({
@@ -34,19 +29,17 @@ export function useCreateExpense() {
 
     const { date, description, ...rest } = validation.data;
 
-    return mutation.mutateAsync({
-      data: {
-        ...rest,
-        ...(!!date && { date }),
-        ...(!!description && { description }),
-      },
+    return transactionMutation.createTransaction({
+      ...rest,
+      ...(!!date && { date }),
+      ...(!!description && { description }),
     });
   };
 
   return {
     createExpense,
-    isLoading: mutation.isPending,
-    isError: mutation.isError,
-    error: mutation.error,
+    isLoading: transactionMutation.isLoading,
+    isError: transactionMutation.isError,
+    error: transactionMutation.error,
   };
 }

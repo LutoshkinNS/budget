@@ -4,6 +4,7 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { CategoryDTOType } from "./categoryDTOType";
 
 export interface CategoryDTO {
   /** @minimum 1 */
@@ -12,4 +13,5 @@ export interface CategoryDTO {
   id: number;
   /** @minLength 1 */
   name: string;
+  type: CategoryDTOType;
 }

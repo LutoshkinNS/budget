@@ -5,9 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ForbiddenErrorDTOStatusCode =
-  (typeof ForbiddenErrorDTOStatusCode)[keyof typeof ForbiddenErrorDTOStatusCode];
-
-export const ForbiddenErrorDTOStatusCode = {
-  NUMBER_403: 403,
-} as const;
+export type ForbiddenErrorDTOStatusCode = 403;

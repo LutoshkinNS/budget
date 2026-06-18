@@ -5,7 +5,4 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ExpensesListParams = {
-  from: string;
-  to: string;
-};
+export type TransactionDTOType = "income" | "expense";
