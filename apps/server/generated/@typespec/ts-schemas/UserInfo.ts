@@ -21,6 +21,7 @@ const UserInfo = {
         "required": [
           "id",
           "name",
+          "initialBalance",
           "isOwner"
         ],
         "properties": {
@@ -30,6 +31,10 @@ const UserInfo = {
           },
           "name": {
             "type": "string"
+          },
+          "initialBalance": {
+            "type": "number",
+            "format": "double"
           },
           "isOwner": {
             "type": "boolean"

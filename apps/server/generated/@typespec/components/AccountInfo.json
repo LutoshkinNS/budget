@@ -3,6 +3,7 @@
   "required": [
     "id",
     "name",
+    "initialBalance",
     "isOwner"
   ],
   "properties": {
@@ -12,6 +13,10 @@
     },
     "name": {
       "type": "string"
+    },
+    "initialBalance": {
+      "type": "number",
+      "format": "double"
     },
     "isOwner": {
       "type": "boolean"

@@ -31,6 +31,7 @@ model AccountInfo {
   @minValue(1)
   id: integer;
   name: string;
+  initialBalance: float64;
   isOwner: boolean;
 }
 
