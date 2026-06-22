@@ -128,6 +128,7 @@ exports.Prisma.UserScalarFieldEnum = {
 exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  initialBalance: 'initialBalance',
   ownerId: 'ownerId',
   createdAt: 'createdAt'
 };
