@@ -11,7 +11,7 @@ export type UpdateParams = { accountId: FromSchema<typeof AccountId> };
 const ERRORS = {
   FORBIDDEN: {
     code: 'FORBIDDEN',
-    message: 'Только владелец аккаунта может изменять его название'
+    message: 'Только владелец аккаунта может изменять настройки аккаунта'
   }
 } as const;
 
@@ -35,13 +35,19 @@ export async function updateAccountHandler(
 
   const updated = await this.prisma.account.update({
     where: { id },
-    data: { ...(req.body.name != null && { name: req.body.name }) }
+    data: {
+      ...(req.body.name != null && { name: req.body.name }),
+      ...(req.body.initialBalance != null && {
+        initialBalance: req.body.initialBalance
+      })
+    }
   });
 
   return reply.send({
     id: updated.id,
     name: updated.name,
-    ownerId: updated.ownerId,
+    initialBalance: updated.initialBalance,
+    ownerId: Number(updated.ownerId),
     createdAt: updated.createdAt.toISOString()
   });
 }

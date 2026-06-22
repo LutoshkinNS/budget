@@ -15,8 +15,6 @@ export async function getAccountsList(prisma: PrismaClient, userId: number) {
     }
   });
 
-  console.log('user', user);
-
   // Объединяем аккаунты, владельцем которых является пользователь,
   // и аккаунты, к которым у него есть доступ
   // Из user.accounts извлекаем вложенный объект account
@@ -27,7 +25,9 @@ export async function getAccountsList(prisma: PrismaClient, userId: number) {
   ];
 
   return allAccounts.map((acc) => ({
-    ...acc,
+    id: acc.id,
+    name: acc.name,
+    initialBalance: acc.initialBalance,
     ownerId: Number(acc.ownerId),
     createdAt: acc.createdAt.toISOString()
   }));

@@ -121,11 +121,13 @@ export async function getUserInfo(
     ...user.ownedAccounts.map((acc) => ({
       id: acc.id,
       name: acc.name,
+      initialBalance: acc.initialBalance,
       isOwner: true as const
     })),
     ...user.accounts.map((au) => ({
       id: au.account.id,
       name: au.account.name,
+      initialBalance: au.account.initialBalance,
       isOwner: false as const
     }))
   ];
