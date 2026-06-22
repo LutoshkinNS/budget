@@ -55,6 +55,7 @@ export const TransactionsSummaryQueryParams = zod.object({
 });
 
 export const TransactionsSummaryResponse = zod.object({
+  initialBalance: zod.number(),
   incomeTotal: zod.number(),
   expenseTotal: zod.number(),
   periodBalance: zod.number(),

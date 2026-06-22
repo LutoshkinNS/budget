@@ -8,6 +8,7 @@
 export interface AccountInfoDTO {
   /** @minimum 1 */
   id: number;
+  initialBalance: number;
   isOwner: boolean;
   name: string;
 }
