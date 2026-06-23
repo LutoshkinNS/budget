@@ -62,13 +62,13 @@ export function PeriodSummary({
       )}
       <div className={s.totals}>
         <div className={s.totalItem}>
-          <span className={s.totalLabel}>Доходы</span>
+          <span className={s.totalLabel}>Доходы периода</span>
           <span className={s.totalValue}>
             {isLoading || !summary ? "—" : formatMoney(summary.incomeTotal)}
           </span>
         </div>
         <div className={s.totalItem}>
-          <span className={s.totalLabel}>Расходы</span>
+          <span className={s.totalLabel}>Расходы периода</span>
           <span className={s.totalValue}>
             {isLoading || !summary ? "—" : formatMoney(summary.expenseTotal)}
           </span>
