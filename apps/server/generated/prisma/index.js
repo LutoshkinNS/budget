@@ -180,7 +180,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\nikit\\.config\\superpowers\\worktrees\\budget\\account-initial-balance\\apps\\server\\generated\\prisma",
+      "value": "C:\\Users\\nikit\\work\\budget\\apps\\server\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -194,11 +194,12 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\nikit\\.config\\superpowers\\worktrees\\budget\\account-initial-balance\\apps\\server\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\nikit\\work\\budget\\apps\\server\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
   "clientVersion": "6.19.2",
