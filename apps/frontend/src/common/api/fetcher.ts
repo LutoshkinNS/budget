@@ -1,6 +1,8 @@
 let refreshPromise: Promise<void> | null = null;
 
-const BASE_URL = import.meta.env.PROD ? import.meta.env.VITE_API_URL : "";
+declare const __API_BASE_URL__: string;
+
+const BASE_URL = __API_BASE_URL__;
 
 const NETWORK_ERROR = {
   code: "Ошибка сети",

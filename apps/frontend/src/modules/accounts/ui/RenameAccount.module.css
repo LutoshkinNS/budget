@@ -1,0 +1,61 @@
+.panel {
+  display: grid;
+  gap: 12px;
+}
+
+.details {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.row {
+  display: grid;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--secondary-color) 45%, transparent);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  color: color-mix(in srgb, var(--primary-text-color) 62%, transparent);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.value {
+  margin: 0;
+  color: var(--primary-text-color);
+  font-size: 16px;
+  line-height: 22px;
+}
+
+.input {
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.editButton {
+  justify-self: start;
+}
+
+.note {
+  margin: 0;
+  color: color-mix(in srgb, var(--primary-text-color) 62%, transparent);
+  font-size: 14px;
+  line-height: 18px;
+}
