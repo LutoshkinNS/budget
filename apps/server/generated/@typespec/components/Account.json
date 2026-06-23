@@ -3,6 +3,7 @@
   "required": [
     "id",
     "name",
+    "initialBalance",
     "ownerId",
     "createdAt"
   ],
@@ -14,6 +15,10 @@
     "name": {
       "type": "string",
       "minLength": 1
+    },
+    "initialBalance": {
+      "type": "number",
+      "format": "double"
     },
     "ownerId": {
       "type": "integer",

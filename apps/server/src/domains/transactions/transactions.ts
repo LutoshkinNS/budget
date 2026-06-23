@@ -7,6 +7,8 @@ import TransactionUpdate from '#s/TransactionUpdate.js';
 import ValidationError from '#s/ValidationError.js';
 import { FastifyApp } from '#src/appInit.js';
 
+import { calculateTransactionSummary } from './balance.js';
+
 const transactionTypes = ['income', 'expense'] as const;
 
 type TransactionType = (typeof transactionTypes)[number];
@@ -142,7 +144,7 @@ export default async function transactionsModule(app: FastifyApp) {
           },
           additionalProperties: false
         },
-        response: { 200: TransactionSummary, 400: ValidationError }
+        response: { 200: TransactionSummary, 400: ValidationError, 404: NotFoundError }
       }
     },
     async function (req, reply) {
@@ -153,7 +155,10 @@ export default async function transactionsModule(app: FastifyApp) {
       }
 
       const accountId = req.user.accountId;
-      const [periodGroups, allGroups] = await Promise.all([
+      const [account, periodGroups, allGroups] = await Promise.all([
+        this.prisma.account.findFirst({
+          where: { id: accountId }
+        }),
         this.prisma.transaction.groupBy({
           by: ['type'],
           where: {
@@ -169,17 +174,22 @@ export default async function transactionsModule(app: FastifyApp) {
         })
       ]);
 
+      if (!account) {
+        return reply.code(404).send(notFound('Account not found or access denied'));
+      }
+
       const incomeTotal = readGroupedTotal(periodGroups, 'income');
       const expenseTotal = readGroupedTotal(periodGroups, 'expense');
       const allIncomeTotal = readGroupedTotal(allGroups, 'income');
       const allExpenseTotal = readGroupedTotal(allGroups, 'expense');
 
-      return {
-        incomeTotal,
-        expenseTotal,
-        periodBalance: incomeTotal - expenseTotal,
-        totalBalance: allIncomeTotal - allExpenseTotal
-      };
+      return calculateTransactionSummary({
+        initialBalance: account.initialBalance,
+        periodIncomeTotal: incomeTotal,
+        periodExpenseTotal: expenseTotal,
+        allIncomeTotal,
+        allExpenseTotal
+      });
     }
   );
 

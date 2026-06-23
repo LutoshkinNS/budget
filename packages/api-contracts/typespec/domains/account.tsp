@@ -9,6 +9,8 @@ model Account {
   @minLength(1)
   name: string;
 
+  initialBalance: float64;
+
   @minValue(1)
   ownerId: integer;
 
@@ -23,6 +25,8 @@ model AccountCreate {
 model AccountUpdate {
   @minLength(1)
   name?: string;
+
+  initialBalance?: float64;
 }
 
 @minValue(1)

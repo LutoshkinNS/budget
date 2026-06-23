@@ -9,6 +9,7 @@ import * as zod from "zod";
 export const AccountsListResponseItem = zod.object({
   id: zod.number().min(1),
   name: zod.string().min(1),
+  initialBalance: zod.number(),
   ownerId: zod.number().min(1),
   createdAt: zod.iso.datetime({}),
 });
@@ -33,11 +34,13 @@ export const AccountsUpdateParams = zod.object({
 
 export const AccountsUpdateBody = zod.object({
   name: zod.string().min(1).optional(),
+  initialBalance: zod.number().optional(),
 });
 
 export const AccountsUpdateResponse = zod.object({
   id: zod.number().min(1),
   name: zod.string().min(1),
+  initialBalance: zod.number(),
   ownerId: zod.number().min(1),
   createdAt: zod.iso.datetime({}),
 });

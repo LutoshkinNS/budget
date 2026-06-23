@@ -6,6 +6,7 @@
  */
 
 export interface AccountUpdateDTO {
+  initialBalance?: number;
   /** @minLength 1 */
   name?: string;
 }

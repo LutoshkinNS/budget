@@ -55,6 +55,7 @@ model TransactionUpdate {
 }
 
 model TransactionSummary {
+  initialBalance: float64;
   incomeTotal: float64;
   expenseTotal: float64;
   periodBalance: float64;

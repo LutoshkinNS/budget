@@ -8,6 +8,7 @@
 export interface TransactionSummaryDTO {
   expenseTotal: number;
   incomeTotal: number;
+  initialBalance: number;
   periodBalance: number;
   totalBalance: number;
 }

@@ -1167,6 +1167,16 @@
               }
             }
           },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server error",
             "content": {
@@ -1340,6 +1350,7 @@
         "required": [
           "id",
           "name",
+          "initialBalance",
           "ownerId",
           "createdAt"
         ],
@@ -1351,6 +1362,10 @@
           "name": {
             "type": "string",
             "minLength": 1
+          },
+          "initialBalance": {
+            "type": "number",
+            "format": "double"
           },
           "ownerId": {
             "type": "integer",
@@ -1375,6 +1390,7 @@
         "required": [
           "id",
           "name",
+          "initialBalance",
           "isOwner"
         ],
         "properties": {
@@ -1384,6 +1400,10 @@
           },
           "name": {
             "type": "string"
+          },
+          "initialBalance": {
+            "type": "number",
+            "format": "double"
           },
           "isOwner": {
             "type": "boolean"
@@ -1471,6 +1491,10 @@
           "name": {
             "type": "string",
             "minLength": 1
+          },
+          "initialBalance": {
+            "type": "number",
+            "format": "double"
           }
         },
         "unevaluatedProperties": {
@@ -1924,12 +1948,17 @@
       "TransactionSummary": {
         "type": "object",
         "required": [
+          "initialBalance",
           "incomeTotal",
           "expenseTotal",
           "periodBalance",
           "totalBalance"
         ],
         "properties": {
+          "initialBalance": {
+            "type": "number",
+            "format": "double"
+          },
           "incomeTotal": {
             "type": "number",
             "format": "double"

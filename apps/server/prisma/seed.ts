@@ -9,7 +9,8 @@ export async function main() {
       id: BigInt(1),
       ownedAccounts: {
         create: {
-          name: 'Личный бюджет'
+          name: 'Личный бюджет',
+          initialBalance: 0
         }
       }
     },

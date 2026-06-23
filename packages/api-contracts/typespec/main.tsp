@@ -99,7 +99,7 @@ interface Transactions {
   @get summary(
     @query from: utcDateTime,
     @query to: utcDateTime,
-  ): TransactionSummary | TransactionErrorResponse | InternalServerErrorResponse;
+  ): TransactionSummary | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
 
   @route("/{transactionId}")
   @get get(

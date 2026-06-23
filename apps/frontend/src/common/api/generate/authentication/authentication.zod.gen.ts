@@ -31,6 +31,7 @@ export const AuthMeResponse = zod.object({
     zod.object({
       id: zod.number().min(1),
       name: zod.string(),
+      initialBalance: zod.number(),
       isOwner: zod.boolean(),
     }),
   ),

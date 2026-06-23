@@ -1,0 +1,1 @@
+ALTER TABLE "Account" ADD COLUMN "initialBalance" REAL NOT NULL DEFAULT 0;

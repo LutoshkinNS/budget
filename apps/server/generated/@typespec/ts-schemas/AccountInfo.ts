@@ -3,6 +3,7 @@ const AccountInfo = {
   "required": [
     "id",
     "name",
+    "initialBalance",
     "isOwner"
   ],
   "properties": {
@@ -12,6 +13,10 @@ const AccountInfo = {
     },
     "name": {
       "type": "string"
+    },
+    "initialBalance": {
+      "type": "number",
+      "format": "double"
     },
     "isOwner": {
       "type": "boolean"

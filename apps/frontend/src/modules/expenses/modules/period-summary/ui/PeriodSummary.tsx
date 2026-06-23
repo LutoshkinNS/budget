@@ -82,11 +82,9 @@ export function PeriodSummary({
           </span>
         </div>
         <div className={s.totalItem}>
-          <span className={s.totalLabel}>Всего накоплено</span>
+          <span className={s.totalLabel}>Текущий баланс</span>
           <span className={s.totalValue}>
-            {isLoading || !summary
-              ? "—"
-              : formatMoney(summary.totalBalance, true)}
+            {isLoading || !summary ? "—" : formatMoney(summary.totalBalance)}
           </span>
         </div>
       </div>

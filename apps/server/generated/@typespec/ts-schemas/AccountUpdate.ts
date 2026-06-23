@@ -4,6 +4,10 @@ const AccountUpdate = {
     "name": {
       "type": "string",
       "minLength": 1
+    },
+    "initialBalance": {
+      "type": "number",
+      "format": "double"
     }
   },
   "additionalProperties": false

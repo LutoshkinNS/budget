@@ -9,6 +9,7 @@ export interface AccountDTO {
   createdAt: string;
   /** @minimum 1 */
   id: number;
+  initialBalance: number;
   /** @minLength 1 */
   name: string;
   /** @minimum 1 */

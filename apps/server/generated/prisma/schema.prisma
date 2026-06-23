@@ -20,11 +20,12 @@ model User {
 }
 
 model Account {
-  id        Int      @id @default(autoincrement())
-  name      String
-  ownerId   BigInt
-  owner     User     @relation("AccountOwner", fields: [ownerId], references: [id])
-  createdAt DateTime @default(now())
+  id             Int      @id @default(autoincrement())
+  name           String
+  initialBalance Float    @default(0)
+  ownerId        BigInt
+  owner          User     @relation("AccountOwner", fields: [ownerId], references: [id])
+  createdAt      DateTime @default(now())
 
   users                 AccountUser[]
   transactionCategories TransactionCategory[]

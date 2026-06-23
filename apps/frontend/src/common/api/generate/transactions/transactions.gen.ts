@@ -349,7 +349,7 @@ export const getTransactionsSummaryQueryKey = (
 
 export const getTransactionsSummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params: TransactionsSummaryParams,
   options?: {
@@ -385,11 +385,12 @@ export type TransactionsSummaryQueryResult = NonNullable<
 >;
 export type TransactionsSummaryQueryError =
   | ValidationErrorDTO
+  | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params: TransactionsSummaryParams,
   options: {
@@ -416,7 +417,7 @@ export function useTransactionsSummary<
 };
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params: TransactionsSummaryParams,
   options?: {
@@ -443,7 +444,7 @@ export function useTransactionsSummary<
 };
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params: TransactionsSummaryParams,
   options?: {
@@ -463,7 +464,7 @@ export function useTransactionsSummary<
 
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params: TransactionsSummaryParams,
   options?: {
