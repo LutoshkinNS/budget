@@ -1,99 +1,131 @@
 .dayGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .dayHeader {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
-    cursor: pointer;
-    user-select: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+  user-select: none;
 }
 
 .dayLabel {
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--primary-text-color);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--primary-text-color);
 }
 
 .daySumRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .dayTotal {
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--primary-text-color);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--primary-text-color);
 }
 
 .arrow {
-    width: 20px;
-    height: 20px;
-    opacity: 0.5;
-    transition: transform 0.2s ease;
+  width: 20px;
+  height: 20px;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
 }
 
 .arrowCollapsed {
-    transform: rotate(-180deg);
+  transform: rotate(-180deg);
 }
 
 .dayGroupItems {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .dayGroupItemsCollapsed {
-    display: none;
+  display: none;
 }
 
 .expenseItem {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 6px 8px;
-    border: 0;
-    background: transparent;
-    font-family: inherit;
-    font-size: 14px;
-    text-align: left;
-    color: var(--primary-text-color);
-    opacity: 0.85;
-    cursor: pointer;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
-.expenseItem:focus-visible {
-    outline: 1.5px solid var(--primary-text-color);
-    outline-offset: 2px;
+.expenseMain {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: var(--primary-text-color);
+  opacity: 0.85;
+  cursor: pointer;
 }
 
-.expenseItem:disabled {
-    color: var(--primary-text-color);
-    cursor: default;
+.expenseMain:focus-visible,
+.deleteButton:focus-visible {
+  outline: 1.5px solid var(--primary-text-color);
+  outline-offset: 2px;
+}
+
+.expenseMain:disabled {
+  color: var(--primary-text-color);
+  cursor: default;
+}
+
+.deleteButton {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.deleteButton:disabled {
+  cursor: default;
+  opacity: 0.3;
 }
 
 .expenseCategory {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .expenseDescription {
-    font-size: 12px;
-    opacity: 0.6;
+  font-size: 12px;
+  opacity: 0.6;
 }
 
 .expenseAmount {
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
 }

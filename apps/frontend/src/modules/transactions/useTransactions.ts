@@ -46,9 +46,7 @@ function toIsoDate(dateStr: string): string {
 
 function getDayLabel(isoDate: string): string {
   const today = toIsoDate(new Date().toISOString());
-  const yesterday = toIsoDate(
-    new Date(Date.now() - 86400000).toISOString(),
-  );
+  const yesterday = toIsoDate(new Date(Date.now() - 86400000).toISOString());
   if (isoDate === today) return "сегодня";
   if (isoDate === yesterday) return "вчера";
   const [year, month, day] = isoDate.split("-");
@@ -172,10 +170,17 @@ export function useTransactionSummary(
 }
 
 export function useInvalidateTransactionsList() {
-  return (params?: TransactionsListParams) =>
-    queryClient.invalidateQueries({
+  return (params?: TransactionsListParams) => {
+    if (!params) {
+      return queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => queryKey[0] === "transactionsList",
+      });
+    }
+
+    return queryClient.invalidateQueries({
       queryKey: getTransactionsListQueryKey(params),
     });
+  };
 }
 
 export function useInvalidateTransaction() {
@@ -186,8 +191,15 @@ export function useInvalidateTransaction() {
 }
 
 export function useInvalidateTransactionSummary() {
-  return (params?: TransactionsSummaryParams) =>
-    queryClient.invalidateQueries({
+  return (params?: TransactionsSummaryParams) => {
+    if (!params) {
+      return queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => queryKey[0] === "transactionsSummary",
+      });
+    }
+
+    return queryClient.invalidateQueries({
       queryKey: getTransactionsSummaryQueryKey(params),
     });
+  };
 }

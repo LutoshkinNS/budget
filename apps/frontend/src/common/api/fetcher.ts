@@ -61,5 +61,9 @@ export const fetcher = async <T>(
     throw await res.json();
   }
 
+  if ([204, 205, 304].includes(res.status)) {
+    return undefined as T;
+  }
+
   return res.json();
 };
