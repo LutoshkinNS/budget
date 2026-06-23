@@ -11,4 +11,5 @@ export type {
   TransactionType,
 } from "./useTransactions.ts";
 export { useCreateTransaction } from "./model/useCreateTransaction.ts";
+export { useDeleteTransaction } from "./model/useDeleteTransaction.ts";
 export { useUpdateTransaction } from "./model/useUpdateTransaction.ts";
