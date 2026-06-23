@@ -2726,6 +2726,7 @@ export namespace Prisma {
     id: number | null
     name: string | null
     initialBalance: number | null
+    initialBalanceDate: Date | null
     ownerId: bigint | null
     createdAt: Date | null
   }
@@ -2734,6 +2735,7 @@ export namespace Prisma {
     id: number | null
     name: string | null
     initialBalance: number | null
+    initialBalanceDate: Date | null
     ownerId: bigint | null
     createdAt: Date | null
   }
@@ -2742,6 +2744,7 @@ export namespace Prisma {
     id: number
     name: number
     initialBalance: number
+    initialBalanceDate: number
     ownerId: number
     createdAt: number
     _all: number
@@ -2764,6 +2767,7 @@ export namespace Prisma {
     id?: true
     name?: true
     initialBalance?: true
+    initialBalanceDate?: true
     ownerId?: true
     createdAt?: true
   }
@@ -2772,6 +2776,7 @@ export namespace Prisma {
     id?: true
     name?: true
     initialBalance?: true
+    initialBalanceDate?: true
     ownerId?: true
     createdAt?: true
   }
@@ -2780,6 +2785,7 @@ export namespace Prisma {
     id?: true
     name?: true
     initialBalance?: true
+    initialBalanceDate?: true
     ownerId?: true
     createdAt?: true
     _all?: true
@@ -2875,6 +2881,7 @@ export namespace Prisma {
     id: number
     name: string
     initialBalance: number
+    initialBalanceDate: Date
     ownerId: bigint
     createdAt: Date
     _count: AccountCountAggregateOutputType | null
@@ -2902,6 +2909,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     initialBalance?: boolean
+    initialBalanceDate?: boolean
     ownerId?: boolean
     createdAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -2916,6 +2924,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     initialBalance?: boolean
+    initialBalanceDate?: boolean
     ownerId?: boolean
     createdAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -2925,6 +2934,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     initialBalance?: boolean
+    initialBalanceDate?: boolean
     ownerId?: boolean
     createdAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -2934,11 +2944,12 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     initialBalance?: boolean
+    initialBalanceDate?: boolean
     ownerId?: boolean
     createdAt?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "initialBalance" | "ownerId" | "createdAt", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "initialBalance" | "initialBalanceDate" | "ownerId" | "createdAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     users?: boolean | Account$usersArgs<ExtArgs>
@@ -2967,6 +2978,7 @@ export namespace Prisma {
       id: number
       name: string
       initialBalance: number
+      initialBalanceDate: Date
       ownerId: bigint
       createdAt: Date
     }, ExtArgs["result"]["account"]>
@@ -3400,6 +3412,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Account", 'Int'>
     readonly name: FieldRef<"Account", 'String'>
     readonly initialBalance: FieldRef<"Account", 'Float'>
+    readonly initialBalanceDate: FieldRef<"Account", 'DateTime'>
     readonly ownerId: FieldRef<"Account", 'BigInt'>
     readonly createdAt: FieldRef<"Account", 'DateTime'>
   }
@@ -9546,6 +9559,7 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     initialBalance: 'initialBalance',
+    initialBalanceDate: 'initialBalanceDate',
     ownerId: 'ownerId',
     createdAt: 'createdAt'
   };
@@ -9735,6 +9749,7 @@ export namespace Prisma {
     id?: IntFilter<"Account"> | number
     name?: StringFilter<"Account"> | string
     initialBalance?: FloatFilter<"Account"> | number
+    initialBalanceDate?: DateTimeFilter<"Account"> | Date | string
     ownerId?: BigIntFilter<"Account"> | bigint | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9748,6 +9763,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     initialBalance?: SortOrder
+    initialBalanceDate?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     owner?: UserOrderByWithRelationInput
@@ -9764,6 +9780,7 @@ export namespace Prisma {
     NOT?: AccountWhereInput | AccountWhereInput[]
     name?: StringFilter<"Account"> | string
     initialBalance?: FloatFilter<"Account"> | number
+    initialBalanceDate?: DateTimeFilter<"Account"> | Date | string
     ownerId?: BigIntFilter<"Account"> | bigint | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9777,6 +9794,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     initialBalance?: SortOrder
+    initialBalanceDate?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     _count?: AccountCountOrderByAggregateInput
@@ -9793,6 +9811,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Account"> | number
     name?: StringWithAggregatesFilter<"Account"> | string
     initialBalance?: FloatWithAggregatesFilter<"Account"> | number
+    initialBalanceDate?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     ownerId?: BigIntWithAggregatesFilter<"Account"> | bigint | number
     createdAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
   }
@@ -10177,6 +10196,7 @@ export namespace Prisma {
   export type AccountCreateInput = {
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedAccountsInput
     users?: AccountUserCreateNestedManyWithoutAccountInput
@@ -10189,6 +10209,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     ownerId: bigint | number
     createdAt?: Date | string
     users?: AccountUserUncheckedCreateNestedManyWithoutAccountInput
@@ -10200,6 +10221,7 @@ export namespace Prisma {
   export type AccountUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedAccountsNestedInput
     users?: AccountUserUpdateManyWithoutAccountNestedInput
@@ -10212,6 +10234,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: BigIntFieldUpdateOperationsInput | bigint | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: AccountUserUncheckedUpdateManyWithoutAccountNestedInput
@@ -10224,6 +10247,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     ownerId: bigint | number
     createdAt?: Date | string
   }
@@ -10231,6 +10255,7 @@ export namespace Prisma {
   export type AccountUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10238,6 +10263,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: BigIntFieldUpdateOperationsInput | bigint | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10743,6 +10769,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     initialBalance?: SortOrder
+    initialBalanceDate?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
   }
@@ -10757,6 +10784,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     initialBalance?: SortOrder
+    initialBalanceDate?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
   }
@@ -10765,6 +10793,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     initialBalance?: SortOrder
+    initialBalanceDate?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
   }
@@ -11887,6 +11916,7 @@ export namespace Prisma {
   export type AccountCreateWithoutOwnerInput = {
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     users?: AccountUserCreateNestedManyWithoutAccountInput
     transactionCategories?: TransactionCategoryCreateNestedManyWithoutAccountInput
@@ -11898,6 +11928,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     users?: AccountUserUncheckedCreateNestedManyWithoutAccountInput
     transactionCategories?: TransactionCategoryUncheckedCreateNestedManyWithoutAccountInput
@@ -11984,6 +12015,7 @@ export namespace Prisma {
     id?: IntFilter<"Account"> | number
     name?: StringFilter<"Account"> | string
     initialBalance?: FloatFilter<"Account"> | number
+    initialBalanceDate?: DateTimeFilter<"Account"> | Date | string
     ownerId?: BigIntFilter<"Account"> | bigint | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
   }
@@ -12288,6 +12320,7 @@ export namespace Prisma {
   export type AccountCreateWithoutInvitationsInput = {
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedAccountsInput
     users?: AccountUserCreateNestedManyWithoutAccountInput
@@ -12299,6 +12332,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     ownerId: bigint | number
     createdAt?: Date | string
     users?: AccountUserUncheckedCreateNestedManyWithoutAccountInput
@@ -12325,6 +12359,7 @@ export namespace Prisma {
   export type AccountUpdateWithoutInvitationsInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedAccountsNestedInput
     users?: AccountUserUpdateManyWithoutAccountNestedInput
@@ -12336,6 +12371,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: BigIntFieldUpdateOperationsInput | bigint | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: AccountUserUncheckedUpdateManyWithoutAccountNestedInput
@@ -12369,6 +12405,7 @@ export namespace Prisma {
   export type AccountCreateWithoutUsersInput = {
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedAccountsInput
     transactionCategories?: TransactionCategoryCreateNestedManyWithoutAccountInput
@@ -12380,6 +12417,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     ownerId: bigint | number
     createdAt?: Date | string
     transactionCategories?: TransactionCategoryUncheckedCreateNestedManyWithoutAccountInput
@@ -12435,6 +12473,7 @@ export namespace Prisma {
   export type AccountUpdateWithoutUsersInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedAccountsNestedInput
     transactionCategories?: TransactionCategoryUpdateManyWithoutAccountNestedInput
@@ -12446,6 +12485,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: BigIntFieldUpdateOperationsInput | bigint | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     transactionCategories?: TransactionCategoryUncheckedUpdateManyWithoutAccountNestedInput
@@ -12456,6 +12496,7 @@ export namespace Prisma {
   export type AccountCreateWithoutTransactionCategoriesInput = {
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedAccountsInput
     users?: AccountUserCreateNestedManyWithoutAccountInput
@@ -12467,6 +12508,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     ownerId: bigint | number
     createdAt?: Date | string
     users?: AccountUserUncheckedCreateNestedManyWithoutAccountInput
@@ -12541,6 +12583,7 @@ export namespace Prisma {
   export type AccountUpdateWithoutTransactionCategoriesInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedAccountsNestedInput
     users?: AccountUserUpdateManyWithoutAccountNestedInput
@@ -12552,6 +12595,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: BigIntFieldUpdateOperationsInput | bigint | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: AccountUserUncheckedUpdateManyWithoutAccountNestedInput
@@ -12658,6 +12702,7 @@ export namespace Prisma {
   export type AccountCreateWithoutTransactionsInput = {
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
     owner: UserCreateNestedOneWithoutOwnedAccountsInput
     users?: AccountUserCreateNestedManyWithoutAccountInput
@@ -12669,6 +12714,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     ownerId: bigint | number
     createdAt?: Date | string
     users?: AccountUserUncheckedCreateNestedManyWithoutAccountInput
@@ -12742,6 +12788,7 @@ export namespace Prisma {
   export type AccountUpdateWithoutTransactionsInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutOwnedAccountsNestedInput
     users?: AccountUserUpdateManyWithoutAccountNestedInput
@@ -12753,6 +12800,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: BigIntFieldUpdateOperationsInput | bigint | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: AccountUserUncheckedUpdateManyWithoutAccountNestedInput
@@ -12823,6 +12871,7 @@ export namespace Prisma {
     id?: number
     name: string
     initialBalance?: number
+    initialBalanceDate?: Date | string
     createdAt?: Date | string
   }
 
@@ -12844,6 +12893,7 @@ export namespace Prisma {
   export type AccountUpdateWithoutOwnerInput = {
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: AccountUserUpdateManyWithoutAccountNestedInput
     transactionCategories?: TransactionCategoryUpdateManyWithoutAccountNestedInput
@@ -12855,6 +12905,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: AccountUserUncheckedUpdateManyWithoutAccountNestedInput
     transactionCategories?: TransactionCategoryUncheckedUpdateManyWithoutAccountNestedInput
@@ -12866,6 +12917,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     initialBalance?: FloatFieldUpdateOperationsInput | number
+    initialBalanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

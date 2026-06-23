@@ -155,7 +155,7 @@ export default async function transactionsModule(app: FastifyApp) {
       }
 
       const accountId = req.user.accountId;
-      const [account, periodGroups, allGroups] = await Promise.all([
+      const [account, periodGroups] = await Promise.all([
         this.prisma.account.findFirst({
           where: { id: accountId }
         }),
@@ -166,11 +166,6 @@ export default async function transactionsModule(app: FastifyApp) {
             date: { gte: dateRange.from, lt: dateRange.to }
           },
           _sum: { amount: true }
-        }),
-        this.prisma.transaction.groupBy({
-          by: ['type'],
-          where: { accountId },
-          _sum: { amount: true }
         })
       ]);
 
@@ -178,17 +173,26 @@ export default async function transactionsModule(app: FastifyApp) {
         return reply.code(404).send(notFound('Account not found or access denied'));
       }
 
+      const balanceGroups = await this.prisma.transaction.groupBy({
+        by: ['type'],
+        where: {
+          accountId,
+          date: { gte: account.initialBalanceDate }
+        },
+        _sum: { amount: true }
+      });
+
       const incomeTotal = readGroupedTotal(periodGroups, 'income');
       const expenseTotal = readGroupedTotal(periodGroups, 'expense');
-      const allIncomeTotal = readGroupedTotal(allGroups, 'income');
-      const allExpenseTotal = readGroupedTotal(allGroups, 'expense');
+      const balanceIncomeTotal = readGroupedTotal(balanceGroups, 'income');
+      const balanceExpenseTotal = readGroupedTotal(balanceGroups, 'expense');
 
       return calculateTransactionSummary({
         initialBalance: account.initialBalance,
         periodIncomeTotal: incomeTotal,
         periodExpenseTotal: expenseTotal,
-        allIncomeTotal,
-        allExpenseTotal
+        balanceIncomeTotal,
+        balanceExpenseTotal
       });
     }
   );

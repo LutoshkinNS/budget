@@ -2,8 +2,8 @@ export type TransactionSummaryInput = {
   initialBalance: number;
   periodIncomeTotal: number;
   periodExpenseTotal: number;
-  allIncomeTotal: number;
-  allExpenseTotal: number;
+  balanceIncomeTotal: number;
+  balanceExpenseTotal: number;
 };
 
 export type TransactionSummaryResult = {
@@ -18,14 +18,14 @@ export function calculateTransactionSummary({
   initialBalance,
   periodIncomeTotal,
   periodExpenseTotal,
-  allIncomeTotal,
-  allExpenseTotal
+  balanceIncomeTotal,
+  balanceExpenseTotal
 }: TransactionSummaryInput): TransactionSummaryResult {
   return {
     initialBalance,
     incomeTotal: periodIncomeTotal,
     expenseTotal: periodExpenseTotal,
     periodBalance: periodIncomeTotal - periodExpenseTotal,
-    totalBalance: initialBalance + allIncomeTotal - allExpenseTotal
+    totalBalance: initialBalance + balanceIncomeTotal - balanceExpenseTotal
   };
 }

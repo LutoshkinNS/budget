@@ -38,7 +38,8 @@ export async function updateAccountHandler(
     data: {
       ...(req.body.name != null && { name: req.body.name }),
       ...(req.body.initialBalance != null && {
-        initialBalance: req.body.initialBalance
+        initialBalance: req.body.initialBalance,
+        initialBalanceDate: new Date()
       })
     }
   });
