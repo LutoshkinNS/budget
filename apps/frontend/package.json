@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:local": "npm run api:generate && vite build --mode local",
+    "build:local": "npm run api:generate && vite build",
     "build:prod": "npm run api:generate && vite build",
     "ts:check": "tsc -b",
     "lint": "eslint .",
@@ -30,6 +30,7 @@
     "@tanstack/eslint-plugin-query": "^5.91.2",
     "@tanstack/react-query-devtools": "^5.91.1",
     "@tanstack/router-plugin": "^1.139.12",
+    "@types/node": "^24.12.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
