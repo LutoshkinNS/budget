@@ -5,6 +5,7 @@ import {
 } from "@/common/api/generate/accounts/accounts.gen.ts";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import type { AccountUpdateDTO } from "@/common/api/generate/model";
+import { getTransactionsSummaryQueryKey } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
 
 export function useUpdateAccount() {
@@ -14,6 +15,9 @@ export function useUpdateAccount() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getAccountsListQueryKey() });
         queryClient.invalidateQueries({ queryKey: getAuthMeQueryKey() });
+        queryClient.invalidateQueries({
+          queryKey: getTransactionsSummaryQueryKey(),
+        });
       },
       onError: (error) => {
         addNotification({
