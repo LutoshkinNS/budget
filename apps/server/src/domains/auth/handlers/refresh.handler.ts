@@ -3,6 +3,15 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ACCESS_TOKEN_MAX_AGE_SECONDS } from '../constants.js';
 
 export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
+  req.log.info(
+    {
+      event: 'auth_refresh_request',
+      hasCookieHeader: Boolean(req.headers.cookie),
+      hasRefreshTokenCookie: Boolean(req.cookies?.refreshToken)
+    },
+    'auth_request'
+  );
+
   await req.refreshJwtVerify();
 
   const { userId, accountId } = req.user;

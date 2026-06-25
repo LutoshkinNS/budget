@@ -23,6 +23,15 @@ export async function loginHandler(
   req: FastifyRequest<{ Body: LoginRequestBody }>,
   reply: FastifyReply
 ) {
+  req.log.info(
+    {
+      event: 'auth_login_request',
+      hasCookieHeader: Boolean(req.headers.cookie),
+      hasRefreshTokenCookie: Boolean(req.cookies?.refreshToken)
+    },
+    'auth_request'
+  );
+
   const isValid = validateTelegramAuth(req.body, this.envs.TELEGRAM_BOT_TOKEN);
 
   if (!isValid) {
