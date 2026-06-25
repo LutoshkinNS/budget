@@ -8,12 +8,12 @@ import s from "./private.module.css";
 
 export function PrivateLayout() {
   return (
-    <main className={s.main}>
-      <GlobalLoader />
-      <Navigation />
-      <AuthLoadingBoundary>
+    <AuthLoadingBoundary>
+      <main className={s.main}>
+        <GlobalLoader />
+        <Navigation />
         <Outlet />
-      </AuthLoadingBoundary>
-    </main>
+      </main>
+    </AuthLoadingBoundary>
   );
 }
