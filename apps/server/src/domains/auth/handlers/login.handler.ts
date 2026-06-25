@@ -18,6 +18,14 @@ import { validateTelegramAuth } from '../validateTelegramAuth.js';
 
 type LoginRequestBody = FromSchema<typeof LoginRequest>;
 
+function countSetCookieHeader(value: string | number | string[] | undefined) {
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+
+  return value ? 1 : 0;
+}
+
 export async function loginHandler(
   this: FastifyApp,
   req: FastifyRequest<{ Body: LoginRequestBody }>,
@@ -84,7 +92,7 @@ export async function loginHandler(
     refreshTokenMaxAgeSeconds: REFRESH_TOKEN_MAX_AGE_SECONDS
   });
 
-  return reply
+  const response = reply
     .setCookie('accessToken', accessToken, {
       httpOnly: true,
       secure: secureCookies,
@@ -98,6 +106,18 @@ export async function loginHandler(
       sameSite: 'lax',
       path: '/api/v1/auth',
       maxAge: REFRESH_TOKEN_MAX_AGE_SECONDS
-    })
-    .send({ success: true });
+    });
+
+  req.log.info(
+    {
+      event: 'auth_login_response',
+      hasSetCookieHeader: Boolean(response.getHeader('set-cookie')),
+      setCookieCount: countSetCookieHeader(response.getHeader('set-cookie')),
+      accessTokenCookiePath: '/',
+      refreshTokenCookiePath: '/api/v1/auth'
+    },
+    'auth_request'
+  );
+
+  return response.send({ success: true });
 }
