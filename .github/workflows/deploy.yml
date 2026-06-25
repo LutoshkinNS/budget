@@ -68,4 +68,7 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           command_timeout: 30m
           script_stop: true
-          script: bash /opt/budget/deploy.sh
+          script: |
+            cd /opt/budget
+            git pull --ff-only origin master
+            bash ./deploy.sh
