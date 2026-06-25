@@ -8,6 +8,7 @@ import { Notifications } from "@/common/lib/notifications";
 
 // Import the generated route tree
 import { routeTree } from "./routes/routeTree.gen";
+import { usePwaAutoUpdate } from "./model/usePwaAutoUpdate";
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -25,6 +26,8 @@ declare module "@tanstack/react-router" {
 }
 
 function App() {
+  usePwaAutoUpdate();
+
   return (
     <QueryClientProvider client={queryClient}>
       <Notifications>
