@@ -9,7 +9,10 @@ export async function meHandler(this: FastifyApp, req: FastifyRequest) {
     {
       event: 'auth_me_request',
       hasCookieHeader: Boolean(req.headers.cookie),
-      hasRefreshTokenCookie: Boolean(req.cookies?.refreshToken)
+      hasRefreshTokenCookie: Boolean(req.cookies?.refreshToken),
+      userAgent: req.headers['user-agent'],
+      origin: req.headers.origin,
+      referer: req.headers.referer
     },
     'auth_request'
   );

@@ -2,20 +2,15 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import { ACCESS_TOKEN_MAX_AGE_SECONDS } from '../constants.js';
 
-function countSetCookieHeader(value: string | number | string[] | undefined) {
-  if (Array.isArray(value)) {
-    return value.length;
-  }
-
-  return value ? 1 : 0;
-}
-
 export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
   req.log.info(
     {
       event: 'auth_refresh_request',
       hasCookieHeader: Boolean(req.headers.cookie),
-      hasRefreshTokenCookie: Boolean(req.cookies?.refreshToken)
+      hasRefreshTokenCookie: Boolean(req.cookies?.refreshToken),
+      userAgent: req.headers['user-agent'],
+      origin: req.headers.origin,
+      referer: req.headers.referer
     },
     'auth_request'
   );
@@ -46,8 +41,7 @@ export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
   req.log.info(
     {
       event: 'auth_refresh_response',
-      hasSetCookieHeader: Boolean(response.getHeader('set-cookie')),
-      setCookieCount: countSetCookieHeader(response.getHeader('set-cookie')),
+      willSetCookieNames: ['accessToken'],
       accessTokenCookiePath: '/'
     },
     'auth_request'
