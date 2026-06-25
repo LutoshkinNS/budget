@@ -22,7 +22,7 @@ echo "==> [3/8] git pull"
 git pull --ff-only origin master
 
 echo "==> Apply nginx site config"
-bash infra/nginx/apply-same-origin-api.sh
+sudo bash infra/nginx/apply-same-origin-api.sh
 
 if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
   echo "==> [4/8] Login to GHCR"
