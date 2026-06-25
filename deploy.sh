@@ -21,6 +21,9 @@ docker builder prune -af
 echo "==> [3/8] git pull"
 git pull --ff-only origin master
 
+echo "==> Apply nginx site config"
+bash infra/nginx/apply-same-origin-api.sh
+
 if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
   echo "==> [4/8] Login to GHCR"
   echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
