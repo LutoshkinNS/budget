@@ -1,7 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import { AuthLoginBody } from "@/common/api/generate/authentication/authentication.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
 
@@ -23,6 +25,7 @@ export function ByTelegram() {
   const [showFallback, setShowFallback] = useState(false);
   const { login } = useLogin();
   const { addNotification } = useNotifications();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
@@ -57,6 +60,8 @@ export function ByTelegram() {
       });
 
       if (result) {
+        queryClient.removeQueries({ queryKey: getAuthMeQueryKey() });
+
         const pendingCode = sessionStorage.getItem(INVITE_CODE_KEY);
         if (pendingCode) {
           sessionStorage.removeItem(INVITE_CODE_KEY);
@@ -97,7 +102,7 @@ export function ByTelegram() {
         container.removeChild(script);
       }
     };
-  }, [login, addNotification, navigate]);
+  }, [login, addNotification, queryClient, navigate]);
 
   async function handleDevLogin() {
     await fetch("/api/v1/auth/dev-login", { credentials: "include" });

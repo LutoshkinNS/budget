@@ -21,8 +21,12 @@ docker builder prune -af
 echo "==> [3/8] git pull"
 git pull --ff-only origin master
 
-echo "==> Apply nginx site config"
-sudo bash infra/nginx/apply-same-origin-api.sh
+if [ "${APPLY_NGINX_CONFIG:-0}" = "1" ]; then
+  echo "==> Apply nginx site config"
+  sudo -n /usr/bin/bash /opt/budget/infra/nginx/apply-same-origin-api.sh
+else
+  echo "==> Skip nginx site config (APPLY_NGINX_CONFIG is not 1)"
+fi
 
 if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
   echo "==> [4/8] Login to GHCR"
