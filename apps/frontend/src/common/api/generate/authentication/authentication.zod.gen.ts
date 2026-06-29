@@ -6,6 +6,27 @@
  */
 import * as zod from "zod";
 
+export const AuthClientEventBody = zod.object({
+  event: zod.enum([
+    "page_loaded",
+    "widget_script_loaded",
+    "widget_script_failed",
+    "auth_callback",
+    "login_started",
+    "login_succeeded",
+    "login_failed",
+    "session_confirmed",
+  ]),
+  buildVersion: zod.string(),
+  attemptId: zod.string().optional(),
+  displayMode: zod.string(),
+  online: zod.boolean(),
+});
+
+export const AuthClientEventResponse = zod.object({
+  success: zod.boolean(),
+});
+
 export const AuthLoginBody = zod.object({
   id: zod.number().min(1),
   first_name: zod.string(),

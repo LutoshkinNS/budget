@@ -29,6 +29,7 @@ WORKDIR /repo/apps/frontend
 
 ARG VITE_API_URL
 ARG VITE_TELEGRAM_BOT_NAME
+ARG VITE_APP_VERSION
 RUN OPENAPI_PATH=/repo/openapi.json pnpm run build:prod
 
 FROM nginxinc/nginx-unprivileged:alpine AS runner

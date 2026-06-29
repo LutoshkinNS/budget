@@ -22,6 +22,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AuthClientEventDTO,
   ForbiddenErrorDTO,
   InternalServerErrorDTO,
   LoginRequestDTO,
@@ -36,6 +37,85 @@ import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
+export const getAuthClientEventUrl = () => {
+  return `/api/v1/auth/client-event`;
+};
+
+export const authClientEvent = async (
+  authClientEventDTO: AuthClientEventDTO,
+  options?: RequestInit,
+): Promise<SuccessResponseDTO> => {
+  return fetcher<SuccessResponseDTO>(getAuthClientEventUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(authClientEventDTO),
+  });
+};
+
+export const getAuthClientEventMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof authClientEvent>>,
+    TError,
+    { data: AuthClientEventDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authClientEvent>>,
+  TError,
+  { data: AuthClientEventDTO },
+  TContext
+> => {
+  const mutationKey = ["authClientEvent"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof authClientEvent>>,
+    { data: AuthClientEventDTO }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return authClientEvent(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AuthClientEventMutationResult = NonNullable<
+  Awaited<ReturnType<typeof authClientEvent>>
+>;
+export type AuthClientEventMutationBody = AuthClientEventDTO;
+export type AuthClientEventMutationError = unknown;
+
+export const useAuthClientEvent = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof authClientEvent>>,
+      TError,
+      { data: AuthClientEventDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof authClientEvent>>,
+  TError,
+  { data: AuthClientEventDTO },
+  TContext
+> => {
+  return useMutation(getAuthClientEventMutationOptions(options), queryClient);
+};
 export const getAuthLoginUrl = () => {
   return `/api/v1/auth/login`;
 };

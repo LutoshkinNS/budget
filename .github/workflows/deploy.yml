@@ -50,6 +50,7 @@ jobs:
           build-args: |
             VITE_API_URL=
             VITE_TELEGRAM_BOT_NAME=${{ vars.VITE_TELEGRAM_BOT_NAME || secrets.VITE_TELEGRAM_BOT_NAME }}
+            VITE_APP_VERSION=${{ github.sha }}
           tags: |
             ghcr.io/lutoshkinns/budget-frontend:latest
             ghcr.io/lutoshkinns/budget-frontend:${{ github.sha }}

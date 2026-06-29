@@ -125,6 +125,11 @@ interface Transactions {
 @route("/auth")
 @tag("Authentication")
 interface Auth {
+  @route("/client-event")
+  @post op clientEvent(
+    @body body: AuthClientEvent
+  ): SuccessResponse;
+
   @route("/login")
   @post op login(
     @body loginRequest: LoginRequest

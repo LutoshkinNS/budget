@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { AuthLoginBody } from "@/common/api/generate/authentication/authenticati
 import { useNotifications } from "@/common/lib/notifications";
 
 import { INVITE_CODE_KEY } from "../model/constants.ts";
+import { reportAuthEvent } from "../model/reportAuthEvent.ts";
 import { useLogin } from "../model/useLogin.ts";
 
 import s from "./ByTelegram.module.css";
@@ -28,11 +29,19 @@ export function ByTelegram() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    void reportAuthEvent("page_loaded");
+  }, []);
+
   useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     window.onTelegramAuth = async (user) => {
+      const attemptId = crypto.randomUUID();
+      const eventOptions = { attemptId };
+
+      void reportAuthEvent("auth_callback", eventOptions);
       setShowFallback(false);
 
       const validateResult = AuthLoginBody.safeParse(user);
@@ -45,33 +54,44 @@ export function ByTelegram() {
           title: "Telegram auth error",
           message: errors,
         });
+        void reportAuthEvent("login_failed", eventOptions);
 
         return;
       }
 
-      const result = await login({
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        username: user.username,
-        photo_url: user.photo_url,
-        auth_date: user.auth_date,
-        hash: user.hash,
-      });
+      void reportAuthEvent("login_started", eventOptions);
 
-      if (result) {
-        queryClient.removeQueries({ queryKey: getAuthMeQueryKey() });
+      try {
+        const result = await login({
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          photo_url: user.photo_url,
+          auth_date: user.auth_date,
+          hash: user.hash,
+        });
 
-        const pendingCode = sessionStorage.getItem(INVITE_CODE_KEY);
-        if (pendingCode) {
-          sessionStorage.removeItem(INVITE_CODE_KEY);
-          await navigate({
-            to: "/invite/$code",
-            params: { code: pendingCode },
-          });
+        if (result) {
+          void reportAuthEvent("login_succeeded", eventOptions);
+          queryClient.removeQueries({ queryKey: getAuthMeQueryKey() });
+
+          const pendingCode = sessionStorage.getItem(INVITE_CODE_KEY);
+          if (pendingCode) {
+            sessionStorage.removeItem(INVITE_CODE_KEY);
+            await navigate({
+              to: "/invite/$code",
+              params: { code: pendingCode },
+            });
+          } else {
+            await navigate({ to: "/" });
+          }
         } else {
-          await navigate({ to: "/" });
+          void reportAuthEvent("login_failed", eventOptions);
         }
+      } catch (error) {
+        void reportAuthEvent("login_failed", eventOptions);
+        throw error;
       }
     };
 
@@ -89,6 +109,16 @@ export function ByTelegram() {
     script.setAttribute("data-size", telegram_widget_config.btnSize);
     script.setAttribute("data-onauth", "onTelegramAuth(user)");
 
+    const handleScriptLoaded = () => {
+      void reportAuthEvent("widget_script_loaded");
+    };
+    const handleScriptFailed = () => {
+      void reportAuthEvent("widget_script_failed");
+    };
+
+    script.addEventListener("load", handleScriptLoaded);
+    script.addEventListener("error", handleScriptFailed);
+
     container.appendChild(script);
 
     const timeoutId = window.setTimeout(() => {
@@ -97,6 +127,8 @@ export function ByTelegram() {
 
     return () => {
       window.clearTimeout(timeoutId);
+      script.removeEventListener("load", handleScriptLoaded);
+      script.removeEventListener("error", handleScriptFailed);
       delete window.onTelegramAuth;
       if (container.contains(script)) {
         container.removeChild(script);

@@ -1,6 +1,7 @@
+import { Outlet } from "@tanstack/react-router";
+
 import { GlobalLoader } from "@/common/ui/loader/Loader.tsx";
 import { Navigation } from "@/common/ui/navigation/Navigation.tsx";
-import { Outlet } from "@tanstack/react-router";
 
 import { AuthLoadingBoundary } from "./AuthLoadingBoundary.tsx";
 

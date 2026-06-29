@@ -10,6 +10,7 @@
     "ts:check": "tsc -b",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "node --test tests/reportAuthEvent.test.ts",
     "preview": "vite preview",
     "prettier:check": "npx prettier . --check",
     "prettier:write": "npx prettier . --write",

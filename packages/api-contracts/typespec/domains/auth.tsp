@@ -79,3 +79,22 @@ model SwitchAccountRequest {
 model SuccessResponse {
   success: boolean;
 }
+
+enum AuthClientEventName {
+  page_loaded,
+  widget_script_loaded,
+  widget_script_failed,
+  auth_callback,
+  login_started,
+  login_succeeded,
+  login_failed,
+  session_confirmed,
+}
+
+model AuthClientEvent {
+  event: AuthClientEventName;
+  buildVersion: string;
+  attemptId?: string;
+  displayMode: string;
+  online: boolean;
+}
