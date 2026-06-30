@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, expect, it } from "vitest";
 
 import { reportAuthEvent } from "../src/modules/auth/model/reportAuthEvent.ts";
 
@@ -25,9 +24,9 @@ describe("reportAuthEvent", () => {
       },
     );
 
-    assert.equal(requests.length, 1);
-    assert.equal(requests[0]?.input, "/api/v1/auth/client-event");
-    assert.deepEqual(JSON.parse(String(requests[0]?.init?.body)), {
+    expect(requests).toHaveLength(1);
+    expect(requests[0]?.input).toBe("/api/v1/auth/client-event");
+    expect(JSON.parse(String(requests[0]?.init?.body))).toEqual({
       event: "auth_callback",
       buildVersion: "build-123",
       attemptId: "attempt-123",
@@ -41,7 +40,7 @@ describe("reportAuthEvent", () => {
       throw new Error("offline");
     };
 
-    await assert.doesNotReject(() =>
+    await expect(
       reportAuthEvent(
         "widget_script_failed",
         {},
@@ -52,10 +51,10 @@ describe("reportAuthEvent", () => {
           fetchImpl,
         },
       ),
-    );
+    ).resolves.toBeUndefined();
   });
 
   it("does not reject when browser runtime APIs are unavailable", async () => {
-    await assert.doesNotReject(() => reportAuthEvent("page_loaded"));
+    await expect(reportAuthEvent("page_loaded")).resolves.toBeUndefined();
   });
 });
