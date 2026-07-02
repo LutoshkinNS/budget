@@ -3,6 +3,7 @@ import {
   InviteToAccount,
   RenameAccount,
 } from "@/modules/accounts";
+import { Logout } from "@/modules/auth";
 
 export function Settings() {
   return (
@@ -10,6 +11,7 @@ export function Settings() {
       <AccountsSelect />
       <InviteToAccount />
       <RenameAccount />
+      <Logout />
     </div>
   );
 }
