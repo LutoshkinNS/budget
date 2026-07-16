@@ -1,141 +1,143 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides repository-specific guidance for Codex when working in this budget/expense tracking monorepo.
 
 ## Project Overview
 
-This is a monorepo for a budget/expense tracking application with a Fastify backend and React frontend. The project uses TypeSpec for API contract generation, with automatic client code generation via Orval.
+This is a monorepo for a budget/expense tracking application with a Fastify backend and React frontend. The project uses TypeSpec for API contract generation and Orval for frontend API client generation.
 
 ## Repository Structure
 
-- `frontend/` - React + TypeScript + Vite frontend application
-- `server/` - Fastify + Prisma backend application
-- `server/typespec/` - TypeSpec API specifications
-- `server/prisma/` - Database schema and migrations
+- `apps/frontend/` - React + TypeScript + Vite frontend application.
+- `apps/server/` - Fastify + Prisma backend application.
+- `apps/server/prisma/` - Database schema and migrations.
+- `packages/api-contracts/` - TypeSpec API contract package.
+- `packages/api-contracts/typespec/` - TypeSpec source files.
+- `packages/api-contracts/generated/` - TypeSpec-generated OpenAPI output.
 
 ## Development Commands
 
-### Frontend (run from `frontend/` directory)
+Run workspace commands from the repository root:
 
 ```bash
-npm run build            # Build for production (runs TypeScript check first)
-npm run lint             # Run ESLint
-npm run prettier:check   # Check code formatting
-npm run prettier:write   # Format code with Prettier
-npm run api:generate     # Generate API client from OpenAPI spec
+pnpm run dev      # Start frontend and server together
+pnpm run client   # Start only @budget/frontend
+pnpm run server   # Start only @budget/server
+pnpm --filter @budget/frontend scaffold frontend-page <page-name> [--private|--public] [--title <title>]   # Create a frontend page and route
 ```
 
-### Server (run from `server/` directory)
+Frontend commands:
 
 ```bash
-npm run build                         # Build TypeScript to dist/
-npm run typespec:generate             # Generate OpenAPI spec from TypeSpec
-npm run typespec:generate:watch       # Generate OpenAPI spec in watch mode
-npm run typespec:generateTsSchemas    # Generate TypeScript schemas from OpenAPI
-npm run typespec                      # Run both typespec commands
-npm run prisma:seed                   # Seed database with initial data
+pnpm --filter @budget/frontend dev
+pnpm --filter @budget/frontend build:local
+pnpm --filter @budget/frontend build:prod
+pnpm --filter @budget/frontend ts:check
+pnpm --filter @budget/frontend lint
+pnpm --filter @budget/frontend lint:fix
+pnpm --filter @budget/frontend test
+pnpm --filter @budget/frontend prettier:check
+pnpm --filter @budget/frontend prettier:write
+pnpm --filter @budget/frontend api:generate
+```
+
+Server commands:
+
+```bash
+pnpm --filter @budget/server build
+pnpm --filter @budget/server dev
+pnpm --filter @budget/server lint
+pnpm --filter @budget/server lint:fix
+pnpm --filter @budget/server prettier:check
+pnpm --filter @budget/server prettier:write
+pnpm --filter @budget/server typespec:generate
+pnpm --filter @budget/server typespec:generate:watch
+pnpm --filter @budget/server typespec:generateTsSchemas
+pnpm --filter @budget/server typespec
+pnpm --filter @budget/server prisma:generate
+pnpm --filter @budget/server prisma:seed
+```
+
+API contract package commands:
+
+```bash
+pnpm --filter @budget/api-contracts typespec:generate
+pnpm --filter @budget/api-contracts typespec:generate:watch
 ```
 
 ## API Contract Development Flow
 
 The project uses a contract-first approach with TypeSpec:
 
-1. **Define API contract**: Edit TypeSpec files in `server/typespec/` (main entry: `main.tsp`)
-2. **Generate OpenAPI spec**: Run `npm run typespec:generate` in server directory
-3. **Generate TypeScript schemas**: Run `npm run typespec:generateTsSchemas` in server directory
-4. **Generate frontend client**: Run `npm run api:generate` in frontend directory
-5. **Implement server handlers**: Create route handlers in `server/src/domains/`
-
-The generated files are in `server/generated/@typespec/` (ignored by git).
+1. Edit TypeSpec files in `packages/api-contracts/typespec/` (entry point: `main.tsp`).
+2. Generate OpenAPI output with `pnpm --filter @budget/api-contracts typespec:generate`.
+3. Generate server TypeScript schemas with `pnpm --filter @budget/server typespec:generateTsSchemas`, or run both steps through `pnpm --filter @budget/server typespec`.
+4. Generate the frontend client with `pnpm --filter @budget/frontend api:generate`.
+5. Implement or update Fastify handlers in `apps/server/src/domains/`.
 
 ## Architecture
 
-### Backend Architecture
+### Backend
 
-- **Framework**: Fastify with JSON Schema validation via Ajv
-- **Database**: SQLite via Prisma ORM
-- **Type Provider**: `@fastify/type-provider-json-schema-to-ts` for type-safe schemas
-- **Module Structure**: Domain-based modules in `server/src/domains/` (categories, expenses, subcategories)
-- **Schemas**: TypeSpec generates JSON schemas imported from `#s/*` alias (`generated/@typespec/ts-schemas/`)
-- **Prisma Plugin**: Prisma client injected via plugin at `server/src/plugins/prisma/prismaPlugin.ts`
+- Framework: Fastify with JSON Schema validation via Ajv.
+- Database: SQLite via Prisma ORM.
+- Type provider: `@fastify/type-provider-json-schema-to-ts`.
+- Module structure: domain modules under `apps/server/src/domains/`.
+- Schemas: generated TypeSpec schemas are imported through the `#s/*` alias from `apps/server/generated/@typespec/ts-schemas/`.
+- Prisma client: generated into `apps/server/generated/prisma/` and injected through `apps/server/src/plugins/prisma/prismaPlugin.ts`.
+- Entry point: `apps/server/src/main.ts` registers domain modules and plugins.
 
-Server entry point: `server/src/main.ts` registers domain modules with route prefixes.
+Server TypeScript path aliases:
 
-TypeScript path aliases (defined in `package.json` imports and `tsconfig.json`):
-- `#src/*` → `./src/*`
-- `#s/*` → `./generated/@typespec/ts-schemas/*`
-- `#generated/*` → `./generated/*`
+- `#src/*` -> `./src/*`
+- `#s/*` -> `./generated/@typespec/ts-schemas/*`
+- `#generated/*` -> `./generated/*`
 
-### Frontend Architecture
+### Frontend
 
-Uses Feature-Sliced Design (FSD) methodology with layers:
+The frontend follows Feature-Sliced Design conventions:
 
-- **app/** - Application initialization, routing, and providers
-  - Contains TanStack Router setup and route definitions
-  - `App.tsx` wraps app with QueryClientProvider and RouterProvider
+- `app/` - app initialization, providers, routing, TanStack Router setup.
+- `pages/` - page-level screens.
+- `entities/` - business entity hooks and model-facing logic.
+- `features/` - feature-specific UI and interactions.
+- `shared/` / `common/` - shared utilities, API setup, reusable UI, generated API client.
 
-- **pages/** - Page components (e.g., Categories, Main)
+Generated Orval client files live under `apps/frontend/src/common/api/generate/`. Do not edit generated files by hand.
 
-- **entities/** - Business entities with hooks (e.g., categories, subcategories, expense)
-  - Each entity has a custom hook that wraps generated API hooks
-  - Hooks include Zod validation and error handling via notifications
-  - Example: `useCategories()` wraps `useCategoriesList()` and validates with Zod and `useInvalidateCategories()`
+## Generated Files
 
-- **features/** - Feature-specific components
+Do not manually edit generated artifacts:
 
-- **shared/** - Shared utilities, UI components
-  - Contains notification system (`shared/lib/notifications`)
-  - Contains all reusable things without business logic
+- `apps/frontend/src/common/api/generate/`
+- `apps/frontend/src/app/routes/routeTree.gen.ts`
+- `apps/server/generated/`
+- `packages/api-contracts/generated/`
 
-- **kernel/** - Core application logic
-  - `kernel/api/` - API client configuration
-    - `appQuery.ts` - TanStack Query client configuration
-    - `customFetcher.ts` - Custom fetch wrapper for API calls
-    - `generate/` - Auto-generated API client from Orval (DO NOT EDIT)
-
-### API Client Generation
-
-Orval configuration (`frontend/orval.config.ts`) generates two outputs:
-- **React Query hooks** (`*.gen.ts`) - TanStack Query hooks for API calls
-- **Zod schemas** (`*.zod.gen.ts`) - Runtime validation schemas
-
-Generated client uses custom fetcher from `kernel/api/customFetcher.ts` that:
-- Throws errors with `{code, message}` structure on non-OK responses
-- Returns undefined for 204/205/304 status codes
-
-### Data Flow Pattern
-
-1. TypeSpec defines API contract in `server/typespec/`
-2. Generated OpenAPI spec creates TypeScript schemas for server
-3. Orval generates React Query hooks and Zod schemas for frontend
-4. Entity hooks (`entities/*/`) wrap generated hooks with validation and error handling
-5. Page components use entity hooks to display data
+Regenerate them through the documented commands instead.
 
 ## Database
 
-- **ORM**: Prisma with SQLite (`server/prisma/dev.db`)
-- **Schema**: `server/prisma/schema.prisma`
-- **Generated client**: Output to `server/generated/prisma/`
-
-Key models: User, Account, AccountUser, Category, Subcategory, Expense
-
-Soft deletes are used for Categories and Subcategories via `deletedAt` field.
+- ORM: Prisma with SQLite.
+- Schema: `apps/server/prisma/schema.prisma`.
+- Generated client: `apps/server/generated/prisma/`.
+- Key models include users, accounts, account membership/invitations, transaction categories, subcategories, and transactions.
+- Category and subcategory deletes are modeled with `deletedAt`.
 
 ## Code Style
 
-- **React Compiler**: Enabled for automatic memoization
-- **Import sorting**: Use `eslint-plugin-simple-import-sort`
-- **Formatting**: Prettier is configured
-- **TypeScript**: Strict mode enabled on both frontend and server
+- Use the existing TypeScript strictness, ESLint, Prettier, and import sorting setup.
+- Preserve Feature-Sliced Design boundaries in frontend changes.
+- Keep backend changes inside the relevant domain/module unless a shared abstraction is justified.
+- Prefer project-local helpers, aliases, and patterns over introducing new conventions.
 
-## Important Notes
+## Repository Artifacts
 
-- **Generated files**: Never edit files in `kernel/api/generate/`, `server/generated/`
-- **Hard-coded account ID**: Server currently uses `accountId = 1` for all operations (TODO: add authentication)
-- **Russian language**: Some UI text and comments are in Russian
-- **FSD methodology**: Follow Feature-Sliced Design patterns when adding frontend code
-- **Error handling**: Frontend entity hooks validate responses with Zod and show notifications on errors
+Do not commit Codex/agent working artifacts. Keep these local unless the user explicitly asks otherwise:
 
-## Working with Claude Code
+- `docs/` working drafts and planning notes.
+- `.codex/` task memory, reports, local config, temporary files.
+- `.claude/` legacy task memory or Claude-specific files.
+- `.playwright-mcp/`, `.mcp.json`, and similar local tool artifacts.
 
-- **Не коммить артефакты разработки через Claude.** Содержимое `docs/` (включая `docs/superpowers/`: планы, спецификации, brainstorming-черновики, ретроспективы) и любые промежуточные файлы, созданные в процессе работы Claude (`.claude/`, `.playwright-mcp/`, `.mcp.json` и т.п.), не должны попадать в коммиты. Эти артефакты — рабочее пространство Claude, а не часть кодовой базы. Храни локально, но не пушь в репозиторий.
+When committing, include only source, tests, configuration, generated artifacts that the project intentionally tracks, and documentation intended for the repository.

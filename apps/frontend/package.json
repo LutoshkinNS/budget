@@ -14,7 +14,8 @@
     "preview": "vite preview",
     "prettier:check": "npx prettier . --check",
     "prettier:write": "npx prettier . --write",
-    "api:generate": "orval --config orval.config.ts"
+    "api:generate": "orval --config orval.config.ts",
+    "scaffold": "node scripts/scaffold/index.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.10",
