@@ -1,4 +1,405 @@
-План развертывания Budget App на VPS (Ubuntu/Debian)
+# Текущее production-состояние
+
+Последнее обновление: 5 июля 2026 года.
+
+Этот раздел описывает фактическое состояние production. Старый пошаговый deployment guide сохранён ниже как справочная информация.
+
+## Production endpoints
+
+```text
+Origin IPv4:          85.235.205.154
+Frontend:             https://budget-best.ru
+Same-origin API:      https://budget-best.ru/api/
+Legacy API hostname:  https://api.budget-best.ru
+Optional www:         https://www.budget-best.ru
+```
+
+`www.budget-best.ru` сейчас не является рабочим обязательным endpoint: origin-сертификат не содержит `www`.
+
+## Топология
+
+```text
+Пользователь
+  -> Cloudflare edge (для proxied hostname)
+  -> host nginx :443
+  -> /api/*  -> localhost:3000 -> budget_server
+  -> /*      -> localhost:3001 -> budget_frontend:8080
+```
+
+Основные пути на VPS:
+
+```text
+/opt/budget/                              production checkout
+/opt/budget/.env                          production secrets; не коммитить
+/opt/budget/docker-compose.yml            compose configuration
+/opt/budget/deploy.sh                     production deploy script
+/opt/budget/apps/server/data/             persistent SQLite directory
+/etc/nginx/sites-available/budget          host nginx virtual hosts
+/etc/nginx/conf.d/cloudflare-realip.conf   trusted Cloudflare networks
+/etc/letsencrypt/live/budget-best.ru/      origin certificate
+```
+
+Контейнеры:
+
+```text
+budget_server    host port 3000 -> container port 3000
+budget_frontend  host port 3001 -> container port 8080
+```
+
+Проверка:
+
+```bash
+cd /opt/budget
+docker compose --env-file .env ps
+docker logs --since 30m --timestamps budget_server 2>&1 | tail -n 200
+docker logs --since 30m --timestamps budget_frontend 2>&1 | tail -n 200
+```
+
+## Cloudflare и DNS
+
+Тариф: Cloudflare Free.
+
+Регистратор: Sprinthost. Домен остаётся под управлением Sprinthost; изменена только NS-делегация.
+
+Authoritative nameservers:
+
+```text
+colin.ns.cloudflare.com
+piper.ns.cloudflare.com
+```
+
+Старая зона Sprinthost сохранена для отката:
+
+```text
+ns1.sprinthost.ru
+ns2.sprinthost.ru
+ns3.sprinthost.net
+ns4.sprinthost.net
+```
+
+NS-делегация Cloudflare подтверждена 5 июля 2026 года через `.ru` parent, `1.1.1.1` и `8.8.8.8`.
+
+Текущие записи в Cloudflare Dashboard:
+
+```text
+budget-best.ru      A  85.235.205.154  Proxied
+api.budget-best.ru  A  85.235.205.154  Proxied в Dashboard
+www.budget-best.ru  A  85.235.205.154  DNS only
+```
+
+Основной `budget-best.ru` подтверждён внешне как proxied (`Server: cloudflare`, `CF-RAY` присутствует). `api.budget-best.ru` окончательно подтверждён как proxied в 21:13 МСК 5 июля: authoritative NS возвращают Cloudflare IP `188.114.96.1`/`188.114.97.1`, HTTPS содержит `Server: cloudflare` и `CF-RAY`.
+
+`www` оставлен DNS-only, потому что текущий Let's Encrypt origin-сертификат не покрывает `www.budget-best.ru`. Перед включением proxy для `www` нужно либо добавить hostname в nginx/Certbot, либо удалить неиспользуемую DNS-запись.
+
+Проверка DNS:
+
+```bash
+dig NS budget-best.ru @1.1.1.1 +short
+dig A budget-best.ru @1.1.1.1 +short
+dig A api.budget-best.ru @1.1.1.1 +short
+```
+
+Признаки proxied hostname:
+
+```bash
+curl -sS -D - -o /dev/null https://budget-best.ru/
+```
+
+В ответе должны быть:
+
+```text
+Server: cloudflare
+CF-RAY: ...
+```
+
+## Cloudflare TLS
+
+```text
+Encryption mode:  Full (strict)
+Universal SSL:    *.budget-best.ru, budget-best.ru
+Type:             Universal / Managed
+Expires:          03.10.2026
+HTTP/3 (QUIC):    Off на время первого production-теста
+```
+
+Origin использует Let's Encrypt:
+
+```text
+Subject:     CN=budget-best.ru
+Issuer:      Let's Encrypt YE2
+Key type:    ECDSA
+SAN:         budget-best.ru, api.budget-best.ru
+Valid until: 01.09.2026 13:36:58
+Certbot:     VALID, 57 days remaining on 05.07.2026
+```
+
+Не выбирать Cloudflare `Flexible`. Не удалять Let's Encrypt: он нужен для `Full (strict)` и прямого DNS-only rollback.
+
+Certbot проверен после Cloudflare rollout:
+
+```bash
+certbot certificates
+certbot renew --dry-run
+```
+
+Фактический результат 5 июля 2026:
+
+```text
+Congratulations, all simulated renewals succeeded
+/etc/letsencrypt/live/budget-best.ru/fullchain.pem (success)
+```
+
+## Cloudflare cache
+
+Активно Cache Rule:
+
+```text
+Name: Bypass API and PWA shell
+Match:
+  URI Path starts with /api/
+  OR URI Path in /sw.js, /index.html, /manifest.webmanifest, /registerSW.js
+  OR URI Path starts with /workbox-
+Action: Bypass cache
+Status: Active
+```
+
+Назначение:
+
+- API и авторизация всегда доходят до origin;
+- service worker и PWA shell не получают устаревшую edge-копию;
+- хешированные `/assets/*` могут кэшироваться Cloudflare.
+
+Ожидаемый анонимный API smoke test:
+
+```bash
+curl -sS -D - https://budget-best.ru/api/v1/auth/me
+```
+
+Нормальный результат без cookie:
+
+```text
+HTTP 401
+{"code":"MISSING_TOKEN","message":"FastifyError","statusCode":401}
+CF-Cache-Status: DYNAMIC
+```
+
+## Реальный IP пользователя за Cloudflare
+
+Nginx собран с:
+
+```text
+--with-http_realip_module
+```
+
+`/etc/nginx/nginx.conf` подключает:
+
+```nginx
+include /etc/nginx/conf.d/*.conf;
+```
+
+Установлен файл:
+
+```text
+/etc/nginx/conf.d/cloudflare-realip.conf
+```
+
+Логика файла:
+
+```nginx
+real_ip_header CF-Connecting-IP;
+real_ip_recursive on;
+set_real_ip_from <официальные Cloudflare IPv4/IPv6 ranges>;
+```
+
+На 5 июля 2026 года установлены 15 IPv4 и 7 IPv6 сетей из:
+
+```text
+https://www.cloudflare.com/ips-v4
+https://www.cloudflare.com/ips-v6
+```
+
+Файл прошёл `nginx -t`; выполнен `systemctl reload nginx`; сервис остался `active`.
+
+Текущие временные файлы на сервере:
+
+```text
+/root/cloudflare-ips-v4.txt
+/root/cloudflare-ips-v6.txt
+/root/cloudflare-realip.conf.new
+```
+
+Real-IP подтверждён 5 июля 2026 года. Проверочный URL:
+
+```text
+https://budget-best.ru/default.png?probe=cf-realip-1
+```
+
+Проверка:
+
+```bash
+grep 'probe=cf-realip-1' /var/log/nginx/access.log | tail -n 5
+```
+
+Фактический результат:
+
+```text
+45.90.98.92      исходный VPN/client IP, HTTP 200
+149.154.161.250  TelegramBot link preview, HTTP 200
+149.154.161.232  TelegramBot link preview, HTTP 200
+```
+
+Первая колонка содержит исходный VPN/client IP, а не Cloudflare edge IP. Запросы `TelegramBot` относятся к link preview и не являются пользовательскими запросами браузера.
+
+Безопасное обновление Cloudflare ranges:
+
+```bash
+curl -fsSL https://www.cloudflare.com/ips-v4 -o /root/cloudflare-ips-v4.txt
+curl -fsSL https://www.cloudflare.com/ips-v6 -o /root/cloudflare-ips-v6.txt
+
+{
+  echo 'real_ip_header CF-Connecting-IP;'
+  echo 'real_ip_recursive on;'
+  awk 'NF {printf "set_real_ip_from %s;\n", $0}' \
+    /root/cloudflare-ips-v4.txt \
+    /root/cloudflare-ips-v6.txt
+} > /root/cloudflare-realip.conf.new
+
+install -m 0644 /root/cloudflare-realip.conf.new \
+  /etc/nginx/conf.d/cloudflare-realip.conf
+nginx -t && systemctl reload nginx
+systemctl is-active nginx
+```
+
+Не использовать `sed` без нормализации перевода строки: официальный список может не иметь завершающего newline, из-за чего последняя IPv4 и первая IPv6 директивы склеятся.
+
+## Nginx и логи
+
+Host nginx:
+
+```text
+Version: nginx/1.24.0 (Ubuntu)
+Access log: /var/log/nginx/access.log
+Error log:  /var/log/nginx/error.log
+```
+
+Маршрутизация `budget-best.ru`:
+
+```text
+/api/* -> http://localhost:3000
+/*     -> http://localhost:3001
+```
+
+Legacy `api.budget-best.ru`:
+
+```text
+/* -> http://localhost:3000
+```
+
+Полезные проверки:
+
+```bash
+nginx -t
+systemctl is-active nginx
+nginx -T 2>&1 | less
+
+tail -n 100 /var/log/nginx/error.log
+grep -E '/api/v1/auth/(client-event|login|me|refresh|logout)' \
+  /var/log/nginx/access.log | tail -n 100
+```
+
+## Firewall и TCP
+
+Текущее состояние, подтверждённое в ходе диагностики:
+
+- временные iptables TCPMSS rules удалены;
+- `net.ipv4.tcp_ecn = 2`;
+- `net.ipv4.tcp_ecn_fallback = 1`;
+- firewall пока не ограничен только Cloudflare IP;
+- origin остаётся доступен напрямую для безопасного rollback.
+
+Перед любым ужесточением firewall сначала проверить:
+
+```bash
+ufw status verbose
+iptables -S
+iptables -t mangle -S
+ss -lntp
+```
+
+Не закрывать origin для прямого доступа до успешного Certbot dry-run, проверки административного доступа к VPS и подготовки проверенного правила firewall с возможностью отката.
+
+## Deploy
+
+Обычный production deploy:
+
+```bash
+cd /opt/budget
+bash ./deploy.sh
+```
+
+Скрипт загружает изменения `master`, скачивает образы из GHCR и пересоздаёт контейнеры. Не записывать значения `.env`, Telegram token, JWT secret или GHCR token в этот файл.
+
+Проверка после deploy:
+
+```bash
+cd /opt/budget
+docker compose --env-file .env ps
+curl -sS -D - -o /dev/null https://budget-best.ru/
+curl -sS -D - https://budget-best.ru/api/v1/auth/me
+```
+
+## SQLite
+
+Production database:
+
+```text
+/opt/budget/apps/server/data/budget.db
+```
+
+Не копировать только `budget.db` во время активной записи, если база работает в WAL mode. Для согласованной копии использовать SQLite backup либо остановить backend и копировать всю директорию данных вместе с возможными `-wal`/`-shm` файлами.
+
+Перед восстановлением всегда остановить `budget_server` и сохранить отдельную копию текущей директории данных.
+
+## Быстрый откат Cloudflare proxy
+
+Если после включения proxy приложение недоступно:
+
+1. Cloudflare Dashboard -> DNS -> Records.
+2. Переключить `budget-best.ru` и `api` из `Proxied` в `DNS only`.
+3. Проверить, что DNS снова возвращает `85.235.205.154`.
+4. Не менять NS во время быстрого отката.
+
+Проверка:
+
+```bash
+dig A budget-best.ru @1.1.1.1 +short
+curl --resolve budget-best.ru:443:85.235.205.154 \
+  -sS -D - -o /dev/null https://budget-best.ru/
+```
+
+Полный возврат NS к Sprinthost нужен только при проблеме с authoritative DNS и займёт больше времени.
+
+## Откат nginx real-IP
+
+Использовать только если real-IP конфигурация вызвала ошибку:
+
+```bash
+rm /etc/nginx/conf.d/cloudflare-realip.conf
+nginx -t && systemctl reload nginx
+systemctl is-active nginx
+```
+
+Удаление real-IP файла не отключает Cloudflare; nginx снова будет записывать edge IP Cloudflare.
+
+## Незавершённые серверные задачи
+
+- решить судьбу `www`: удалить запись или добавить hostname в nginx/Certbot;
+- после стабильного теста решить, включать ли HTTP/3;
+- firewall restriction to Cloudflare ranges пока не выполнять.
+
+---
+
+# Первоначальный план развертывания Budget App на VPS (Ubuntu/Debian)
 
 Обзор
 
