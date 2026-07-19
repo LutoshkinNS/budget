@@ -1,6 +1,6 @@
 import { CategoryKeyboard } from "@/modules/expenses/modules/category-keyboard";
 
-import { useCategories } from "../useCategories.ts";
+import { useCategories } from "../model/useCategories.ts";
 
 type CategoryType = "income" | "expense";
 

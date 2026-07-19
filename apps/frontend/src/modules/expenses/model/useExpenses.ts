@@ -8,7 +8,7 @@ import {
 import {
   type ExpenseDateRange,
   getExpenseDateRange,
-} from "./modules/period-summary/model/types.ts";
+} from "../modules/period-summary";
 
 export type ExpenseDTO = TransactionDTO;
 

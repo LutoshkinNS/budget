@@ -5,7 +5,7 @@ import {
   useInvalidateTransaction,
   useInvalidateTransactionsList,
   useInvalidateTransactionSummary,
-} from "../useTransactions.ts";
+} from "./useTransactions.ts";
 
 export function useDeleteTransaction() {
   const invalidateTransaction = useInvalidateTransaction();

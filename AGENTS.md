@@ -24,6 +24,7 @@ pnpm run dev      # Start frontend and server together
 pnpm run client   # Start only @budget/frontend
 pnpm run server   # Start only @budget/server
 pnpm --filter @budget/frontend scaffold frontend-page <page-name> [--private|--public] [--title <title>]   # Create a frontend page and route
+pnpm --filter @budget/frontend scaffold frontend-module <module-name> [--parent <module-path>] [--title <title>] [--dry-run] [--force]  # Create a frontend module boundary
 ```
 
 Frontend commands:
@@ -95,13 +96,35 @@ Server TypeScript path aliases:
 
 ### Frontend
 
-The frontend follows Feature-Sliced Design conventions:
+The frontend follows FEOD (Fractal Entity Oriental Design), not FSD; the full convention is documented in `apps/frontend/ARCHITECTURE.md`:
 
 - `app/` - app initialization, providers, routing, TanStack Router setup.
 - `pages/` - page-level screens.
-- `entities/` - business entity hooks and model-facing logic.
-- `features/` - feature-specific UI and interactions.
-- `shared/` / `common/` - shared utilities, API setup, reusable UI, generated API client.
+- `modules/` - feature/domain modules with a public API through `index.ts`.
+- `common/` - shared utilities, API setup, reusable UI, generated API client.
+- `app/routes/` - thin TanStack Router adapter files that bind routes to pages.
+
+Frontend module rules:
+
+- Create top-level modules with `pnpm --filter @budget/frontend scaffold frontend-module <module-name> [--title <title>] [--dry-run] [--force]`.
+- Create nested modules with `pnpm --filter @budget/frontend scaffold frontend-module <module-name> --parent <module-path> [--title <title>] [--dry-run] [--force]`.
+- `--parent` is relative to `src/modules`; for example, `--parent expenses` creates under `src/modules/expenses/modules`.
+- `--dry-run` previews files and `--force` permits overwriting existing files.
+- Expose module public API only from `src/modules/<module>/index.ts`.
+- Nested modules are first-class FEOD modules and also expose their public API through `index.ts`.
+- Keep UI components in `src/modules/<module>/ui/`.
+- Keep module types, schemas and hooks in `src/modules/<module>/model/`, unless the existing module already uses a legacy root hook file.
+- Root module hooks outside `model/` are legacy exceptions; migrate them when the module is otherwise touched.
+- Do not import from another module's internal `model/` or `ui/` files; import from that module's `index.ts`.
+- Do not place business logic in `pages/`; pages compose modules and route-level state.
+
+Frontend React rules:
+
+- Use `useEffect` only for code that must run because the component was displayed to the user. Do not use effects for deriving render data, synchronizing local state from props, or handling direct user actions when the logic can run in render, event handlers, or data/query hooks.
+
+`common` is shared infrastructure, not a module boundary: it does not require `index.ts`, and new code may use direct imports from concrete files. Existing `pages -> app/routes` imports are legacy exceptions for TanStack Router coupling; new pages must not import route objects directly.
+
+`app/routes` files are TanStack adapter files. They own `createFileRoute`, route hooks, and the adapter that passes route data/actions into a page; page composition and business logic belong in `pages` and `modules`.
 
 Generated Orval client files live under `apps/frontend/src/common/api/generate/`. Do not edit generated files by hand.
 
@@ -127,7 +150,8 @@ Regenerate them through the documented commands instead.
 ## Code Style
 
 - Use the existing TypeScript strictness, ESLint, Prettier, and import sorting setup.
-- Preserve Feature-Sliced Design boundaries in frontend changes.
+- Name new files and folders with kebab-case (`file-name.ts`, `feature-module/`) unless an external convention, generator, or framework requires another format.
+- Preserve FEOD module boundaries and dependency directions in frontend changes.
 - Keep backend changes inside the relevant domain/module unless a shared abstraction is justified.
 - Prefer project-local helpers, aliases, and patterns over introducing new conventions.
 

@@ -5,7 +5,7 @@ import { CategoriesCreateBody } from "@/common/api/generate/categories/categorie
 import type { CategoryCreateDTO } from "@/common/api/generate/model";
 import { errorHandler } from "@/common/lib/error-handler/error-handler.ts";
 
-import { useInvalidateCategories } from "../useCategories.ts";
+import { useInvalidateCategories } from "./useCategories.ts";
 
 export type CategoryCreateData = Omit<CategoryCreateDTO, "type"> & {
   type?: CategoryCreateDTO["type"] | undefined;

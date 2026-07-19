@@ -1,7 +1,7 @@
 import { useState } from "react";
 import clsx from "clsx";
 
-import type { ExpenseDTO } from "../../../useExpenses.ts";
+import type { ExpenseDTO } from "../../../model/useExpenses.ts";
 
 import { ExpenseDayHeader } from "./ExpenseDayHeader.tsx";
 import { ExpenseDayItem } from "./ExpenseDayItem.tsx";

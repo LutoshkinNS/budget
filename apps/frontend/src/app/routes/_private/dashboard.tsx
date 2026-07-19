@@ -1,33 +1,37 @@
-import type { SearchSchemaInput } from "@tanstack/react-router";
+import { useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import {
-  clampFutureMonth,
-  getCurrentMonthValue,
-  isMonthValue,
-  isPeriod,
-  type Period,
-} from "@/modules/expenses/modules/period-summary";
-import { Dashboard } from "@/pages/dashboard";
-
-export type DashboardSearch = {
-  period: Period;
-  month: string;
-};
-
-type DashboardSearchInput = {
-  period?: unknown;
-  month?: unknown;
-} & SearchSchemaInput;
+  Dashboard,
+  type DashboardSearchChangeHandler,
+  validateDashboardSearch,
+} from "@/pages/dashboard";
 
 export const Route = createFileRoute("/_private/dashboard")({
-  validateSearch: (search: DashboardSearchInput): DashboardSearch => {
-    const period = isPeriod(search.period) ? search.period : "month";
-    const month = isMonthValue(search.month)
-      ? clampFutureMonth(search.month)
-      : getCurrentMonthValue();
-
-    return { period, month };
-  },
-  component: Dashboard,
+  validateSearch: validateDashboardSearch,
+  component: DashboardRoute,
 });
+
+function DashboardRoute() {
+  const { period, month } = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  const handleSearchChange = useCallback<DashboardSearchChangeHandler>(
+    (search, options) => {
+      void navigate(
+        options?.replace === undefined
+          ? { search }
+          : { search, replace: options.replace },
+      );
+    },
+    [navigate],
+  );
+
+  return (
+    <Dashboard
+      period={period}
+      month={month}
+      onSearchChange={handleSearchChange}
+    />
+  );
+}

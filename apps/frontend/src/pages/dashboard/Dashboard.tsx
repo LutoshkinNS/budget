@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { Route } from "@/app/routes/_private/dashboard";
 import { ExpensesByDays } from "@/modules/expenses";
 import {
   clampFutureMonth,
@@ -9,11 +8,17 @@ import {
 } from "@/modules/expenses/modules/period-summary";
 import { UserFilter } from "@/modules/expenses/modules/user-filter";
 
+import type { DashboardSearchChangeHandler } from "./route.ts";
+
 import s from "./Dashboard.module.css";
 
-export function Dashboard() {
-  const { period, month } = Route.useSearch();
-  const navigate = Route.useNavigate();
+type DashboardProps = {
+  month: string;
+  onSearchChange: DashboardSearchChangeHandler;
+  period: Parameters<typeof getExpenseDateRange>[0];
+};
+
+export function Dashboard({ month, onSearchChange, period }: DashboardProps) {
   const [userId, setUserId] = useState<number | null>(null);
   const safeMonth = clampFutureMonth(month);
   const range = useMemo(
@@ -22,11 +27,8 @@ export function Dashboard() {
   );
 
   useEffect(() => {
-    void navigate({
-      search: { period, month: safeMonth },
-      replace: true,
-    });
-  }, [navigate, period, safeMonth]);
+    onSearchChange({ period, month: safeMonth }, { replace: true });
+  }, [onSearchChange, period, safeMonth]);
 
   return (
     <div className={s.container}>
@@ -36,14 +38,10 @@ export function Dashboard() {
         period={period}
         month={safeMonth}
         onPeriodChange={(nextPeriod) =>
-          void navigate({
-            search: { period: nextPeriod, month: safeMonth },
-          })
+          onSearchChange({ period: nextPeriod, month: safeMonth })
         }
         onMonthChange={(nextMonth) =>
-          void navigate({
-            search: { period, month: clampFutureMonth(nextMonth) },
-          })
+          onSearchChange({ period, month: clampFutureMonth(nextMonth) })
         }
       />
       <UserFilter value={userId} onChange={setUserId} />

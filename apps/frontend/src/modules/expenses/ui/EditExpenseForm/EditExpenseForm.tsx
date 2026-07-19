@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Input } from "@/common/ui/input/Input";
 import { useCategories } from "@/modules/categories";
 
+import type { ExpenseDTO } from "../../model/useExpenses.ts";
 import { useUpdateExpense } from "../../model/useUpdateExpense";
-import type { ExpenseDTO } from "../../useExpenses.ts";
 
 import s from "./EditExpenseForm.module.css";
 

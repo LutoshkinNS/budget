@@ -1,4 +1,7 @@
-export { useCategories, useInvalidateCategories } from "./useCategories.ts";
+export {
+  useCategories,
+  useInvalidateCategories,
+} from "./model/useCategories.ts";
 export { CategoriesList } from "./ui/CategoriesList.tsx";
 export { CategoriesSelect } from "./ui/CategoriesSelect.tsx";
 export { CategoriesKeyboard } from "./ui/CategoriesKeyboard.tsx";

@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCategories } from "@/modules/categories";
 import { useDeleteTransaction } from "@/modules/transactions";
 
-import type { ExpenseDTO } from "../../../useExpenses.ts";
+import type { ExpenseDTO } from "../../../model/useExpenses.ts";
 
 import s from "./expenseDay.module.css";
 

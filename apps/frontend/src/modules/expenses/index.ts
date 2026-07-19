@@ -2,8 +2,8 @@ export {
   useExpenses,
   useInvalidateExpense,
   useInvalidateExpensesList,
-} from "./useExpenses.ts";
-export type { ExpenseDayGroup } from "./useExpenses.ts";
+} from "./model/useExpenses.ts";
+export type { ExpenseDayGroup } from "./model/useExpenses.ts";
 export { useCreateExpense } from "./model/useCreateExpense.ts";
 export { useUpdateExpense } from "./model/useUpdateExpense.ts";
 export { CreateExpense } from "./ui/CreateExpense/CreateExpense.tsx";

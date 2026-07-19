@@ -9,7 +9,7 @@ import {
   useInvalidateTransaction,
   useInvalidateTransactionsList,
   useInvalidateTransactionSummary,
-} from "../useTransactions.ts";
+} from "./useTransactions.ts";
 
 export function useUpdateTransaction(transactionId: number) {
   const invalidateTransaction = useInvalidateTransaction();

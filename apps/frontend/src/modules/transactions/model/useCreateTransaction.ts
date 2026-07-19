@@ -8,7 +8,7 @@ import { useNotifications } from "@/common/lib/notifications";
 import {
   useInvalidateTransactionsList,
   useInvalidateTransactionSummary,
-} from "../useTransactions.ts";
+} from "./useTransactions.ts";
 
 export function useCreateTransaction() {
   const invalidateTransactionsList = useInvalidateTransactionsList();

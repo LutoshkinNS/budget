@@ -1,5 +1,5 @@
 import type { CategoryType } from "../model/types.ts";
-import { useCategories } from "../useCategories.ts";
+import { useCategories } from "../model/useCategories.ts";
 
 const IDS = {
   CATEGORY: "category",

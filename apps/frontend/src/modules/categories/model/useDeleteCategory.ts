@@ -4,9 +4,8 @@ import { useCategoriesDelete } from "@/common/api/generate/categories/categories
 import { CategoriesDeleteParams } from "@/common/api/generate/categories/categories.zod.gen.ts";
 import { errorHandler } from "@/common/lib/error-handler/error-handler.ts";
 
-import { useInvalidateCategories } from "../useCategories.ts";
-
 import { deleteCategoryFormDataSchema } from "./schemas.ts";
+import { useInvalidateCategories } from "./useCategories.ts";
 
 export function useDeleteCategory() {
   const invalidateCategories = useInvalidateCategories();

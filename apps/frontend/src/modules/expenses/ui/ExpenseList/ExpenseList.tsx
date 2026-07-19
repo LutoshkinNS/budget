@@ -1,7 +1,7 @@
 import { FormBlock } from "@/common/ui/form-block/FormBlock.tsx";
 import { useCategories } from "@/modules/categories";
 
-import { useExpenses } from "../../useExpenses.ts";
+import { useExpenses } from "../../model/useExpenses.ts";
 
 export function ExpenseList() {
   const { groups } = useExpenses();
