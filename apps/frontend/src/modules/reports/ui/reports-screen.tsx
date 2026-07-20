@@ -5,7 +5,7 @@ import {
   buildReportsPeriodRanges,
   getCurrentMonthValue,
   type ReportsPeriod,
-  type ReportsSearch,
+  type ReportsPeriodSelection,
 } from "../model/period.ts";
 import {
   type ReportsCategory,
@@ -17,11 +17,11 @@ import {
 import s from "./reports-screen.module.css";
 
 type ReportsScreenProps = {
-  search: ReportsSearch;
-  onSearchChange: (
-    search: ReportsSearch,
-    options?: { replace?: boolean },
-  ) => void;
+  periodSelection: ReportsPeriodSelection;
+  selectedCategoryId: number | undefined;
+  onPeriodSelectionChange: (periodSelection: ReportsPeriodSelection) => void;
+  onCategorySelect: (categoryId: number) => void;
+  onCategoryClose: () => void;
 };
 
 const PERIOD_LABELS: Record<ReportsPeriod, string> = {
@@ -60,14 +60,17 @@ function formatDate(value: string): string {
   }).format(new Date(value));
 }
 
-function PeriodControls({ search, onSearchChange }: ReportsScreenProps) {
-  const update = (change: Partial<ReportsSearch>) => {
-    const { selectedCategoryId: _selectedCategoryId, ...nextSearch } = {
-      ...search,
-      ...change,
-    };
+type PeriodControlsProps = {
+  periodSelection: ReportsPeriodSelection;
+  onPeriodSelectionChange: (periodSelection: ReportsPeriodSelection) => void;
+};
 
-    onSearchChange(nextSearch);
+function PeriodControls({
+  periodSelection,
+  onPeriodSelectionChange,
+}: PeriodControlsProps) {
+  const update = (change: Partial<ReportsPeriodSelection>) => {
+    onPeriodSelectionChange({ ...periodSelection, ...change });
   };
 
   return (
@@ -78,9 +81,11 @@ function PeriodControls({ search, onSearchChange }: ReportsScreenProps) {
             key={period}
             type="button"
             role="tab"
-            aria-selected={search.period === period}
+            aria-selected={periodSelection.period === period}
             className={
-              search.period === period ? s.periodTabActive : s.periodTab
+              periodSelection.period === period
+                ? s.periodTabActive
+                : s.periodTab
             }
             onClick={() => update({ period })}
           >
@@ -88,25 +93,25 @@ function PeriodControls({ search, onSearchChange }: ReportsScreenProps) {
           </button>
         ))}
       </div>
-      {search.period === "month" && (
+      {periodSelection.period === "month" && (
         <label className={s.field}>
           <span>Месяц</span>
           <input
             type="month"
-            value={search.month}
+            value={periodSelection.month}
             max={getCurrentMonthValue()}
             onChange={(event) => update({ month: event.target.value })}
           />
         </label>
       )}
-      {search.period === "range" && (
+      {periodSelection.period === "range" && (
         <div className={s.rangeFields}>
           <label className={s.field}>
             <span>От</span>
             <input
               type="date"
-              value={search.fromDate}
-              max={search.toDate}
+              value={periodSelection.fromDate}
+              max={periodSelection.toDate}
               onChange={(event) => update({ fromDate: event.target.value })}
             />
           </label>
@@ -114,8 +119,8 @@ function PeriodControls({ search, onSearchChange }: ReportsScreenProps) {
             <span>До</span>
             <input
               type="date"
-              value={search.toDate}
-              min={search.fromDate}
+              value={periodSelection.toDate}
+              min={periodSelection.fromDate}
               max={new Date().toISOString().slice(0, 10)}
               onChange={(event) => update({ toDate: event.target.value })}
             />
@@ -260,24 +265,28 @@ function CategorySheet({
   );
 }
 
-export function ReportsScreen({ search, onSearchChange }: ReportsScreenProps) {
-  const ranges = buildReportsPeriodRanges(search);
+export function ReportsScreen({
+  periodSelection,
+  selectedCategoryId,
+  onPeriodSelectionChange,
+  onCategorySelect,
+  onCategoryClose,
+}: ReportsScreenProps) {
+  const ranges = buildReportsPeriodRanges(periodSelection);
   const summaryQuery = useReportsCategorySummary(ranges);
   const summary = summaryQuery.summary;
   const selectedCategory =
     summary?.categories.find(
-      (category) => category.categoryId === search.selectedCategoryId,
+      (category) => category.categoryId === selectedCategoryId,
     ) ?? null;
-  const closeCategorySheet = () => {
-    const { selectedCategoryId: _selectedCategoryId, ...nextSearch } = search;
-
-    onSearchChange(nextSearch, { replace: true });
-  };
 
   return (
     <div className={s.container}>
       <h1 className={s.title}>Отчёты</h1>
-      <PeriodControls search={search} onSearchChange={onSearchChange} />
+      <PeriodControls
+        periodSelection={periodSelection}
+        onPeriodSelectionChange={onPeriodSelectionChange}
+      />
       {summaryQuery.isLoading && <Loader />}
       {summaryQuery.isError && (
         <SimpleError>Не удалось загрузить отчёт.</SimpleError>
@@ -300,12 +309,7 @@ export function ReportsScreen({ search, onSearchChange }: ReportsScreenProps) {
                   <CategoryItem
                     key={category.categoryId}
                     category={category}
-                    onClick={() =>
-                      onSearchChange({
-                        ...search,
-                        selectedCategoryId: category.categoryId,
-                      })
-                    }
+                    onClick={() => onCategorySelect(category.categoryId)}
                   />
                 ))}
               </div>
@@ -319,7 +323,7 @@ export function ReportsScreen({ search, onSearchChange }: ReportsScreenProps) {
         category={selectedCategory}
         from={ranges.current.from}
         to={ranges.current.to}
-        onClose={closeCategorySheet}
+        onClose={onCategoryClose}
       />
     </div>
   );

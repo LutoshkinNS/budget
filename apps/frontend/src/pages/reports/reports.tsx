@@ -1,6 +1,6 @@
-import { ReportsScreen, type ReportsSearch } from "@/modules/reports";
+import { type ReportsPeriodSelection, ReportsScreen } from "@/modules/reports";
 
-import type { ReportsSearchChangeHandler } from "./route.ts";
+import type { ReportsSearch, ReportsSearchChangeHandler } from "./route.ts";
 
 type ReportsProps = {
   search: ReportsSearch;
@@ -8,5 +8,27 @@ type ReportsProps = {
 };
 
 export function Reports({ search, onSearchChange }: ReportsProps) {
-  return <ReportsScreen search={search} onSearchChange={onSearchChange} />;
+  const { selectedCategoryId, ...periodSelection } = search;
+
+  const handlePeriodSelectionChange = (
+    nextPeriodSelection: ReportsPeriodSelection,
+  ) => {
+    onSearchChange(nextPeriodSelection);
+  };
+  const handleCategorySelect = (categoryId: number) => {
+    onSearchChange({ ...search, selectedCategoryId: categoryId });
+  };
+  const handleCategoryClose = () => {
+    onSearchChange(periodSelection, { replace: true });
+  };
+
+  return (
+    <ReportsScreen
+      periodSelection={periodSelection}
+      selectedCategoryId={selectedCategoryId}
+      onPeriodSelectionChange={handlePeriodSelectionChange}
+      onCategorySelect={handleCategorySelect}
+      onCategoryClose={handleCategoryClose}
+    />
+  );
 }

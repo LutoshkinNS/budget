@@ -1,11 +1,10 @@
 export type ReportsPeriod = "day" | "week" | "month" | "range";
 
-export type ReportsSearch = {
+export type ReportsPeriodSelection = {
   period: ReportsPeriod;
   month: string;
   fromDate: string;
   toDate: string;
-  selectedCategoryId?: number;
 };
 
 export type ReportsPeriodRange = {
@@ -66,78 +65,24 @@ function toIso(date: Date): string {
   return date.toISOString();
 }
 
-function isFutureDate(value: string, now: Date): boolean {
-  return dateValueToDate(value) > startOfDay(now);
-}
-
-function parsePositiveInteger(value: unknown): number | undefined {
-  if (typeof value === "number" && Number.isInteger(value) && value >= 1) {
-    return value;
-  }
-
-  if (typeof value !== "string" || !/^\d+$/.test(value)) {
-    return undefined;
-  }
-
-  const parsed = Number(value);
-
-  return Number.isSafeInteger(parsed) && parsed >= 1 ? parsed : undefined;
-}
-
-export function normalizeReportsSearch(
-  search: Partial<Record<keyof ReportsSearch, unknown>> = {},
-  now: Date = new Date(),
-): ReportsSearch {
-  const currentMonth = getCurrentMonthValue(now);
-  const currentDate = getCurrentDateValue(now);
-  const period = PERIODS.includes(search.period as ReportsPeriod)
-    ? (search.period as ReportsPeriod)
-    : "month";
-  const month =
-    typeof search.month === "string" &&
-    MONTH_PATTERN.test(search.month) &&
-    search.month <= currentMonth
-      ? search.month
-      : currentMonth;
-  const fromDate =
-    isValidDateValue(search.fromDate) && !isFutureDate(search.fromDate, now)
-      ? search.fromDate
-      : currentDate;
-  const toDate =
-    isValidDateValue(search.toDate) && !isFutureDate(search.toDate, now)
-      ? search.toDate
-      : currentDate;
-
-  const hasValidRange = dateValueToDate(fromDate) <= dateValueToDate(toDate);
-  const selectedCategoryId = parsePositiveInteger(search.selectedCategoryId);
-  const normalized = hasValidRange
-    ? { period, month, fromDate, toDate }
-    : { period, month, fromDate: currentDate, toDate: currentDate };
-
-  return selectedCategoryId === undefined
-    ? normalized
-    : { ...normalized, selectedCategoryId };
-}
-
 export function buildReportsPeriodRanges(
-  search: Partial<ReportsSearch>,
+  selection: ReportsPeriodSelection,
   now: Date = new Date(),
 ): ReportsPeriodRanges {
-  const normalized = normalizeReportsSearch(search, now);
   const today = startOfDay(now);
   const tomorrow = addDays(today, 1);
   let from: Date;
   let to: Date;
   let compare: ReportsPeriodRange;
 
-  if (normalized.period === "day") {
+  if (selection.period === "day") {
     from = today;
     to = tomorrow;
     compare = {
       from: toIso(addDays(from, -1)),
       to: toIso(from),
     };
-  } else if (normalized.period === "week") {
+  } else if (selection.period === "week") {
     const mondayOffset = (today.getDay() + 6) % 7;
     from = new Date(
       today.getFullYear(),
@@ -153,8 +98,8 @@ export function buildReportsPeriodRanges(
       from: toIso(previousWeekFrom),
       to: toIso(new Date(previousWeekFrom.getTime() + duration)),
     };
-  } else if (normalized.period === "month") {
-    const [yearValue, monthValue] = normalized.month.split("-");
+  } else if (selection.period === "month") {
+    const [yearValue, monthValue] = selection.month.split("-");
     const year = Number(yearValue);
     const month = Number(monthValue);
     from = new Date(year, month - 1, 1);
@@ -165,7 +110,7 @@ export function buildReportsPeriodRanges(
       1,
     );
 
-    if (normalized.month === getCurrentMonthValue(now)) {
+    if (selection.month === getCurrentMonthValue(now)) {
       if (to > tomorrow) to = tomorrow;
 
       const duration = to.getTime() - from.getTime();
@@ -180,8 +125,8 @@ export function buildReportsPeriodRanges(
       };
     }
   } else {
-    from = dateValueToDate(normalized.fromDate);
-    to = addDays(dateValueToDate(normalized.toDate), 1);
+    from = dateValueToDate(selection.fromDate);
+    to = addDays(dateValueToDate(selection.toDate), 1);
 
     const duration = to.getTime() - from.getTime();
     compare = {

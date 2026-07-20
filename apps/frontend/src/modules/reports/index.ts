@@ -5,11 +5,10 @@ export {
   isReportsDateValue,
   isReportsMonthValue,
   isReportsPeriod,
-  normalizeReportsSearch,
   type ReportsPeriod,
+  type ReportsPeriodSelection,
   type ReportsPeriodRange,
   type ReportsPeriodRanges,
-  type ReportsSearch,
 } from "./model/period.ts";
 export {
   useReportsCategorySummary,
