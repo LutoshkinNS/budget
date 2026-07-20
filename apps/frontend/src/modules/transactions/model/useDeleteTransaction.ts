@@ -3,12 +3,15 @@ import { useNotifications } from "@/common/lib/notifications";
 
 import {
   useInvalidateTransaction,
+  useInvalidateTransactionsCategorySummary,
   useInvalidateTransactionsList,
   useInvalidateTransactionSummary,
 } from "./useTransactions.ts";
 
 export function useDeleteTransaction() {
   const invalidateTransaction = useInvalidateTransaction();
+  const invalidateTransactionsCategorySummary =
+    useInvalidateTransactionsCategorySummary();
   const invalidateTransactionsList = useInvalidateTransactionsList();
   const invalidateTransactionSummary = useInvalidateTransactionSummary();
   const { addNotification } = useNotifications();
@@ -26,6 +29,7 @@ export function useDeleteTransaction() {
         await Promise.all([
           invalidateTransactionsList(),
           invalidateTransactionSummary(),
+          invalidateTransactionsCategorySummary(),
           invalidateTransaction(variables.transactionId),
         ]);
         addNotification({

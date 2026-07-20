@@ -4,10 +4,12 @@ import type { z } from "zod";
 import { queryClient } from "@/common/api/appQuery";
 import type {
   TransactionDTO,
+  TransactionsCategorySummaryParams,
   TransactionsListParams,
   TransactionsSummaryParams,
 } from "@/common/api/generate/model";
 import {
+  getTransactionsCategorySummaryQueryKey,
   getTransactionsGetQueryKey,
   getTransactionsListQueryKey,
   getTransactionsSummaryQueryKey,
@@ -200,6 +202,21 @@ export function useInvalidateTransactionSummary() {
 
     return queryClient.invalidateQueries({
       queryKey: getTransactionsSummaryQueryKey(params),
+    });
+  };
+}
+
+export function useInvalidateTransactionsCategorySummary() {
+  return (params?: TransactionsCategorySummaryParams) => {
+    if (!params) {
+      return queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          queryKey[0] === "transactionsCategorySummary",
+      });
+    }
+
+    return queryClient.invalidateQueries({
+      queryKey: getTransactionsCategorySummaryQueryKey(params),
     });
   };
 }

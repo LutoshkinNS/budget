@@ -6,6 +6,7 @@ import { CategoriesKeyboard } from "@/modules/categories";
 import { useCreateTransaction } from "@/modules/transactions";
 import { useMe } from "@/modules/user";
 
+import { parseExpenseAmountInput } from "../../model/amount.ts";
 import { NumericKeyboard } from "../../modules/numeric-keyboard";
 
 import s from "./CreateExpense.module.css";
@@ -25,13 +26,13 @@ export function CreateExpense() {
 
   const { createTransaction } = useCreateTransaction();
   const { data: me } = useMe();
-  const currentAccount = me?.accounts.find(
-    (a) => a.id === me.currentAccountId,
-  );
+  const currentAccount = me?.accounts.find((a) => a.id === me.currentAccountId);
 
   const handleSubmit = async (selectedCategoryId: number) => {
+    const amountValue = parseExpenseAmountInput(amount);
+
     await createTransaction({
-      amount: Number(amount),
+      amount: amountValue ?? Number.NaN,
       categoryId: selectedCategoryId,
       type,
       ...(!!description && { description }),

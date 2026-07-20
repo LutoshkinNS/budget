@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Input } from "@/common/ui/input/Input";
 import { useCategories } from "@/modules/categories";
 
+import { parseExpenseAmountInput } from "../../model/amount.ts";
 import type { ExpenseDTO } from "../../model/useExpenses.ts";
 import { useUpdateExpense } from "../../model/useUpdateExpense";
 
@@ -55,11 +56,16 @@ export function EditExpenseForm({ expense }: EditExpenseFormProps) {
 
   const { data: categories } = useCategories({ type: "expense" });
   const { updateExpense, isLoading } = useUpdateExpense(expense.id);
-  const amountValue = Number(amount);
-  const canSubmit = amountValue > 0 && Boolean(date) && categoryId > 0;
+  const amountValue = parseExpenseAmountInput(amount);
+  const canSubmit =
+    amountValue !== null && amountValue > 0 && Boolean(date) && categoryId > 0;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (amountValue === null) {
+      return;
+    }
 
     try {
       await updateExpense({

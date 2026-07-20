@@ -1,5 +1,6 @@
 export {
   useInvalidateTransaction,
+  useInvalidateTransactionsCategorySummary,
   useInvalidateTransactionSummary,
   useInvalidateTransactionsList,
   useTransactionSummary,

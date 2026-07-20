@@ -6,11 +6,14 @@ import { TransactionsCreateBody } from "@/common/api/generate/transactions/trans
 import { useNotifications } from "@/common/lib/notifications";
 
 import {
+  useInvalidateTransactionsCategorySummary,
   useInvalidateTransactionsList,
   useInvalidateTransactionSummary,
 } from "./useTransactions.ts";
 
 export function useCreateTransaction() {
+  const invalidateTransactionsCategorySummary =
+    useInvalidateTransactionsCategorySummary();
   const invalidateTransactionsList = useInvalidateTransactionsList();
   const invalidateTransactionSummary = useInvalidateTransactionSummary();
   const { addNotification } = useNotifications();
@@ -22,6 +25,7 @@ export function useCreateTransaction() {
         await Promise.all([
           invalidateTransactionsList(),
           invalidateTransactionSummary(),
+          invalidateTransactionsCategorySummary(),
         ]);
       },
     },
