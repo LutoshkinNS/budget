@@ -22,12 +22,14 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  CategorySummaryDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
   TransactionCreateDTO,
   TransactionDTO,
   TransactionSummaryDTO,
   TransactionUpdateDTO,
+  TransactionsCategorySummaryParams,
   TransactionsListParams,
   TransactionsSummaryParams,
   ValidationErrorDTO,
@@ -313,6 +315,202 @@ export const useTransactionsCreate = <
     queryClient,
   );
 };
+export const getTransactionsCategorySummaryUrl = (
+  params: TransactionsCategorySummaryParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/transactions/category-summary?${stringifiedParams}`
+    : `/api/v1/transactions/category-summary`;
+};
+
+export const transactionsCategorySummary = async (
+  params: TransactionsCategorySummaryParams,
+  options?: RequestInit,
+): Promise<CategorySummaryDTO> => {
+  return fetcher<CategorySummaryDTO>(
+    getTransactionsCategorySummaryUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getTransactionsCategorySummaryQueryKey = (
+  params?: TransactionsCategorySummaryParams,
+) => {
+  return ["transactionsCategorySummary", ...(params ? [params] : [])] as const;
+};
+
+export const getTransactionsCategorySummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
+  TError = ValidationErrorDTO | InternalServerErrorDTO,
+>(
+  params: TransactionsCategorySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof transactionsCategorySummary>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getTransactionsCategorySummaryQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof transactionsCategorySummary>>
+  > = ({ signal }) =>
+    transactionsCategorySummary(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof transactionsCategorySummary>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type TransactionsCategorySummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof transactionsCategorySummary>>
+>;
+export type TransactionsCategorySummaryQueryError =
+  | ValidationErrorDTO
+  | InternalServerErrorDTO;
+
+export function useTransactionsCategorySummary<
+  TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
+  TError = ValidationErrorDTO | InternalServerErrorDTO,
+>(
+  params: TransactionsCategorySummaryParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof transactionsCategorySummary>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof transactionsCategorySummary>>,
+          TError,
+          Awaited<ReturnType<typeof transactionsCategorySummary>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useTransactionsCategorySummary<
+  TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
+  TError = ValidationErrorDTO | InternalServerErrorDTO,
+>(
+  params: TransactionsCategorySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof transactionsCategorySummary>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof transactionsCategorySummary>>,
+          TError,
+          Awaited<ReturnType<typeof transactionsCategorySummary>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useTransactionsCategorySummary<
+  TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
+  TError = ValidationErrorDTO | InternalServerErrorDTO,
+>(
+  params: TransactionsCategorySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof transactionsCategorySummary>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useTransactionsCategorySummary<
+  TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
+  TError = ValidationErrorDTO | InternalServerErrorDTO,
+>(
+  params: TransactionsCategorySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof transactionsCategorySummary>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getTransactionsCategorySummaryQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const invalidateTransactionsCategorySummary = async (
+  queryClient: QueryClient,
+  params: TransactionsCategorySummaryParams,
+  options?: InvalidateOptions,
+): Promise<QueryClient> => {
+  await queryClient.invalidateQueries(
+    { queryKey: getTransactionsCategorySummaryQueryKey(params) },
+    options,
+  );
+
+  return queryClient;
+};
+
 export const getTransactionsSummaryUrl = (
   params: TransactionsSummaryParams,
 ) => {

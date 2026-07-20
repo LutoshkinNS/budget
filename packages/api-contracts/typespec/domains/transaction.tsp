@@ -62,6 +62,30 @@ model TransactionSummary {
   totalBalance: float64;
 }
 
+model CategoryExpenseSummary {
+  @minValue(1)
+  categoryId: integer;
+
+  categoryName: string;
+  amount: float64;
+  percentage: float64;
+  previousAmount: float64;
+  changePercent: float64 | null;
+
+  @minValue(0)
+  transactionCount: integer;
+}
+
+model CategorySummary {
+  totalExpense: float64;
+  previousTotalExpense: float64;
+  changePercent: float64 | null;
+
+  @minValue(0)
+  transactionCount: integer;
+  categories: CategoryExpenseSummary[];
+}
+
 model TransactionErrorResponse {
   ...BadRequestResponse;
   ...Body<ValidationError>;

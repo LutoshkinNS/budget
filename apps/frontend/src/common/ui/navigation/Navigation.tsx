@@ -13,6 +13,9 @@ export function Navigation() {
           <Link to="/dashboard">Дашборд</Link>
         </li>
         <li className={s.navItem}>
+          <Link to="/reports">Отчёты</Link>
+        </li>
+        <li className={s.navItem}>
           <Link to="/categories">Категории</Link>
         </li>
         <li className={s.navItem}>

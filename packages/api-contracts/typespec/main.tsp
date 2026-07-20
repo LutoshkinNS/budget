@@ -93,7 +93,17 @@ interface Transactions {
     @query from: utcDateTime,
     @query to: utcDateTime,
     @query type?: TransactionType,
+    @minValue(1)
+    @query categoryId?: integer,
   ): Transaction[] | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
+
+  @route("/category-summary")
+  @get categorySummary(
+    @query from: utcDateTime,
+    @query to: utcDateTime,
+    @query compareFrom: utcDateTime,
+    @query compareTo: utcDateTime,
+  ): CategorySummary | TransactionErrorResponse | InternalServerErrorResponse;
 
   @route("/summary")
   @get summary(

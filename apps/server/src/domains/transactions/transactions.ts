@@ -1,3 +1,4 @@
+import CategorySummary from '#s/CategorySummary.js';
 import idObj from '#s/idObj.js';
 import NotFoundError from '#s/NotFoundError.js';
 import Transaction from '#s/Transaction.js';
@@ -8,6 +9,7 @@ import ValidationError from '#s/ValidationError.js';
 import { FastifyApp } from '#src/appInit.js';
 
 import { calculateTransactionSummary } from './balance.js';
+import { buildCategorySummaryResponse } from './category-summary.js';
 
 const transactionTypes = ['income', 'expense'] as const;
 
@@ -34,7 +36,9 @@ function parseDateRange(query: { from: string; to: string }) {
   const to = new Date(query.to);
 
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
-    return validationError('Query parameters from and to must be valid date-time values');
+    return validationError(
+      'Query parameters from and to must be valid date-time values'
+    );
   }
 
   if (from >= to) {
@@ -44,7 +48,27 @@ function parseDateRange(query: { from: string; to: string }) {
   return { from, to };
 }
 
-function serializeTransaction<T extends { type: string; userId: bigint; date: Date }>(transaction: T) {
+function parseCategoryId(categoryId: unknown) {
+  if (categoryId === undefined) {
+    return undefined;
+  }
+
+  if (
+    typeof categoryId !== 'number' ||
+    !Number.isInteger(categoryId) ||
+    categoryId < 1
+  ) {
+    return validationError(
+      'Query parameter categoryId must be a positive integer'
+    );
+  }
+
+  return categoryId;
+}
+
+function serializeTransaction<
+  T extends { type: string; userId: bigint; date: Date }
+>(transaction: T) {
   return {
     ...transaction,
     type: transaction.type as TransactionType,
@@ -85,6 +109,30 @@ async function validateCategory(
   return category;
 }
 
+async function validateCategoryFilter(
+  app: FastifyApp,
+  categoryId: number,
+  accountId: number,
+  transactionType?: TransactionType
+) {
+  const category = await app.prisma.transactionCategory.findFirst({
+    where: {
+      id: categoryId,
+      accountId
+    }
+  });
+
+  if (!category) {
+    return notFound('Category not found or access denied');
+  }
+
+  if (transactionType !== undefined && category.type !== transactionType) {
+    return validationError('Category type must match transaction type');
+  }
+
+  return category;
+}
+
 export default async function transactionsModule(app: FastifyApp) {
   app.addHook('preHandler', app.authenticate);
 
@@ -98,11 +146,16 @@ export default async function transactionsModule(app: FastifyApp) {
           properties: {
             from: { type: 'string', format: 'date-time' },
             to: { type: 'string', format: 'date-time' },
-            type: { type: 'string', enum: transactionTypes }
+            type: { type: 'string', enum: transactionTypes },
+            categoryId: { type: 'integer', minimum: 1 }
           },
           additionalProperties: false
         },
-        response: { 200: { type: 'array', items: Transaction }, 400: ValidationError }
+        response: {
+          200: { type: 'array', items: Transaction },
+          400: ValidationError,
+          404: NotFoundError
+        }
       }
     },
     async function (req, reply) {
@@ -113,21 +166,135 @@ export default async function transactionsModule(app: FastifyApp) {
       }
 
       const type = req.query.type;
+      const categoryId = parseCategoryId(req.query.categoryId);
 
       if (type !== undefined && !isTransactionType(type)) {
-        return reply.code(400).send(validationError('Query parameter type must be income or expense'));
+        return reply
+          .code(400)
+          .send(
+            validationError('Query parameter type must be income or expense')
+          );
+      }
+
+      if (categoryId !== undefined && typeof categoryId !== 'number') {
+        return reply.code(400).send(categoryId);
+      }
+
+      if (categoryId !== undefined) {
+        const category = await validateCategoryFilter(
+          this,
+          categoryId,
+          req.user.accountId,
+          type
+        );
+
+        if ('statusCode' in category) {
+          return reply.code(category.statusCode).send(category);
+        }
       }
 
       const transactions = await this.prisma.transaction.findMany({
         where: {
           accountId: req.user.accountId,
           date: { gte: dateRange.from, lt: dateRange.to },
-          ...(type === undefined ? {} : { type })
+          ...(type === undefined ? {} : { type }),
+          ...(categoryId === undefined ? {} : { categoryId })
         },
         orderBy: { date: 'desc' }
       });
 
       return transactions.map(serializeTransaction);
+    }
+  );
+
+  app.get(
+    '/category-summary',
+    {
+      schema: {
+        querystring: {
+          type: 'object',
+          required: ['from', 'to', 'compareFrom', 'compareTo'],
+          properties: {
+            from: { type: 'string', format: 'date-time' },
+            to: { type: 'string', format: 'date-time' },
+            compareFrom: { type: 'string', format: 'date-time' },
+            compareTo: { type: 'string', format: 'date-time' }
+          },
+          additionalProperties: false
+        },
+        response: { 200: CategorySummary, 400: ValidationError }
+      }
+    },
+    async function (req, reply) {
+      const currentRange = parseDateRange(req.query);
+      const previousRange = parseDateRange({
+        from: req.query.compareFrom,
+        to: req.query.compareTo
+      });
+
+      if ('statusCode' in currentRange) {
+        return reply.code(400).send(currentRange);
+      }
+
+      if ('statusCode' in previousRange) {
+        return reply.code(400).send(previousRange);
+      }
+
+      const accountId = req.user.accountId;
+      const expenseWhere = {
+        accountId,
+        type: 'expense'
+      };
+      const [currentGroups, previousGroups] = await Promise.all([
+        this.prisma.transaction.groupBy({
+          by: ['categoryId'],
+          where: {
+            ...expenseWhere,
+            date: { gte: currentRange.from, lt: currentRange.to }
+          },
+          _sum: { amount: true },
+          _count: { _all: true }
+        }),
+        this.prisma.transaction.groupBy({
+          by: ['categoryId'],
+          where: {
+            ...expenseWhere,
+            date: { gte: previousRange.from, lt: previousRange.to }
+          },
+          _sum: { amount: true }
+        })
+      ]);
+      const categories = await this.prisma.transactionCategory.findMany({
+        where: {
+          id: { in: currentGroups.map((group) => group.categoryId) },
+          accountId
+        },
+        select: { id: true, name: true }
+      });
+      const categoryNames = new Map(
+        categories.map((category) => [category.id, category.name])
+      );
+
+      return buildCategorySummaryResponse({
+        current: currentGroups.flatMap((group) => {
+          const categoryName = categoryNames.get(group.categoryId);
+
+          return categoryName === undefined
+            ? []
+            : [
+                {
+                  categoryId: group.categoryId,
+                  categoryName,
+                  amount: group._sum.amount ?? 0,
+                  transactionCount: group._count._all
+                }
+              ];
+        }),
+        previous: previousGroups.map((group) => ({
+          categoryId: group.categoryId,
+          amount: group._sum.amount ?? 0
+        }))
+      });
     }
   );
 
@@ -144,7 +311,11 @@ export default async function transactionsModule(app: FastifyApp) {
           },
           additionalProperties: false
         },
-        response: { 200: TransactionSummary, 400: ValidationError, 404: NotFoundError }
+        response: {
+          200: TransactionSummary,
+          400: ValidationError,
+          404: NotFoundError
+        }
       }
     },
     async function (req, reply) {
@@ -170,7 +341,9 @@ export default async function transactionsModule(app: FastifyApp) {
       ]);
 
       if (!account) {
-        return reply.code(404).send(notFound('Account not found or access denied'));
+        return reply
+          .code(404)
+          .send(notFound('Account not found or access denied'));
       }
 
       const balanceGroups = await this.prisma.transaction.groupBy({
@@ -214,7 +387,9 @@ export default async function transactionsModule(app: FastifyApp) {
       });
 
       if (!transaction) {
-        return reply.code(404).send(notFound('Transaction not found or access denied'));
+        return reply
+          .code(404)
+          .send(notFound('Transaction not found or access denied'));
       }
 
       return serializeTransaction(transaction);
@@ -231,7 +406,12 @@ export default async function transactionsModule(app: FastifyApp) {
     },
     async function (req, reply) {
       const accountId = req.user.accountId;
-      const category = await validateCategory(this, req.body.categoryId, accountId, req.body.type);
+      const category = await validateCategory(
+        this,
+        req.body.categoryId,
+        accountId,
+        req.body.type
+      );
 
       if ('statusCode' in category) {
         return reply.code(category.statusCode).send(category);
@@ -273,10 +453,17 @@ export default async function transactionsModule(app: FastifyApp) {
       });
 
       if (!transaction) {
-        return reply.code(404).send(notFound('Transaction not found or access denied'));
+        return reply
+          .code(404)
+          .send(notFound('Transaction not found or access denied'));
       }
 
-      const category = await validateCategory(this, req.body.categoryId, accountId, req.body.type);
+      const category = await validateCategory(
+        this,
+        req.body.categoryId,
+        accountId,
+        req.body.type
+      );
 
       if ('statusCode' in category) {
         return reply.code(category.statusCode).send(category);
@@ -295,7 +482,9 @@ export default async function transactionsModule(app: FastifyApp) {
       });
 
       if (update.count === 0) {
-        return reply.code(404).send(notFound('Transaction not found or access denied'));
+        return reply
+          .code(404)
+          .send(notFound('Transaction not found or access denied'));
       }
 
       const result = await this.prisma.transaction.findFirst({
@@ -306,7 +495,9 @@ export default async function transactionsModule(app: FastifyApp) {
       });
 
       if (!result) {
-        return reply.code(404).send(notFound('Transaction not found or access denied'));
+        return reply
+          .code(404)
+          .send(notFound('Transaction not found or access denied'));
       }
 
       return serializeTransaction(result);

@@ -14,6 +14,7 @@ import { Route as PrivateRouteRouteImport } from './_private/route'
 import { Route as PrivateIndexRouteImport } from './_private/index'
 import { Route as PublicLoginRouteImport } from './_public/login'
 import { Route as PrivateSettingsRouteImport } from './_private/settings'
+import { Route as PrivateReportsRouteImport } from './_private/reports'
 import { Route as PrivateDashboardRouteImport } from './_private/dashboard'
 import { Route as PrivateCategoriesRouteImport } from './_private/categories'
 import { Route as PublicInviteCodeRouteImport } from './_public/invite.$code'
@@ -42,6 +43,11 @@ const PrivateSettingsRoute = PrivateSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
+const PrivateReportsRoute = PrivateReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 const PrivateDashboardRoute = PrivateDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/': typeof PrivateIndexRoute
   '/categories': typeof PrivateCategoriesRoute
   '/dashboard': typeof PrivateDashboardRoute
+  '/reports': typeof PrivateReportsRoute
   '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/invite/$code': typeof PublicInviteCodeRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/': typeof PrivateIndexRoute
   '/categories': typeof PrivateCategoriesRoute
   '/dashboard': typeof PrivateDashboardRoute
+  '/reports': typeof PrivateReportsRoute
   '/settings': typeof PrivateSettingsRoute
   '/login': typeof PublicLoginRoute
   '/invite/$code': typeof PublicInviteCodeRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteRouteWithChildren
   '/_private/categories': typeof PrivateCategoriesRoute
   '/_private/dashboard': typeof PrivateDashboardRoute
+  '/_private/reports': typeof PrivateReportsRoute
   '/_private/settings': typeof PrivateSettingsRoute
   '/_public/login': typeof PublicLoginRoute
   '/_private/': typeof PrivateIndexRoute
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/reports'
     | '/settings'
     | '/login'
     | '/invite/$code'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/reports'
     | '/settings'
     | '/login'
     | '/invite/$code'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/_public'
     | '/_private/categories'
     | '/_private/dashboard'
+    | '/_private/reports'
     | '/_private/settings'
     | '/_public/login'
     | '/_private/'
@@ -168,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateSettingsRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
+    '/_private/reports': {
+      id: '/_private/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof PrivateReportsRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_private/dashboard': {
       id: '/_private/dashboard'
       path: '/dashboard'
@@ -202,6 +221,7 @@ declare module '@tanstack/react-router' {
 interface PrivateRouteRouteChildren {
   PrivateCategoriesRoute: typeof PrivateCategoriesRoute
   PrivateDashboardRoute: typeof PrivateDashboardRoute
+  PrivateReportsRoute: typeof PrivateReportsRoute
   PrivateSettingsRoute: typeof PrivateSettingsRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
   PrivateExpensesExpenseIdEditRoute: typeof PrivateExpensesExpenseIdEditRoute
@@ -210,6 +230,7 @@ interface PrivateRouteRouteChildren {
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateCategoriesRoute: PrivateCategoriesRoute,
   PrivateDashboardRoute: PrivateDashboardRoute,
+  PrivateReportsRoute: PrivateReportsRoute,
   PrivateSettingsRoute: PrivateSettingsRoute,
   PrivateIndexRoute: PrivateIndexRoute,
   PrivateExpensesExpenseIdEditRoute: PrivateExpensesExpenseIdEditRoute,

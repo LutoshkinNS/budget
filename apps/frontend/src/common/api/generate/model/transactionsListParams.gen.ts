@@ -10,4 +10,8 @@ export type TransactionsListParams = {
   from: string;
   to: string;
   type?: TransactionsListType;
+  /**
+   * @minimum 1
+   */
+  categoryId?: number;
 };

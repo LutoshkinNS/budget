@@ -10,6 +10,7 @@ export const TransactionsListQueryParams = zod.object({
   from: zod.iso.datetime({}),
   to: zod.iso.datetime({}),
   type: zod.enum(["income", "expense"]).optional(),
+  categoryId: zod.number().min(1).optional(),
 });
 
 export const transactionsListResponseAmountMin = 0.01;
@@ -47,6 +48,41 @@ export const TransactionsCreateResponse = zod.object({
   type: zod.enum(["income", "expense"]),
   description: zod.union([zod.string(), zod.null()]).optional(),
   date: zod.iso.datetime({}),
+});
+
+export const TransactionsCategorySummaryQueryParams = zod.object({
+  from: zod.iso.datetime({}),
+  to: zod.iso.datetime({}),
+  compareFrom: zod.iso.datetime({}),
+  compareTo: zod.iso.datetime({}),
+});
+
+export const transactionsCategorySummaryResponseTransactionCountMin = 0;
+
+export const transactionsCategorySummaryResponseCategoriesItemTransactionCountMin = 0;
+
+export const TransactionsCategorySummaryResponse = zod.object({
+  totalExpense: zod.number(),
+  previousTotalExpense: zod.number(),
+  changePercent: zod.union([zod.number(), zod.null()]),
+  transactionCount: zod
+    .number()
+    .min(transactionsCategorySummaryResponseTransactionCountMin),
+  categories: zod.array(
+    zod.object({
+      categoryId: zod.number().min(1),
+      categoryName: zod.string(),
+      amount: zod.number(),
+      percentage: zod.number(),
+      previousAmount: zod.number(),
+      changePercent: zod.union([zod.number(), zod.null()]),
+      transactionCount: zod
+        .number()
+        .min(
+          transactionsCategorySummaryResponseCategoriesItemTransactionCountMin,
+        ),
+    }),
+  ),
 });
 
 export const TransactionsSummaryQueryParams = zod.object({
