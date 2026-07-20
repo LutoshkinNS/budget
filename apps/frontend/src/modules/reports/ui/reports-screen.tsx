@@ -35,11 +35,21 @@ function formatMoney(value: number): string {
   return `${value.toLocaleString("ru-RU")} ₽`;
 }
 
-function formatPercent(value: number | null): string {
-  if (value === null) return "Нет данных для сравнения";
+function formatPercent(value: number): string {
   return `${value > 0 ? "+" : ""}${value.toLocaleString("ru-RU", {
     maximumFractionDigits: 1,
   })}%`;
+}
+
+function formatExpenseShare(value: number): string {
+  return `${value.toLocaleString("ru-RU", {
+    maximumFractionDigits: 1,
+  })}% от расходов`;
+}
+
+function formatPeriodChange(value: number | null): string {
+  if (value === null) return "К прошлому периоду: нет данных";
+  return `${formatPercent(value)} к прошлому периоду`;
 }
 
 function formatDate(value: string): string {
@@ -143,13 +153,8 @@ function CategoryItem({
         />
       </span>
       <span className={s.categoryMeta}>
-        <span>
-          {category.percentage.toLocaleString("ru-RU", {
-            maximumFractionDigits: 1,
-          })}
-          %
-        </span>
-        <span>{formatPercent(category.changePercent)}</span>
+        <span>{formatExpenseShare(category.percentage)}</span>
+        <span>{formatPeriodChange(category.changePercent)}</span>
         <span>{category.transactionCount} операций</span>
       </span>
     </button>
@@ -224,10 +229,8 @@ function CategorySheet({
             <h2 id="category-sheet-title">{category.categoryName}</h2>
             <p>
               {formatMoney(category.amount)} ·{" "}
-              {category.percentage.toLocaleString("ru-RU", {
-                maximumFractionDigits: 1,
-              })}
-              % · {category.transactionCount} операций
+              {formatExpenseShare(category.percentage)} ·{" "}
+              {category.transactionCount} операций
             </p>
           </div>
           <button
@@ -240,7 +243,9 @@ function CategorySheet({
             ×
           </button>
         </div>
-        <p className={s.sheetChange}>{formatPercent(category.changePercent)}</p>
+        <p className={s.sheetChange}>
+          {formatPeriodChange(category.changePercent)}
+        </p>
         <h3>Операции</h3>
         {operationsQuery.isError ? (
           <SimpleError>Не удалось загрузить операции.</SimpleError>
@@ -283,7 +288,7 @@ export function ReportsScreen({ search, onSearchChange }: ReportsScreenProps) {
             <span>Расходы</span>
             <strong>{formatMoney(summary.totalExpense)}</strong>
             <div>
-              <span>{formatPercent(summary.changePercent)}</span>
+              <span>{formatPeriodChange(summary.changePercent)}</span>
               <span>{summary.transactionCount} операций</span>
             </div>
           </section>
