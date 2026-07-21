@@ -110,6 +110,8 @@ src/modules/<module>/
   ui/
     some-component.tsx
     some-component.module.css
+  modules/
+    README.md
 ```
 
 Правила:
@@ -167,6 +169,20 @@ src/modules/expenses/
 - Родитель может импортировать child module через `./modules/<child>`.
 - Другие modules не должны лезть во внутренности child module.
 - Если child module начинает использоваться многими unrelated modules, поднять его выше в `src/modules/` или вынести в `common`, если в нём нет бизнес-смысла.
+
+### Decomposition checklist
+
+Для новой frontend-фичи или существенного расширения существующего модуля перед коммитом пройти checklist:
+
+- `pages` содержит route-level composition и route/search state, но не доменную бизнес-логику.
+- `modules/<module>/index.ts` экспортирует только intended public API.
+- `model/` разделён по use-case, endpoint, adapter или типам, а не собирает всю логику в один catch-all файл.
+- `ui/` разделён по видимым блокам экрана: controls, summary, list, item, details, sheet, form.
+- Один `screen.tsx` не должен одновременно содержать controls, list, detail sheet, formatters, data adapters и navigation semantics; если это произошло, нужен split или короткое обоснование в PR/commit context.
+- Если внутри модуля появляется самостоятельный workflow, list/detail/editor/filter/sheet или capability, рассмотреть nested module в `modules/<nested-module>/`.
+- Route/search/navigation decisions остаются на уровне `app/routes` или `pages`; module UI сообщает события наружу через props/callbacks.
+- Форматтеры, pure helpers и adapters выносятся из React components, когда начинают использоваться более чем в одном блоке или мешают читать UI.
+- Перед финальной проверкой структура папок должна объяснять устройство фичи без чтения одного большого файла.
 
 ### `common`
 
@@ -296,4 +312,4 @@ pnpm --filter @budget/frontend scaffold frontend-module <module-name> --parent <
 
 `--parent` is a path relative to `src/modules`: `--parent expenses` creates the module in `src/modules/expenses/modules`, while `--parent expenses/modules/charts` creates it in `src/modules/expenses/modules/charts/modules`. Without `--force`, the scaffold refuses to overwrite existing files; `--dry-run` only previews the planned files.
 
-Scaffolds intentionally generate only a boundary and simple placeholders. They should not generate domain behavior until the API contract and module responsibility are clear.
+Scaffolds intentionally generate only a boundary and simple placeholders. They should not generate domain behavior until the API contract and module responsibility are clear. `frontend-module` also creates `modules/README.md` as a local reminder for when to extract nested modules; delete it only when the module intentionally does not need nested capabilities.

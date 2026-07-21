@@ -62,5 +62,20 @@ export function ${componentName}({ title = "${moduleTitle}" }: ${componentName}P
 }
 `,
     },
+    {
+      path: path.join(moduleDir, "modules/README.md"),
+      content: `# Nested modules
+
+Use this directory when ${moduleTitle} grows an internal capability with its own public API.
+
+Good candidates:
+
+- list/detail/editor/filter/sheet workflows;
+- reusable sub-features that still belong to ${moduleTitle};
+- UI plus model code that would make the root module hard to scan.
+
+Keep route/search/navigation state in pages or route adapters, not in nested modules.
+`,
+    },
   ];
 }

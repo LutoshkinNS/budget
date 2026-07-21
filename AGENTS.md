@@ -118,6 +118,14 @@ Frontend module rules:
 - Do not import from another module's internal `model/` or `ui/` files; import from that module's `index.ts`.
 - Do not place business logic in `pages/`; pages compose modules and route-level state.
 
+Frontend decomposition checklist for new features or substantial module changes:
+
+- Keep route/search/navigation state in `app/routes` or `pages`, not in `modules`.
+- Split `ui/` by visible blocks such as controls, summary, list, item, details, sheet, and form instead of growing one large screen file.
+- Split `model/` by use case, endpoint, adapter, schema, or type responsibility instead of growing one catch-all hook file.
+- When a module contains an internal workflow, list/detail/editor/filter/sheet, consider a nested module under `modules/<module>/modules/<nested-module>/`.
+- Before committing, verify the folder tree explains the feature shape without reading one large file.
+
 Frontend React rules:
 
 - Use `useEffect` only for code that must run because the component was displayed to the user. Do not use effects for deriving render data, synchronizing local state from props, or handling direct user actions when the logic can run in render, event handlers, or data/query hooks.
