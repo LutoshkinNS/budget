@@ -6,12 +6,14 @@ import {
   isReportsDateValue,
   isReportsMonthValue,
   isReportsPeriod,
+  type ReportsCategory,
   type ReportsPeriodSelection,
 } from "@/modules/reports";
 
 export type ReportsSearch = ReportsPeriodSelection & {
-  selectedCategoryId?: number;
+  selectedCategoryId?: ReportsCategory["categoryId"];
 };
+type ReportsSearchRaw = Partial<Record<keyof ReportsSearch, unknown>>;
 
 export type ReportsSearchChangeOptions = { replace?: boolean };
 export type ReportsSearchChangeHandler = (
@@ -19,7 +21,7 @@ export type ReportsSearchChangeHandler = (
   options?: ReportsSearchChangeOptions,
 ) => void;
 
-export type ReportsSearchInput = Partial<ReportsSearch> & SearchSchemaInput;
+export type ReportsSearchInput = ReportsSearchRaw & SearchSchemaInput;
 
 function dateValueToDate(value: string): Date {
   const [yearValue, monthValue, dayValue] = value.split("-");
@@ -37,7 +39,9 @@ function isFutureDate(value: string, now: Date): boolean {
   return dateValueToDate(value) > startOfDay(now);
 }
 
-function parsePositiveInteger(value: unknown): number | undefined {
+function parsePositiveInteger(
+  value: unknown,
+): ReportsSearch["selectedCategoryId"] {
   if (typeof value === "number" && Number.isInteger(value) && value >= 1) {
     return value;
   }
@@ -52,7 +56,7 @@ function parsePositiveInteger(value: unknown): number | undefined {
 }
 
 export function normalizeReportsSearch(
-  search: Partial<Record<keyof ReportsSearch, unknown>> = {},
+  search: ReportsSearchRaw = {},
   now: Date = new Date(),
 ): ReportsSearch {
   const currentMonth = getCurrentMonthValue(now);

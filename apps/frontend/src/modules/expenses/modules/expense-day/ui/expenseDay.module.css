@@ -17,7 +17,7 @@
 .dayLabel {
   font-size: 16px;
   font-weight: 400;
-  color: var(--primary-text-color);
+  color: var(--app-text-color);
 }
 
 .daySumRow {
@@ -30,7 +30,7 @@
 .dayTotal {
   font-size: 16px;
   font-weight: 400;
-  color: var(--primary-text-color);
+  color: var(--app-text-color);
 }
 
 .arrow {
@@ -75,19 +75,19 @@
   font-family: inherit;
   font-size: 14px;
   text-align: left;
-  color: var(--primary-text-color);
+  color: var(--app-text-color);
   opacity: 0.85;
   cursor: pointer;
 }
 
 .expenseMain:focus-visible,
 .deleteButton:focus-visible {
-  outline: 1.5px solid var(--primary-text-color);
+  outline: 1.5px solid var(--app-border-strong-color);
   outline-offset: 2px;
 }
 
 .expenseMain:disabled {
-  color: var(--primary-text-color);
+  color: var(--app-text-color);
   cursor: default;
 }
 
@@ -99,7 +99,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--primary-text-color);
+  color: var(--app-text-color);
   font: inherit;
   font-size: 20px;
   line-height: 1;

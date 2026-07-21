@@ -1,0 +1,55 @@
+.periodSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.periodTabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px;
+  background: var(--app-surface-muted-color);
+  border-radius: 8px;
+}
+
+.periodTab,
+.periodTabActive {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  color: var(--app-muted-text-color);
+}
+
+.periodTabActive {
+  background: var(--app-surface-raised-color);
+  color: var(--app-text-color);
+  box-shadow: 0 1px 3px var(--app-shadow-color);
+}
+
+.rangeFields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--app-muted-text-color);
+  font-size: 14px;
+}
+
+.field input {
+  min-height: 42px;
+  box-sizing: border-box;
+  border: 1px solid var(--app-border-color);
+  border-radius: 8px;
+  padding: 0 10px;
+  font: inherit;
+  color: var(--app-text-color);
+  background: var(--app-surface-raised-color);
+}

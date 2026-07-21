@@ -1,0 +1,94 @@
+.empty {
+  margin: 0;
+  color: var(--app-muted-text-color);
+}
+
+.sheetOverlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: end;
+  background: var(--app-overlay-color);
+}
+
+.sheet {
+  width: 100%;
+  max-height: 82vh;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 10px 20px 24px;
+  border-radius: 8px 8px 0 0;
+  background: var(--app-surface-raised-color);
+}
+
+.sheetHandle {
+  width: 36px;
+  height: 4px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  background: var(--app-border-color);
+}
+
+.sheetHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sheetHeader h2 {
+  margin: 0;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+
+.sheetHeader p,
+.sheetChange {
+  margin: 6px 0 0;
+  color: var(--app-muted-text-color);
+}
+
+.closeButton {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 50%;
+  color: var(--app-text-color);
+  background: var(--app-surface-muted-color);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.sheet h3 {
+  margin: 24px 0 0;
+  font-size: 18px;
+}
+
+.operations {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.operation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.operation span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.operation small,
+.operation time {
+  color: var(--app-muted-text-color);
+  font-size: 13px;
+}

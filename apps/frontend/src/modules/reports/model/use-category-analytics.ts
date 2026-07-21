@@ -3,6 +3,7 @@ import type { z } from "zod";
 
 import type {
   TransactionDTO,
+  TransactionsCategorySummaryParams,
   TransactionsListParams,
 } from "@/common/api/generate/model";
 import {
@@ -22,6 +23,12 @@ export type ReportsCategorySummary = z.infer<
 >;
 export type ReportsCategory = ReportsCategorySummary["categories"][number];
 export type ReportsCategoryTransaction = TransactionDTO;
+type ReportsCategoryTransactionsParams = Pick<
+  TransactionsListParams,
+  "from" | "to"
+> & {
+  categoryId: NonNullable<TransactionsListParams["categoryId"]> | null;
+};
 
 function normalizeTransaction(
   transaction: z.infer<typeof TransactionsListResponse>[number],
@@ -32,7 +39,9 @@ function normalizeTransaction(
   };
 }
 
-function toCategorySummaryParams(ranges: ReportsPeriodRanges) {
+function toCategorySummaryParams(
+  ranges: ReportsPeriodRanges,
+): TransactionsCategorySummaryParams {
   return {
     from: ranges.current.from,
     to: ranges.current.to,
@@ -45,11 +54,7 @@ function toCategoryTransactionsParams({
   categoryId,
   from,
   to,
-}: {
-  categoryId: number | null;
-  from: string;
-  to: string;
-}): TransactionsListParams {
+}: ReportsCategoryTransactionsParams): TransactionsListParams {
   return categoryId === null
     ? { from, to, type: "expense" }
     : { from, to, type: "expense", categoryId };
@@ -97,11 +102,7 @@ export function useReportsCategoryTransactions({
   categoryId,
   from,
   to,
-}: {
-  categoryId: number | null;
-  from: string;
-  to: string;
-}) {
+}: ReportsCategoryTransactionsParams) {
   const params = toCategoryTransactionsParams({ categoryId, from, to });
   const { data, isError, error, isLoading } = useTransactionsList(params, {
     query: { enabled: categoryId !== null },

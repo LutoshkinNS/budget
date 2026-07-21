@@ -1,53 +1,53 @@
 .wrapper {
-    position: relative;
-    display: inline-flex;
-    flex-shrink: 0;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
 .avatar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: var(--secondary-color);
-    cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--app-control-active-color);
+  cursor: pointer;
 }
 
 .image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
 }
 
 .imageVisible {
-    opacity: 1;
+  opacity: 1;
 }
 
 .letter {
-    color: var(--secondary-text-color);
-    font-weight: 600;
-    line-height: 1;
-    user-select: none;
+  color: var(--app-control-active-text-color);
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
 }
 
 .dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background-color: var(--primary-color);
-    border-radius: 12px;
-    padding: 10px 14px;
-    white-space: nowrap;
-    z-index: 100;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: var(--app-surface-raised-color);
+  border-radius: 12px;
+  padding: 10px 14px;
+  white-space: nowrap;
+  z-index: 100;
 }
 
 .dropdownName {
-    color: var(--primary-text-color);
-    font-size: 14px;
-    font-weight: 500;
+  color: var(--app-text-color);
+  font-size: 14px;
+  font-weight: 500;
 }

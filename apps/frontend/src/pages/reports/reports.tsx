@@ -15,7 +15,9 @@ export function Reports({ search, onSearchChange }: ReportsProps) {
   ) => {
     onSearchChange(nextPeriodSelection);
   };
-  const handleCategorySelect = (categoryId: number) => {
+  const handleCategorySelect = (
+    categoryId: NonNullable<ReportsSearch["selectedCategoryId"]>,
+  ) => {
     onSearchChange({ ...search, selectedCategoryId: categoryId });
   };
   const handleCategoryClose = () => {

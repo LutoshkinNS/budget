@@ -1,79 +1,81 @@
 .summary {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 .switcher {
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
-    padding: 4px;
-    background-color: var(--primary-color);
-    border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding: 4px;
+  background-color: var(--app-surface-color);
+  border-radius: 12px;
 }
 
 .switchBtn {
-    background: none;
-    border: none;
-    padding: 6px 14px;
-    font-size: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: var(--primary-text-color);
-    transition: background-color 0.15s ease, color 0.15s ease;
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--app-text-color);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .switchBtnActive {
-    background-color: var(--secondary-color);
-    color: var(--secondary-text-color);
+  background-color: var(--app-control-active-color);
+  color: var(--app-control-active-text-color);
 }
 
 .monthInput {
-    padding: 6px 10px;
-    border: 1.5px solid var(--secondary-color);
-    border-radius: 8px;
-    background-color: var(--primary-color);
-    color: var(--primary-text-color);
-    font: inherit;
-    font-size: 14px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--app-border-strong-color);
+  border-radius: 8px;
+  background-color: var(--app-surface-color);
+  color: var(--app-text-color);
+  font: inherit;
+  font-size: 14px;
 }
 
 .monthInput:focus {
-    border-color: var(--primary-text-color);
-    outline: none;
+  border-color: var(--app-border-strong-color);
+  outline: none;
 }
 
 .totals {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
 }
 
 .totalItem {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .totalLabel {
-    font-size: 12px;
-    line-height: 1.2;
-    color: var(--primary-text-color);
-    opacity: 0.6;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--app-text-color);
+  opacity: 0.6;
 }
 
 .totalValue {
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--primary-text-color);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--app-text-color);
 }
 
 @media (min-width: 640px) {
-    .totals {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  .totals {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

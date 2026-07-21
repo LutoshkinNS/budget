@@ -7,6 +7,8 @@ import { createCategoryFormDataSchema } from "../model/schemas.ts";
 import type { CategoryType, CreateCategoryFormData } from "../model/types.ts";
 import { useCreateCategory } from "../model/useCreateCategory.ts";
 
+import s from "./create-category.module.css";
+
 const IDS = {
   NAME: "name",
 } as const;
@@ -63,7 +65,7 @@ export function CreateCategory({ type }: CreateCategoryProps) {
             }
           />
           <br />
-          <span style={{ color: "red" }}>
+          <span className={s.fieldError}>
             {errors?.fieldErrors.name || errors?.formErrors}
           </span>
         </p>

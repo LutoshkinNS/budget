@@ -1,4 +1,6 @@
-export type ReportsPeriod = "day" | "week" | "month" | "range";
+const PERIODS = ["day", "week", "month", "range"] as const;
+
+export type ReportsPeriod = (typeof PERIODS)[number];
 
 export type ReportsPeriodSelection = {
   period: ReportsPeriod;
@@ -17,7 +19,6 @@ export type ReportsPeriodRanges = {
   compare: ReportsPeriodRange;
 };
 
-const PERIODS = ["day", "week", "month", "range"] as const;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
@@ -141,7 +142,7 @@ export function buildReportsPeriodRanges(
 }
 
 export function isReportsPeriod(value: unknown): value is ReportsPeriod {
-  return PERIODS.includes(value as ReportsPeriod);
+  return PERIODS.some((period) => period === value);
 }
 
 export function isReportsMonthValue(value: unknown): value is string {

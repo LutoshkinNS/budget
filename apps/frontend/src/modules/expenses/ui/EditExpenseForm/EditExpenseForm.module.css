@@ -1,51 +1,51 @@
 .form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .label {
-    font-size: 14px;
-    color: color-mix(in srgb, var(--primary-text-color) 70%, transparent);
+  font-size: 14px;
+  color: color-mix(in srgb, var(--app-text-color) 70%, transparent);
 }
 
 .select {
-    width: 100%;
-    background: transparent;
-    color: var(--primary-text-color);
-    font-family: inherit;
-    font-size: 16px;
-    line-height: 20px;
-    outline: none;
-    border: 1.5px solid var(--secondary-color);
-    border-radius: 12px;
-    padding: 10px 12px;
+  width: 100%;
+  background: transparent;
+  color: var(--app-text-color);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 20px;
+  outline: none;
+  border: 1.5px solid var(--app-border-strong-color);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
 .actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .submit {
-    border: 0;
-    border-radius: 12px;
-    padding: 10px 16px;
-    color: var(--secondary-text-color);
-    background: var(--primary-text-color);
-    font-family: inherit;
-    font-size: 16px;
-    cursor: pointer;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: var(--app-control-active-text-color);
+  background: var(--app-control-active-color);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .submit:disabled {
-    cursor: default;
-    opacity: 0.5;
+  cursor: default;
+  opacity: 0.5;
 }

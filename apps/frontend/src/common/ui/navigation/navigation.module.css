@@ -1,42 +1,42 @@
 .navigationContainer {
-    position: fixed;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    bottom: 20px;
-    z-index: 999;
+  position: fixed;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  bottom: 20px;
+  z-index: 999;
 }
 
 .navList {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    list-style-type: none;
-    margin: 0;
-    padding: 4px;
-    background-color: var(--primary-color);
-    height: 44px;
-    border-radius: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  list-style-type: none;
+  margin: 0;
+  padding: 4px;
+  background-color: var(--app-surface-raised-color);
+  height: 44px;
+  border-radius: 16px;
 }
 
 .navItem {
-    min-height: 24px;
-    background-color: var(--primary-color);
-    cursor: pointer;
+  min-height: 24px;
+  background-color: var(--app-surface-raised-color);
+  cursor: pointer;
 }
 
 .navItem a {
-    display: inline-block;
-    padding: 6px 8px;
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--primary-text-color);
-    font-size: 10px;
+  display: inline-block;
+  padding: 6px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--app-text-color);
+  font-size: 10px;
 }
 
 a[data-status="active"] {
-    background-color: var(--secondary-color);
-    color: var(--secondary-text-color);
+  background-color: var(--app-control-active-color);
+  color: var(--app-control-active-text-color);
 }

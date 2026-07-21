@@ -1,0 +1,26 @@
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 8px;
+  color: var(--app-emphasis-text-color);
+  background: var(--app-emphasis-surface-color);
+}
+
+.summary > span {
+  opacity: 0.75;
+}
+
+.summary strong {
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.summary div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}

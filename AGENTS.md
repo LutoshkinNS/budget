@@ -159,6 +159,8 @@ Regenerate them through the documented commands instead.
 
 - Use the existing TypeScript strictness, ESLint, Prettier, and import sorting setup.
 - Name new files and folders with kebab-case (`file-name.ts`, `feature-module/`) unless an external convention, generator, or framework requires another format.
+- Avoid unsafe TypeScript type assertions (`value as Type`) in handwritten code. Prefer type guards, typed constants, discriminated unions, schemas, or narrower helper APIs. `as const` for literal inference is allowed and encouraged. If a non-const assertion is truly unavoidable, ask the user for explicit approval before adding it and document why.
+- Keep related TypeScript types connected instead of widening them to abstract primitives. Prefer deriving unions, params, keys, and collections from the source type or tuple (`typeof SOME_VALUES[number]`, `Record<DomainType, ...>`, indexed access types) when entities represent the same domain concept.
 - Preserve FEOD module boundaries and dependency directions in frontend changes.
 - Keep backend changes inside the relevant domain/module unless a shared abstraction is justified.
 - Prefer project-local helpers, aliases, and patterns over introducing new conventions.

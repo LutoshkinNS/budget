@@ -1,59 +1,59 @@
 .header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .title {
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 28px;
-    letter-spacing: -0.03em;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 28px;
+  letter-spacing: -0.03em;
 }
 
 .typeSwitch {
-    display: inline-flex;
-    gap: 4px;
-    padding: 4px;
-    margin-top: 16px;
-    border-radius: 12px;
-    background: var(--secondary-color);
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-top: 16px;
+  border-radius: 12px;
+  background: var(--app-control-active-color);
 }
 
 .typeSwitch button {
-    min-width: 88px;
-    padding: 8px 14px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--secondary-text-color);
-    font: inherit;
-    cursor: pointer;
+  min-width: 88px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--app-control-active-text-color);
+  font: inherit;
+  cursor: pointer;
 }
 
 .typeSwitch button:active {
-    opacity: 0.6;
+  opacity: 0.6;
 }
 
 .typeSwitch .typeSwitchActive {
-    background: var(--primary-color);
-    color: var(--primary-text-color);
+  background: var(--app-surface-color);
+  color: var(--app-text-color);
 }
 
 .categories {
-    margin-top: 28px;
-    margin-bottom: 28px;
+  margin-top: 28px;
+  margin-bottom: 28px;
 }
 
 .fields {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    margin-bottom: 28px;
-    margin-top: 28px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: 28px;
+  margin-top: 28px;
 }
 
-.dateInput{
-    width: 120px;
+.dateInput {
+  width: 120px;
 }

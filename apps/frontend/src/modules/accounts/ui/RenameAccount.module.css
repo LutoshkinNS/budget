@@ -14,7 +14,7 @@
   gap: 4px;
   padding: 10px 0;
   border-bottom: 1px solid
-    color-mix(in srgb, var(--secondary-color) 45%, transparent);
+    color-mix(in srgb, var(--app-border-strong-color) 45%, transparent);
 }
 
 .row:last-child {
@@ -27,14 +27,14 @@
 }
 
 .label {
-  color: color-mix(in srgb, var(--primary-text-color) 62%, transparent);
+  color: color-mix(in srgb, var(--app-text-color) 62%, transparent);
   font-size: 13px;
   line-height: 16px;
 }
 
 .value {
   margin: 0;
-  color: var(--primary-text-color);
+  color: var(--app-text-color);
   font-size: 16px;
   line-height: 22px;
 }
@@ -55,7 +55,7 @@
 
 .note {
   margin: 0;
-  color: color-mix(in srgb, var(--primary-text-color) 62%, transparent);
+  color: color-mix(in srgb, var(--app-text-color) 62%, transparent);
   font-size: 14px;
   line-height: 18px;
 }
