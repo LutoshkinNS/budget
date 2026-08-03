@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 docs
 
+# Package manager
+package-lock.json
+
 node_modules
 dist
 dev-dist
@@ -44,6 +47,8 @@ git-info.json
 # Claude Code workspace artifacts
 .claude/
 .codex/
+.playwright-cli/
 .playwright-mcp/
 .mcp.json
+output/playwright/
 nul

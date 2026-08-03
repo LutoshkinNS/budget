@@ -5,7 +5,7 @@ Fastify сервер с SQLite базой данных. Использует Pri
 ## Требования
 
 - Node.js 20+
-- npm
+- pnpm 9+
 - Docker и Docker Compose (для production запуска)
 
 ## Первоначальная настройка
@@ -13,8 +13,7 @@ Fastify сервер с SQLite базой данных. Использует Pri
 ### 1. Установка зависимостей
 
 ```bash
-cd server
-npm install
+pnpm install
 ```
 
 ### 2. Генерация Prisma клиента
@@ -22,7 +21,7 @@ npm install
 Prisma клиент генерируется автоматически, но можно запустить вручную:
 
 ```bash
-npx prisma generate
+pnpm --filter @budget/server prisma:generate
 ```
 
 Это создаст TypeScript клиент в `generated/prisma/` на основе `prisma/schema.prisma`.
@@ -32,10 +31,11 @@ npx prisma generate
 Если база данных еще не создана или нужно применить миграции:
 
 ```bash
-npx prisma migrate dev
+pnpm --filter @budget/server exec prisma migrate dev
 ```
 
 Эта команда:
+
 - Создаст базу данных SQLite (`prisma/dev.db`), если её нет
 - Применит все миграции из `prisma/migrations/`
 - Запустит seed (если настроен в `prisma.config.ts`)
@@ -45,10 +45,11 @@ npx prisma migrate dev
 TypeSpec используется для описания API и генерации JSON схем:
 
 ```bash
-npm run typespec
+pnpm --filter @budget/server typespec
 ```
 
 Эта команда:
+
 - Компилирует TypeSpec файлы из `typespec/` в OpenAPI 3.1.0
 - Генерирует TypeScript схемы в `generated/@typespec/ts-schemas/`
 
@@ -59,7 +60,7 @@ npm run typespec
 ### Запуск сервера в режиме разработки
 
 ```bash
-npm run dev
+pnpm --filter @budget/server dev
 ```
 
 Сервер запустится на `http://localhost:3000` с автоматической перезагрузкой при изменении файлов.
@@ -69,13 +70,13 @@ npm run dev
 #### Генерация схем (один раз)
 
 ```bash
-npm run typespec
+pnpm --filter @budget/server typespec
 ```
 
 #### Генерация схем в watch режиме (автоматически при изменениях)
 
 ```bash
-npm run typespec:generate:watch
+pnpm --filter @budget/server typespec:generate:watch
 ```
 
 Это удобно при активной разработке API - схемы будут обновляться автоматически.
@@ -87,8 +88,9 @@ npm run typespec:generate:watch
 - `typespec/general.tsp` - общие типы и утилиты
 
 После генерации схемы доступны через импорты:
+
 ```typescript
-import Category from "#s/Category.js";
+import Category from '#s/Category.js';
 ```
 
 ### Работа с Prisma
@@ -96,7 +98,7 @@ import Category from "#s/Category.js";
 #### Prisma Studio - визуальный редактор БД
 
 ```bash
-npm run prisma:studio
+pnpm --filter @budget/server prisma:studio
 ```
 
 Откроется веб-интерфейс на `http://localhost:5555` для просмотра и редактирования данных.
@@ -106,15 +108,17 @@ npm run prisma:studio
 Когда изменяешь `prisma/schema.prisma`:
 
 ```bash
-npx prisma migrate dev --name название_миграции
+pnpm --filter @budget/server exec prisma migrate dev --name название_миграции
 ```
 
 Например:
+
 ```bash
-npx prisma migrate dev --name add_expense_table
+pnpm --filter @budget/server exec prisma migrate dev --name add_expense_table
 ```
 
 Эта команда:
+
 - Создаст новую миграцию в `prisma/migrations/`
 - Применит её к базе данных
 - Автоматически сгенерирует Prisma клиент
@@ -122,13 +126,13 @@ npx prisma migrate dev --name add_expense_table
 #### Просмотр статуса миграций
 
 ```bash
-npx prisma migrate status
+pnpm --filter @budget/server exec prisma migrate status
 ```
 
 #### Откат миграции
 
 ```bash
-npx prisma migrate resolve --rolled-back название_миграции
+pnpm --filter @budget/server exec prisma migrate resolve --rolled-back название_миграции
 ```
 
 #### Генерация Prisma клиента (без миграций)
@@ -136,7 +140,7 @@ npx prisma migrate resolve --rolled-back название_миграции
 Если нужно только обновить клиент после изменения схемы:
 
 ```bash
-npx prisma generate
+pnpm --filter @budget/server prisma:generate
 ```
 
 #### Seed базы данных
@@ -144,7 +148,7 @@ npx prisma generate
 Для заполнения БД начальными данными:
 
 ```bash
-npx prisma db seed
+pnpm --filter @budget/server prisma:seed
 ```
 
 Seed файл находится в `prisma/seed.ts`.
@@ -264,23 +268,25 @@ server/
 ## Типичный workflow разработки
 
 1. **Изменил схему БД** (`prisma/schema.prisma`):
+
    ```bash
-   npx prisma migrate dev --name описание_изменения
+   pnpm --filter @budget/server exec prisma migrate dev --name описание_изменения
    ```
 
 2. **Изменил API** (`typespec/`):
+
    ```bash
-   npm run typespec
+   pnpm --filter @budget/server typespec
    # или в watch режиме:
-   npm run typespec:generate:watch
+   pnpm --filter @budget/server typespec:generate:watch
    ```
 
 3. **Обновил код сервера** (`src/`):
-   - Сервер автоматически перезагрузится (если запущен `npm run dev`)
+   - Сервер автоматически перезагрузится (если запущен `pnpm --filter @budget/server dev`)
 
 4. **Проверил данные в БД**:
    ```bash
-   npm run prisma:studio
+   pnpm --filter @budget/server prisma:studio
    ```
 
 ## Преимущества SQLite
@@ -321,8 +327,8 @@ docker-compose -f docker-compose.prod.yml up -d
 - **База данных (production)**: `server/data/budget.db`
 - **Логи**: `docker logs fastify_app`
 
-
 ### TODO
+
 - [ ] Добавить проверку на добавление категорий с одинаковым наименованием
 - [ ] Удалять категорию из базы и предлагать пользователю переместить траты в другую категорию
-- [ ] 
+- [ ]

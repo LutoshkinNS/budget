@@ -9,7 +9,7 @@
     "#generated/*": "./generated/*"
   },
   "scripts": {
-    "build": "rimraf dist && npm run typespec && tsc -p tsconfig.build.json",
+    "build": "rimraf dist && pnpm run typespec && tsc -p tsconfig.build.json",
     "dev": "prisma generate && tsx watch src/main.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -20,10 +20,10 @@
     "typespec:generateTsSchemas": "node typespec-helper.ts --generateTsSchemas",
     "typespec": "pnpm run typespec:generate && pnpm run typespec:generateTsSchemas",
     "prisma:generate": "prisma generate",
-    "prisma:studio": "npx prisma studio",
+    "prisma:studio": "prisma studio",
     "categories:merge-duplicates:dry-run": "tsx scripts/mergeDuplicateCategories.ts --dry-run",
     "categories:merge-duplicates": "tsx scripts/mergeDuplicateCategories.ts",
-    "prisma:seed": "npx prisma db seed"
+    "prisma:seed": "prisma db seed"
   },
   "keywords": [],
   "author": "",
