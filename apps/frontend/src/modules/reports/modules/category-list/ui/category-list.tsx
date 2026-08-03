@@ -1,22 +1,28 @@
 import {
-  formatExpenseShare,
+  formatCategoryShare,
   formatMoney,
   formatPeriodChange,
 } from "../../../model/formatters.ts";
-import type { ReportsCategory } from "../../../model/use-category-analytics.ts";
+import type {
+  ReportsCategory,
+  ReportsTransactionType,
+} from "../../../model/use-category-analytics.ts";
 
 import s from "./category-list.module.css";
 
 export type CategoryListProps = {
   categories: ReportsCategory[];
+  reportType: ReportsTransactionType;
   onCategorySelect: (categoryId: ReportsCategory["categoryId"]) => void;
 };
 
 function CategoryItem({
   category,
+  reportType,
   onClick,
 }: {
   category: ReportsCategory;
+  reportType: ReportsTransactionType;
   onClick: () => void;
 }) {
   return (
@@ -39,7 +45,7 @@ function CategoryItem({
         />
       </span>
       <span className={s.categoryMeta}>
-        <span>{formatExpenseShare(category.percentage)}</span>
+        <span>{formatCategoryShare(category.percentage, reportType)}</span>
         <span>{formatPeriodChange(category.changePercent)}</span>
         <span>{category.transactionCount} операций</span>
       </span>
@@ -49,23 +55,30 @@ function CategoryItem({
 
 export function CategoryList({
   categories,
+  reportType,
   onCategorySelect,
 }: CategoryListProps) {
   return (
     <section className={s.categories} aria-labelledby="categories-title">
-      <h2 id="categories-title">Категории</h2>
+      <h2 id="categories-title">
+        Категории {reportType === "expense" ? "расходов" : "доходов"}
+      </h2>
       {categories.length ? (
         <div className={s.categoryList}>
           {categories.map((category) => (
             <CategoryItem
               key={category.categoryId}
               category={category}
+              reportType={reportType}
               onClick={() => onCategorySelect(category.categoryId)}
             />
           ))}
         </div>
       ) : (
-        <p className={s.empty}>Расходов за выбранный период пока нет.</p>
+        <p className={s.empty}>
+          {reportType === "expense" ? "Расходов" : "Доходов"} за выбранный
+          период пока нет.
+        </p>
       )}
     </section>
   );

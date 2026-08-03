@@ -5,7 +5,7 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export interface CategoryExpenseSummaryDTO {
+export interface CategoryTransactionSummaryDTO {
   amount: number;
   /** @minimum 1 */
   categoryId: number;

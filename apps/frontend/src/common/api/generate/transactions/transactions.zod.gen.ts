@@ -55,6 +55,7 @@ export const TransactionsCategorySummaryQueryParams = zod.object({
   to: zod.iso.datetime({}),
   compareFrom: zod.iso.datetime({}),
   compareTo: zod.iso.datetime({}),
+  type: zod.enum(["income", "expense"]).optional(),
 });
 
 export const transactionsCategorySummaryResponseTransactionCountMin = 0;
@@ -62,8 +63,8 @@ export const transactionsCategorySummaryResponseTransactionCountMin = 0;
 export const transactionsCategorySummaryResponseCategoriesItemTransactionCountMin = 0;
 
 export const TransactionsCategorySummaryResponse = zod.object({
-  totalExpense: zod.number(),
-  previousTotalExpense: zod.number(),
+  totalAmount: zod.number(),
+  previousTotalAmount: zod.number(),
   changePercent: zod.union([zod.number(), zod.null()]),
   transactionCount: zod
     .number()

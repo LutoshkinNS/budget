@@ -20,6 +20,7 @@ describe("reports route search", () => {
       ),
     ).toEqual({
       period: "month",
+      type: "expense",
       month: getCurrentMonthValue(now),
       fromDate: getCurrentDateValue(now),
       toDate: getCurrentDateValue(now),
@@ -39,6 +40,7 @@ describe("reports route search", () => {
       ),
     ).toEqual({
       period: "range",
+      type: "expense",
       month: "2026-07",
       fromDate: getCurrentDateValue(now),
       toDate: getCurrentDateValue(now),
@@ -57,10 +59,43 @@ describe("reports route search", () => {
       ),
     ).toEqual({
       period: "month",
+      type: "expense",
       month: "2026-07",
       fromDate: getCurrentDateValue(now),
       toDate: getCurrentDateValue(now),
       selectedCategoryId: 42,
     });
+  });
+
+  it("keeps a valid report type in normalized search", () => {
+    expect(
+      normalizeReportsSearch(
+        {
+          period: "month",
+          month: "2026-07",
+          type: "income",
+        },
+        now,
+      ),
+    ).toEqual({
+      period: "month",
+      type: "income",
+      month: "2026-07",
+      fromDate: getCurrentDateValue(now),
+      toDate: getCurrentDateValue(now),
+    });
+  });
+
+  it("falls back to expenses for an invalid report type", () => {
+    expect(
+      normalizeReportsSearch(
+        {
+          period: "month",
+          month: "2026-07",
+          type: "balance",
+        },
+        now,
+      ),
+    ).toMatchObject({ type: "expense" });
   });
 });

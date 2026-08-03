@@ -19,7 +19,7 @@ describe('calculateChangePercent', () => {
 });
 
 describe('buildCategorySummaryResponse', () => {
-  it('builds sorted category expense analytics for the current period', () => {
+  it('builds sorted category analytics for the current period', () => {
     const summary = buildCategorySummaryResponse({
       current: [
         {
@@ -48,8 +48,8 @@ describe('buildCategorySummaryResponse', () => {
     });
 
     assert.deepEqual(summary, {
-      totalExpense: 150,
-      previousTotalExpense: 120,
+      totalAmount: 150,
+      previousTotalAmount: 120,
       changePercent: 25,
       transactionCount: 3,
       categories: [

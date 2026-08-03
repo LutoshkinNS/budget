@@ -1,4 +1,10 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "orval";
@@ -20,6 +26,9 @@ const syncModelImportProxies = () => {
   );
   const importedModelNames = new Set<string>();
   const importPattern = /from "\.\/([^"]+)";/g;
+  const proxyFiles = readdirSync(modelDir).filter(
+    (fileName) => fileName.endsWith(".ts") && !fileName.endsWith(".gen.ts"),
+  );
 
   for (const fileName of generatedModelFiles) {
     const source = readFileSync(join(modelDir, fileName), "utf8");
@@ -35,6 +44,14 @@ const syncModelImportProxies = () => {
       ) {
         importedModelNames.add(importName);
       }
+    }
+  }
+
+  for (const fileName of proxyFiles) {
+    const modelName = fileName.replace(/\.ts$/, "");
+
+    if (!generatedModelNames.has(modelName)) {
+      unlinkSync(join(modelDir, fileName));
     }
   }
 

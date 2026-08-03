@@ -103,6 +103,7 @@ interface Transactions {
     @query to: utcDateTime,
     @query compareFrom: utcDateTime,
     @query compareTo: utcDateTime,
+    @query type?: TransactionType,
   ): CategorySummary | TransactionErrorResponse | InternalServerErrorResponse;
 
   @route("/summary")

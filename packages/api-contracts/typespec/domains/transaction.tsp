@@ -62,7 +62,7 @@ model TransactionSummary {
   totalBalance: float64;
 }
 
-model CategoryExpenseSummary {
+model CategoryTransactionSummary {
   @minValue(1)
   categoryId: integer;
 
@@ -77,13 +77,13 @@ model CategoryExpenseSummary {
 }
 
 model CategorySummary {
-  totalExpense: float64;
-  previousTotalExpense: float64;
+  totalAmount: float64;
+  previousTotalAmount: float64;
   changePercent: float64 | null;
 
   @minValue(0)
   transactionCount: integer;
-  categories: CategoryExpenseSummary[];
+  categories: CategoryTransactionSummary[];
 }
 
 model TransactionErrorResponse {

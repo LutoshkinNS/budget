@@ -16,5 +16,6 @@ export {
   type ReportsCategory,
   type ReportsCategorySummary,
   type ReportsCategoryTransaction,
+  type ReportsTransactionType,
 } from "./model/use-category-analytics.ts";
 export { ReportsScreen } from "./ui/reports-screen.tsx";

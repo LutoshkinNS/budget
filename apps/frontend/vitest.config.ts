@@ -1,5 +1,5 @@
 import path from "node:path";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   define: {
@@ -17,6 +17,7 @@ export default defineConfig({
       VITE_APP_VERSION: "test",
       VITE_TELEGRAM_BOT_NAME: "test_bot",
     },
+    exclude: [...configDefaults.exclude, "e2e/**"],
     restoreMocks: true,
   },
 });

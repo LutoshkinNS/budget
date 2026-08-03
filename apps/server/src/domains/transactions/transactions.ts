@@ -218,7 +218,8 @@ export default async function transactionsModule(app: FastifyApp) {
             from: { type: 'string', format: 'date-time' },
             to: { type: 'string', format: 'date-time' },
             compareFrom: { type: 'string', format: 'date-time' },
-            compareTo: { type: 'string', format: 'date-time' }
+            compareTo: { type: 'string', format: 'date-time' },
+            type: { type: 'string', enum: transactionTypes }
           },
           additionalProperties: false
         },
@@ -240,16 +241,26 @@ export default async function transactionsModule(app: FastifyApp) {
         return reply.code(400).send(previousRange);
       }
 
+      const type = req.query.type ?? 'expense';
+
+      if (!isTransactionType(type)) {
+        return reply
+          .code(400)
+          .send(
+            validationError('Query parameter type must be income or expense')
+          );
+      }
+
       const accountId = req.user.accountId;
-      const expenseWhere = {
+      const categorySummaryWhere = {
         accountId,
-        type: 'expense'
+        type
       };
       const [currentGroups, previousGroups] = await Promise.all([
         this.prisma.transaction.groupBy({
           by: ['categoryId'],
           where: {
-            ...expenseWhere,
+            ...categorySummaryWhere,
             date: { gte: currentRange.from, lt: currentRange.to }
           },
           _sum: { amount: true },
@@ -258,7 +269,7 @@ export default async function transactionsModule(app: FastifyApp) {
         this.prisma.transaction.groupBy({
           by: ['categoryId'],
           where: {
-            ...expenseWhere,
+            ...categorySummaryWhere,
             date: { gte: previousRange.from, lt: previousRange.to }
           },
           _sum: { amount: true }

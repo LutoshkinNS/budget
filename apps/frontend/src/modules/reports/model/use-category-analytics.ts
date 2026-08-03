@@ -23,11 +23,15 @@ export type ReportsCategorySummary = z.infer<
 >;
 export type ReportsCategory = ReportsCategorySummary["categories"][number];
 export type ReportsCategoryTransaction = TransactionDTO;
+export type ReportsTransactionType = NonNullable<
+  TransactionsCategorySummaryParams["type"]
+>;
 type ReportsCategoryTransactionsParams = Pick<
   TransactionsListParams,
   "from" | "to"
 > & {
   categoryId: NonNullable<TransactionsListParams["categoryId"]> | null;
+  type: ReportsTransactionType;
 };
 
 function normalizeTransaction(
@@ -41,12 +45,14 @@ function normalizeTransaction(
 
 function toCategorySummaryParams(
   ranges: ReportsPeriodRanges,
+  type: ReportsTransactionType,
 ): TransactionsCategorySummaryParams {
   return {
     from: ranges.current.from,
     to: ranges.current.to,
     compareFrom: ranges.compare.from,
     compareTo: ranges.compare.to,
+    type,
   };
 }
 
@@ -54,14 +60,18 @@ function toCategoryTransactionsParams({
   categoryId,
   from,
   to,
+  type,
 }: ReportsCategoryTransactionsParams): TransactionsListParams {
   return categoryId === null
-    ? { from, to, type: "expense" }
-    : { from, to, type: "expense", categoryId };
+    ? { from, to, type }
+    : { from, to, type, categoryId };
 }
 
-export function useReportsCategorySummary(ranges: ReportsPeriodRanges) {
-  const params = toCategorySummaryParams(ranges);
+export function useReportsCategorySummary(
+  ranges: ReportsPeriodRanges,
+  type: ReportsTransactionType,
+) {
+  const params = toCategorySummaryParams(ranges, type);
   const { data, isError, error, isLoading } =
     useTransactionsCategorySummary(params);
   const { addNotification } = useNotifications();
@@ -102,8 +112,9 @@ export function useReportsCategoryTransactions({
   categoryId,
   from,
   to,
+  type,
 }: ReportsCategoryTransactionsParams) {
-  const params = toCategoryTransactionsParams({ categoryId, from, to });
+  const params = toCategoryTransactionsParams({ categoryId, from, to, type });
   const { data, isError, error, isLoading } = useTransactionsList(params, {
     query: { enabled: categoryId !== null },
   });

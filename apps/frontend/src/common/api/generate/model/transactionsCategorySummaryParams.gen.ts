@@ -4,10 +4,12 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { TransactionsCategorySummaryType } from "./transactionsCategorySummaryType";
 
 export type TransactionsCategorySummaryParams = {
   from: string;
   to: string;
   compareFrom: string;
   compareTo: string;
+  type?: TransactionsCategorySummaryType;
 };

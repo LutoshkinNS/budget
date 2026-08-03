@@ -6,7 +6,7 @@ import type {
 
 type ReportsMoneyAmount =
   | ReportsCategory["amount"]
-  | ReportsCategorySummary["totalExpense"]
+  | ReportsCategorySummary["totalAmount"]
   | ReportsCategoryTransaction["amount"];
 type ReportsChangePercent =
   | ReportsCategory["changePercent"]
@@ -22,12 +22,13 @@ function formatPercent(value: NonNullable<ReportsChangePercent>): string {
   })}%`;
 }
 
-export function formatExpenseShare(
+export function formatCategoryShare(
   value: ReportsCategory["percentage"],
+  type: "expense" | "income",
 ): string {
   return `${value.toLocaleString("ru-RU", {
     maximumFractionDigits: 1,
-  })}% от расходов`;
+  })}% от ${type === "expense" ? "расходов" : "доходов"}`;
 }
 
 export function formatPeriodChange(value: ReportsChangePercent): string {

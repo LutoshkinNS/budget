@@ -4,13 +4,13 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { CategoryExpenseSummaryDTO } from "./categoryExpenseSummaryDTO";
+import type { CategoryTransactionSummaryDTO } from "./categoryTransactionSummaryDTO";
 
 export interface CategorySummaryDTO {
-  categories: CategoryExpenseSummaryDTO[];
+  categories: CategoryTransactionSummaryDTO[];
   changePercent: number | null;
-  previousTotalExpense: number;
-  totalExpense: number;
+  previousTotalAmount: number;
+  totalAmount: number;
   /** @minimum 0 */
   transactionCount: number;
 }

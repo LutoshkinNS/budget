@@ -1,13 +1,14 @@
 import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
 
 import {
-  formatExpenseShare,
+  formatCategoryShare,
   formatMoney,
   formatPeriodChange,
 } from "../../../model/formatters.ts";
 import type { ReportsPeriodRange } from "../../../model/period.ts";
 import {
   type ReportsCategory,
+  type ReportsTransactionType,
   useReportsCategoryTransactions,
 } from "../../../model/use-category-analytics.ts";
 
@@ -19,6 +20,7 @@ export type CategoryDetailSheetProps = {
   category: ReportsCategory | null;
   from: ReportsPeriodRange["from"];
   to: ReportsPeriodRange["to"];
+  reportType: ReportsTransactionType;
   onClose: () => void;
 };
 
@@ -26,12 +28,14 @@ export function CategoryDetailSheet({
   category,
   from,
   to,
+  reportType,
   onClose,
 }: CategoryDetailSheetProps) {
   const operationsQuery = useReportsCategoryTransactions({
     categoryId: category?.categoryId ?? null,
     from,
     to,
+    type: reportType,
   });
 
   if (!category) return null;
@@ -55,7 +59,7 @@ export function CategoryDetailSheet({
             <h2 id="category-sheet-title">{category.categoryName}</h2>
             <p>
               {formatMoney(category.amount)} ·{" "}
-              {formatExpenseShare(category.percentage)} ·{" "}
+              {formatCategoryShare(category.percentage, reportType)} ·{" "}
               {category.transactionCount} операций
             </p>
           </div>

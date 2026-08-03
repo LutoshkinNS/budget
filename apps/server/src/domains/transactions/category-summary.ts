@@ -1,11 +1,11 @@
-type CurrentCategoryExpense = {
+type CurrentCategoryTransaction = {
   categoryId: number;
   categoryName: string;
   amount: number;
   transactionCount: number;
 };
 
-type PreviousCategoryExpense = {
+type PreviousCategoryTransaction = {
   categoryId: number;
   amount: number;
 };
@@ -25,17 +25,17 @@ export function buildCategorySummaryResponse({
   current,
   previous
 }: {
-  current: CurrentCategoryExpense[];
-  previous: PreviousCategoryExpense[];
+  current: CurrentCategoryTransaction[];
+  previous: PreviousCategoryTransaction[];
 }) {
   const previousAmounts = new Map(
     previous.map(({ categoryId, amount }) => [categoryId, amount])
   );
-  const totalExpense = current.reduce(
+  const totalAmount = current.reduce(
     (total, category) => total + category.amount,
     0
   );
-  const previousTotalExpense = previous.reduce(
+  const previousTotalAmount = previous.reduce(
     (total, category) => total + category.amount,
     0
   );
@@ -45,9 +45,9 @@ export function buildCategorySummaryResponse({
   );
 
   return {
-    totalExpense,
-    previousTotalExpense,
-    changePercent: calculateChangePercent(totalExpense, previousTotalExpense),
+    totalAmount,
+    previousTotalAmount,
+    changePercent: calculateChangePercent(totalAmount, previousTotalAmount),
     transactionCount,
     categories: current
       .map((category) => {
@@ -56,7 +56,7 @@ export function buildCategorySummaryResponse({
         return {
           ...category,
           percentage:
-            totalExpense === 0 ? 0 : (category.amount / totalExpense) * 100,
+            totalAmount === 0 ? 0 : (category.amount / totalAmount) * 100,
           previousAmount,
           changePercent: calculateChangePercent(category.amount, previousAmount)
         };

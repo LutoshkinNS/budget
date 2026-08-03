@@ -8,9 +8,11 @@ import {
   isReportsPeriod,
   type ReportsCategory,
   type ReportsPeriodSelection,
+  type ReportsTransactionType,
 } from "@/modules/reports";
 
 export type ReportsSearch = ReportsPeriodSelection & {
+  type: ReportsTransactionType;
   selectedCategoryId?: ReportsCategory["categoryId"];
 };
 type ReportsSearchRaw = Partial<Record<keyof ReportsSearch, unknown>>;
@@ -55,6 +57,12 @@ function parsePositiveInteger(
   return Number.isSafeInteger(parsed) && parsed >= 1 ? parsed : undefined;
 }
 
+function isReportsTransactionType(
+  value: unknown,
+): value is ReportsTransactionType {
+  return value === "expense" || value === "income";
+}
+
 export function normalizeReportsSearch(
   search: ReportsSearchRaw = {},
   now: Date = new Date(),
@@ -62,6 +70,7 @@ export function normalizeReportsSearch(
   const currentMonth = getCurrentMonthValue(now);
   const currentDate = getCurrentDateValue(now);
   const period = isReportsPeriod(search.period) ? search.period : "month";
+  const type = isReportsTransactionType(search.type) ? search.type : "expense";
   const month =
     isReportsMonthValue(search.month) && search.month <= currentMonth
       ? search.month
@@ -78,8 +87,8 @@ export function normalizeReportsSearch(
   const hasValidRange = dateValueToDate(fromDate) <= dateValueToDate(toDate);
   const selectedCategoryId = parsePositiveInteger(search.selectedCategoryId);
   const normalized = hasValidRange
-    ? { period, month, fromDate, toDate }
-    : { period, month, fromDate: currentDate, toDate: currentDate };
+    ? { period, type, month, fromDate, toDate }
+    : { period, type, month, fromDate: currentDate, toDate: currentDate };
 
   return selectedCategoryId === undefined
     ? normalized

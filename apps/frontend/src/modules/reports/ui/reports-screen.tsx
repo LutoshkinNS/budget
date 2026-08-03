@@ -7,32 +7,38 @@ import {
 } from "../model/period.ts";
 import {
   type ReportsCategory,
+  type ReportsTransactionType,
   useReportsCategorySummary,
 } from "../model/use-category-analytics.ts";
 import { CategoryDetailSheet } from "../modules/category-detail-sheet";
 import { CategoryList } from "../modules/category-list";
-import { ExpenseSummary } from "../modules/expense-summary";
 import { PeriodControls } from "../modules/period-controls";
+import { ReportTypeControls } from "../modules/report-type-controls";
+import { TransactionSummary } from "../modules/transaction-summary";
 
 import s from "./reports-screen.module.css";
 
 type ReportsScreenProps = {
   periodSelection: ReportsPeriodSelection;
+  reportType: ReportsTransactionType;
   selectedCategoryId: ReportsCategory["categoryId"] | undefined;
   onPeriodSelectionChange: (periodSelection: ReportsPeriodSelection) => void;
+  onReportTypeChange: (type: ReportsTransactionType) => void;
   onCategorySelect: (categoryId: ReportsCategory["categoryId"]) => void;
   onCategoryClose: () => void;
 };
 
 export function ReportsScreen({
   periodSelection,
+  reportType,
   selectedCategoryId,
   onPeriodSelectionChange,
+  onReportTypeChange,
   onCategorySelect,
   onCategoryClose,
 }: ReportsScreenProps) {
   const ranges = buildReportsPeriodRanges(periodSelection);
-  const summaryQuery = useReportsCategorySummary(ranges);
+  const summaryQuery = useReportsCategorySummary(ranges, reportType);
   const summary = summaryQuery.summary;
   const selectedCategory =
     summary?.categories.find(
@@ -42,6 +48,10 @@ export function ReportsScreen({
   return (
     <div className={s.container}>
       <h1 className={s.title}>Отчёты</h1>
+      <ReportTypeControls
+        reportType={reportType}
+        onReportTypeChange={onReportTypeChange}
+      />
       <PeriodControls
         periodSelection={periodSelection}
         onPeriodSelectionChange={onPeriodSelectionChange}
@@ -52,9 +62,10 @@ export function ReportsScreen({
       )}
       {summary && (
         <>
-          <ExpenseSummary summary={summary} />
+          <TransactionSummary summary={summary} reportType={reportType} />
           <CategoryList
             categories={summary.categories}
+            reportType={reportType}
             onCategorySelect={onCategorySelect}
           />
         </>
@@ -63,6 +74,7 @@ export function ReportsScreen({
         category={selectedCategory}
         from={ranges.current.from}
         to={ranges.current.to}
+        reportType={reportType}
         onClose={onCategoryClose}
       />
     </div>
