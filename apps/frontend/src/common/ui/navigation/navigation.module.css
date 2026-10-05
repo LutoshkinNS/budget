@@ -1,6 +1,8 @@
 .navigationContainer {
   position: fixed;
-  width: 100%;
+  left: 0;
+  right: 0;
+  width: auto;
   display: flex;
   flex-direction: row;
   justify-content: center;
