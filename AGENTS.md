@@ -96,7 +96,7 @@ Server TypeScript path aliases:
 
 ### Frontend
 
-The frontend follows FEOD (Fractal Entity Oriental Design), not FSD; the full convention is documented in `apps/frontend/ARCHITECTURE.md`:
+The frontend follows FEOD (Fractal Entity Oriental Design), not FSD; the full convention is documented in `apps/frontend/docs/frontend-architecture.md`:
 
 - `app/` - app initialization, providers, routing, TanStack Router setup.
 - `pages/` - page-level screens.

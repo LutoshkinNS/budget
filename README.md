@@ -129,7 +129,7 @@ pnpm --filter @budget/frontend e2e
 
 - [Development Guide](docs/development.md) explains local setup, env files, daily commands, TypeSpec, Prisma, testing, and troubleshooting.
 - [Architecture Guide](docs/architecture.md) explains the monorepo, backend domains, frontend FEOD boundaries, generated API flow, data model, and production topology.
-- [Frontend Architecture](apps/frontend/ARCHITECTURE.md) is the detailed FEOD convention for `apps/frontend`.
+- [Frontend Architecture](apps/frontend/docs/frontend-architecture.md) is the detailed FEOD convention for `apps/frontend`.
 - [Production Runbook](prod.md) documents the deployed `budget-best.ru` environment and operational procedures.
 
 ## Development Notes

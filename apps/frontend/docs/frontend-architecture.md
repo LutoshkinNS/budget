@@ -203,6 +203,8 @@ src/common/
 - `common/api/generate` - generated Orval client. Не редактировать руками.
 - `common/api/fetcher.ts`, `appQuery.ts`, `ApiError.ts` - инфраструктура API.
 - `common/ui` - reusable UI primitives.
+- Работа с SVG и иконками описана в [отдельном руководстве](frontend-icons.md).
+- Состав и отображение основного меню принадлежат функциональному модулю `modules/navigation` с публичным API через `index.ts`. Layout подключает модуль через этот API; модуль не импортирует внутренности `app/routes` или страниц. Route/search-адаптеры остаются в `app/routes` и `pages`; `common/ui/navigation` содержит только переиспользуемый пункт меню.
 - `common/lib` - reusable utilities.
 - Не превращать `common` в свалку бизнес-логики. Если код знает про account/category/transaction, ему место в module.
 

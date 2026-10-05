@@ -1,0 +1,26 @@
+.container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  bottom: 20px;
+  z-index: 999;
+}
+
+.list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  list-style-type: none;
+  margin: 0;
+  padding: 4px;
+  background-color: var(--app-surface-raised-color);
+  height: 44px;
+  border-radius: 16px;
+  max-width: calc(100vw - 16px);
+}

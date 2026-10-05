@@ -76,7 +76,7 @@ Key paths:
 - `src/common/` for API infrastructure, generated client, shared UI, and utilities.
 - `src/common/api/generate/` for Orval-generated code.
 
-The detailed frontend convention lives in [../apps/frontend/ARCHITECTURE.md](../apps/frontend/ARCHITECTURE.md).
+The detailed frontend convention lives in [../apps/frontend/docs/frontend-architecture.md](../apps/frontend/docs/frontend-architecture.md).
 
 ## API Generation Flow
 

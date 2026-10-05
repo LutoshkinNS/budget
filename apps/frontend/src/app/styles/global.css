@@ -43,6 +43,7 @@ body {
     --app-border-strong-color: #333334;
     --app-control-active-color: #333334;
     --app-control-active-text-color: #f3f3f3;
+    --app-icon-color: #626166;
     --app-accent-color: #4f46e5;
     --app-accent-text-color: #ffffff;
     --app-emphasis-surface-color: #202b3c;
@@ -82,6 +83,7 @@ body {
     --app-border-strong-color: #bfbfbf;
     --app-control-active-color: #bfbfbf;
     --app-control-active-text-color: #242229;
+    --app-icon-color: var(--app-muted-text-color);
     --app-accent-color: #818cf8;
     --app-accent-text-color: #1a1a1f;
     --app-emphasis-surface-color: #202b3c;
