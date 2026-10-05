@@ -6,7 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-docs
+
+# Local documentation drafts and generated planning notes
+docs/_drafts/
 
 # Package manager
 package-lock.json
@@ -50,5 +52,6 @@ git-info.json
 .playwright-cli/
 .playwright-mcp/
 .mcp.json
+.agents/.mcp.json
 output/playwright/
 nul

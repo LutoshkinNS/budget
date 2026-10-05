@@ -167,9 +167,17 @@ Regenerate them through the documented commands instead.
 
 ## Repository Artifacts
 
+Keep public, user-facing project documentation in `docs/`. Put temporary Codex/agent working documents under `docs/_drafts/`, which is ignored by git, unless the user explicitly asks to promote a draft into tracked documentation.
+
+Use `docs/_drafts/` for:
+
+- temporary plans, specs, research notes, rollout logs, and investigation notes;
+- design or implementation drafts created by agents or skills;
+- historical notes that are useful locally but are not intended as repository documentation.
+
 Do not commit Codex/agent working artifacts. Keep these local unless the user explicitly asks otherwise:
 
-- `docs/` working drafts and planning notes.
+- `docs/_drafts/` working drafts and planning notes.
 - `.codex/` task memory, reports, local config, temporary files.
 - `.claude/` legacy task memory or Claude-specific files.
 - `.playwright-mcp/`, `.mcp.json`, and similar local tool artifacts.
