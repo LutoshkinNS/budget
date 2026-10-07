@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { queryClient } from "@/common/api/appQuery";
 import {
+  getCategoriesGetQueryKey,
   getCategoriesListQueryKey,
   useCategoriesList,
 } from "@/common/api/generate/categories/categories.gen.ts";
@@ -40,8 +41,18 @@ export function useCategories(params?: CategoriesListParams) {
 }
 
 export function useInvalidateCategories() {
-  return (params?: CategoriesListParams) =>
-    queryClient.invalidateQueries({
-      queryKey: getCategoriesListQueryKey(params),
-    });
+  return async (categoryId?: number) => {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: getCategoriesListQueryKey(),
+      }),
+      ...(categoryId === undefined
+        ? []
+        : [
+            queryClient.invalidateQueries({
+              queryKey: getCategoriesGetQueryKey(categoryId),
+            }),
+          ]),
+    ]);
+  };
 }

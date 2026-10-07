@@ -29,8 +29,8 @@ export function Categories() {
           доходы
         </button>
       </fieldset>
-      <CategoriesList type={type} />
-      <CreateCategory type={type} />
+      <CategoriesList key={`list-${type}`} type={type} />
+      <CreateCategory key={`create-${type}`} type={type} />
       <DeleteCategory type={type} />
     </div>
   );

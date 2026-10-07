@@ -1,0 +1,44 @@
+.fieldset {
+  min-width: 0;
+}
+
+.fieldset legend,
+.name {
+  overflow-wrap: anywhere;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  padding-block: 8px;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+}
+
+.edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

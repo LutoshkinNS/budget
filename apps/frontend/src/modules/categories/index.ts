@@ -11,3 +11,4 @@ export type { CategoryType, CreateCategoryFormData } from "./model/types.ts";
 export { CATEGORY_ICONS, getCategoryIcon } from "./model/category-icons";
 export type { CategoryIconKey } from "./model/category-icons";
 export { CategoryIcon } from "./ui/category-icon";
+export { CategoryIconPicker } from "./ui/category-icon-picker";

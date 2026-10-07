@@ -1,3 +1,12 @@
 .fieldError {
   color: var(--app-error-color);
 }
+
+.fieldset {
+  min-width: 0;
+}
+
+.fieldset input {
+  box-sizing: border-box;
+  max-width: 100%;
+}

@@ -13,7 +13,7 @@ export type CategoryCreateData = Omit<CategoryCreateDTO, "type"> & {
 
 function getCreateCategoryErrorMessage(error: unknown) {
   if (typeof error === "object" && error !== null && "code" in error) {
-    const code = (error as { code?: unknown }).code;
+    const code = error.code;
 
     if (code === "CATEGORY_ALREADY_EXISTS") {
       return "Категория с таким названием уже существует";
@@ -25,7 +25,7 @@ function getCreateCategoryErrorMessage(error: unknown) {
   }
 
   if (typeof error === "object" && error !== null && "message" in error) {
-    const message = (error as { message?: unknown }).message;
+    const message = error.message;
 
     if (typeof message === "string") {
       return message;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 
 import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
@@ -6,6 +6,8 @@ import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
 import { createCategoryFormDataSchema } from "../model/schemas.ts";
 import type { CategoryType, CreateCategoryFormData } from "../model/types.ts";
 import { useCreateCategory } from "../model/useCreateCategory.ts";
+
+import { CategoryIconPicker } from "./category-icon-picker";
 
 import s from "./create-category.module.css";
 
@@ -27,7 +29,12 @@ export function CreateCategory({ type }: CreateCategoryProps) {
 
   const [formState, setFormState] = useState<CreateCategoryFormData>({
     name: "",
+    iconKey: null,
   });
+  const submitting = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>();
+  const pending = isPending || isSubmitting;
 
   const validationResult = createCategoryFormDataSchema.safeParse(formState);
   const errors = validationResult.success
@@ -36,6 +43,7 @@ export function CreateCategory({ type }: CreateCategoryProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (pending || submitting.current) return;
 
     const validationResult = createCategoryFormDataSchema.safeParse(formState);
 
@@ -43,12 +51,25 @@ export function CreateCategory({ type }: CreateCategoryProps) {
       return;
     }
 
-    await createCategory({ ...validationResult.data, type });
+    submitting.current = true;
+    setIsSubmitting(true);
+    setSubmitError(undefined);
+    try {
+      const category = await createCategory({ ...validationResult.data, type });
+      if (category) setFormState({ name: "", iconKey: null });
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Не удалось создать категорию",
+      );
+    } finally {
+      submitting.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <fieldset disabled={isPending}>
+      <fieldset disabled={pending} className={s.fieldset}>
         <legend>Создание новой категории</legend>
         <p>
           <label htmlFor={IDS.NAME}>Наименование категории</label>
@@ -69,13 +90,21 @@ export function CreateCategory({ type }: CreateCategoryProps) {
             {errors?.fieldErrors.name || errors?.formErrors}
           </span>
         </p>
-        {isError && (
+        <CategoryIconPicker
+          value={formState.iconKey}
+          onChange={(iconKey) =>
+            setFormState((state) => ({ ...state, iconKey }))
+          }
+          disabled={pending}
+        />
+        {(isError || submitError) && (
           <SimpleError>
-            Ошибка: {errorMessage || "Не удалось создать категорию"}
+            Ошибка:{" "}
+            {submitError || errorMessage || "Не удалось создать категорию"}
           </SimpleError>
         )}
-        <button type="submit" disabled={isPending || !validationResult.success}>
-          {isPending ? "Создание..." : "Создать"}
+        <button type="submit" disabled={pending || !validationResult.success}>
+          {pending ? "Создание..." : "Создать"}
         </button>
       </fieldset>
     </form>

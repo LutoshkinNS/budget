@@ -1,18 +1,24 @@
 import type { CategoryType } from "../model/types.ts";
+import { useCategories } from "../model/useCategories";
 
-import { CategoriesSelect } from "./CategoriesSelect.tsx";
+import { CategoryListItem } from "./category-list-item";
+
+import styles from "./categories-list.module.css";
 
 type CategoriesListProps = {
   type: CategoryType;
 };
 
 export function CategoriesList({ type }: CategoriesListProps) {
+  const { data } = useCategories({ type });
   return (
-    <form>
-      <fieldset>
-        <legend>Список категорий</legend>
-        <CategoriesSelect type={type} />
-      </fieldset>
-    </form>
+    <fieldset className={styles.fieldset}>
+      <legend>Список категорий</legend>
+      <ul className={styles.list}>
+        {data.map((category) => (
+          <CategoryListItem key={category.id} category={category} />
+        ))}
+      </ul>
+    </fieldset>
   );
 }

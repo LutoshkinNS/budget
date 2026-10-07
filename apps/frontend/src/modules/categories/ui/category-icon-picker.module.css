@@ -1,0 +1,39 @@
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 12px;
+}
+
+.picker button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 2px solid var(--app-border-color);
+  border-radius: 12px;
+  background: var(--app-surface-color);
+  color: var(--app-text-color);
+  cursor: pointer;
+}
+
+.picker button[aria-pressed="true"] {
+  border-color: var(--app-accent-color);
+  background: var(--app-surface-muted-color);
+}
+
+.picker button:focus-visible {
+  outline: 2px solid var(--app-accent-color);
+  outline-offset: 2px;
+}
+
+.picker button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.empty {
+  flex-basis: 100%;
+}
