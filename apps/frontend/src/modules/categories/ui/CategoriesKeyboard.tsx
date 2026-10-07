@@ -1,6 +1,6 @@
-import { CategoryKeyboard } from "@/modules/expenses/modules/category-keyboard";
-
 import { useCategories } from "../model/useCategories.ts";
+
+import { CategoryKeyboard } from "./category-keyboard/category-keyboard";
 
 type CategoryType = "income" | "expense";
 
@@ -19,20 +19,12 @@ export function CategoriesKeyboard({
 }: CategoriesKeyboardProps) {
   const { data: categories } = useCategories({ type });
 
-  const items = categories.map((cat) => ({ emoji: "", label: cat.name }));
-  const selectedName = categories.find((cat) => cat.id === value)?.name ?? null;
-
-  const handleChange = (name: string | null) => {
-    const id = categories.find((cat) => cat.name === name)?.id ?? null;
-    onChange(id);
-  };
-
   return (
     <div className={className}>
       <CategoryKeyboard
-        categories={items}
-        value={selectedName}
-        onChange={handleChange}
+        categories={categories}
+        value={value}
+        onChange={onChange}
       />
     </div>
   );

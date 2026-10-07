@@ -1,0 +1,56 @@
+.card {
+  --category-card-background: var(--app-surface-color);
+  --category-card-text: var(--app-text-color);
+  --category-card-selected-border: var(--app-border-strong-color);
+  --category-card-selected-background: color-mix(
+    in srgb,
+    var(--category-card-text) 8%,
+    var(--category-card-background)
+  );
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 0;
+  box-shadow: inset 0 0 0 1px transparent;
+  background: var(--category-card-background);
+  color: var(--category-card-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+  transition:
+    opacity 0.1s,
+    box-shadow 0.15s,
+    background 0.15s;
+  width: max-content;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+.card:active {
+  opacity: 0.6;
+}
+
+.selected {
+  box-shadow: inset 0 0 0 1px var(--category-card-selected-border);
+  background: var(--category-card-selected-background);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--category-card-selected-border);
+  outline-offset: 2px;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    --category-card-background: #2f2d34;
+  }
+}

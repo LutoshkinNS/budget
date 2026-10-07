@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 
-import { useCategories } from "@/modules/categories";
+import { CategoryIcon, useCategories } from "@/modules/categories";
 import { useDeleteTransaction } from "@/modules/transactions";
 
 import type { ExpenseDTO } from "../../../model/useExpenses.ts";
@@ -27,9 +27,7 @@ export function ExpenseDayItem({
 }: ExpenseDayItemProps) {
   const navigate = useNavigate();
   const { data: categories } = useCategories();
-  const categoryName = categories.find(
-    (c) => c.id === expense.categoryId,
-  )?.name;
+  const category = categories.find((c) => c.id === expense.categoryId);
   const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
   const canEdit = expense.type === "expense";
   const deleteLabel =
@@ -61,7 +59,10 @@ export function ExpenseDayItem({
         onClick={handleEdit}
       >
         <div className={s.expenseCategory}>
-          <span>{categoryName ?? "—"}</span>
+          <span className={s.expenseCategoryName}>
+            <CategoryIcon iconKey={category?.iconKey} />
+            <span>{category?.name ?? "—"}</span>
+          </span>
           {expense.description && (
             <span className={s.expenseDescription}>{expense.description}</span>
           )}

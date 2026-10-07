@@ -1,10 +1,13 @@
 import { useCallback } from "react";
 
-import { Category, CategoryKeyboardProps } from "../models/types";
+import type {
+  Category,
+  CategoryKeyboardProps,
+} from "../../model/category-keyboard";
 
-import { CategoryCard } from "./CategoryCard";
+import { CategoryCard } from "./category-card";
 
-import s from "./CategoryKeyboard.module.css";
+import s from "./category-keyboard.module.css";
 
 export function CategoryKeyboard({
   categories,
@@ -12,7 +15,7 @@ export function CategoryKeyboard({
   onChange,
 }: CategoryKeyboardProps) {
   const handleSelect = useCallback(
-    (label: string) => onChange?.(value === label ? null : label),
+    (id: Category["id"]) => onChange?.(value === id ? null : id),
     [value, onChange],
   );
 
@@ -21,11 +24,11 @@ export function CategoryKeyboard({
 
   const renderCard = (cat: Category) => (
     <CategoryCard
-      key={cat.label}
-      emoji={cat.emoji}
-      label={cat.label}
-      selected={value === cat.label}
-      onSelect={handleSelect}
+      key={cat.id}
+      iconKey={cat.iconKey}
+      label={cat.name}
+      selected={value === cat.id}
+      onSelect={() => handleSelect(cat.id)}
     />
   );
 

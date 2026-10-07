@@ -119,6 +119,12 @@
   min-width: 0;
 }
 
+.expenseCategoryName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .expenseDescription {
   font-size: 12px;
   opacity: 0.6;
