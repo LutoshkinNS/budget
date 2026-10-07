@@ -1,5 +1,9 @@
+import clsx from "clsx";
+
 import type { CategoryType } from "../model/types.ts";
 import { useCategories } from "../model/useCategories.ts";
+
+import styles from "./categories-select.module.css";
 
 const IDS = {
   CATEGORY: "category",
@@ -13,7 +17,11 @@ type CategoriesSelectProps = React.ComponentPropsWithoutRef<"select"> & {
   type?: CategoryType;
 };
 
-export function CategoriesSelect({ type, ...props }: CategoriesSelectProps) {
+export function CategoriesSelect({
+  type,
+  className,
+  ...props
+}: CategoriesSelectProps) {
   const { data: categoriesResponse } = useCategories(
     type ? { type } : undefined,
   );
@@ -25,6 +33,7 @@ export function CategoriesSelect({ type, ...props }: CategoriesSelectProps) {
         name={FIELD_VALUES.CATEGORY_ID}
         id={IDS.CATEGORY}
         {...props}
+        className={clsx(styles.select, className)}
       >
         {props.value === "" && categoriesResponse.length ? (
           <option value="">Выберите категорию</option>

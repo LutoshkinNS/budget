@@ -31,7 +31,7 @@ export function Categories() {
       </fieldset>
       <CategoriesList key={`list-${type}`} type={type} />
       <CreateCategory key={`create-${type}`} type={type} />
-      <DeleteCategory type={type} />
+      <DeleteCategory key={`delete-${type}`} type={type} />
     </div>
   );
 }
