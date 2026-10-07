@@ -59,6 +59,12 @@ interface Categories {
     @body category: CategoryCreate,
   ): Category | CategoryErrorResponse | CategoryConflictResponse | InternalServerErrorResponse;
 
+  @route("/{categoryId}")
+  @patch update(
+    @path categoryId: integer,
+    @body category: CategoryUpdate,
+  ): Category | CategoryErrorResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+
   @delete delete(@path categoryId: integer): {
     @statusCode statusCode: 204;
   } | InternalServerErrorResponse;

@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": [
+    "iconKey"
+  ],
+  "properties": {
+    "iconKey": {
+      "anyOf": [
+        {
+          "$ref": "CategoryIconKey.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

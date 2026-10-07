@@ -15,12 +15,64 @@ export const CategoriesListResponseItem = zod.object({
   accountId: zod.number().min(1),
   type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
+  iconKey: zod.union([
+    zod.enum([
+      "groceries",
+      "meals",
+      "clothes",
+      "sport",
+      "car",
+      "home",
+      "leisure",
+      "mobile",
+      "internet",
+      "gifts",
+      "public-transport",
+      "pets",
+      "subscriptions",
+      "games",
+      "education",
+      "travel",
+      "taxi",
+      "apartment",
+      "health",
+      "beauty",
+    ]),
+    zod.null(),
+  ]),
 });
 export const CategoriesListResponse = zod.array(CategoriesListResponseItem);
 
 export const CategoriesCreateBody = zod.object({
   type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
+  iconKey: zod
+    .union([
+      zod.enum([
+        "groceries",
+        "meals",
+        "clothes",
+        "sport",
+        "car",
+        "home",
+        "leisure",
+        "mobile",
+        "internet",
+        "gifts",
+        "public-transport",
+        "pets",
+        "subscriptions",
+        "games",
+        "education",
+        "travel",
+        "taxi",
+        "apartment",
+        "health",
+        "beauty",
+      ]),
+      zod.null(),
+    ])
+    .optional(),
 });
 
 export const CategoriesCreateResponse = zod.object({
@@ -28,6 +80,31 @@ export const CategoriesCreateResponse = zod.object({
   accountId: zod.number().min(1),
   type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
+  iconKey: zod.union([
+    zod.enum([
+      "groceries",
+      "meals",
+      "clothes",
+      "sport",
+      "car",
+      "home",
+      "leisure",
+      "mobile",
+      "internet",
+      "gifts",
+      "public-transport",
+      "pets",
+      "subscriptions",
+      "games",
+      "education",
+      "travel",
+      "taxi",
+      "apartment",
+      "health",
+      "beauty",
+    ]),
+    zod.null(),
+  ]),
 });
 
 export const CategoriesGetParams = zod.object({
@@ -39,6 +116,95 @@ export const CategoriesGetResponse = zod.object({
   accountId: zod.number().min(1),
   type: zod.enum(["income", "expense"]),
   name: zod.string().min(1),
+  iconKey: zod.union([
+    zod.enum([
+      "groceries",
+      "meals",
+      "clothes",
+      "sport",
+      "car",
+      "home",
+      "leisure",
+      "mobile",
+      "internet",
+      "gifts",
+      "public-transport",
+      "pets",
+      "subscriptions",
+      "games",
+      "education",
+      "travel",
+      "taxi",
+      "apartment",
+      "health",
+      "beauty",
+    ]),
+    zod.null(),
+  ]),
+});
+
+export const CategoriesUpdateParams = zod.object({
+  categoryId: zod.number(),
+});
+
+export const CategoriesUpdateBody = zod.object({
+  iconKey: zod.union([
+    zod.enum([
+      "groceries",
+      "meals",
+      "clothes",
+      "sport",
+      "car",
+      "home",
+      "leisure",
+      "mobile",
+      "internet",
+      "gifts",
+      "public-transport",
+      "pets",
+      "subscriptions",
+      "games",
+      "education",
+      "travel",
+      "taxi",
+      "apartment",
+      "health",
+      "beauty",
+    ]),
+    zod.null(),
+  ]),
+});
+
+export const CategoriesUpdateResponse = zod.object({
+  id: zod.number().min(1),
+  accountId: zod.number().min(1),
+  type: zod.enum(["income", "expense"]),
+  name: zod.string().min(1),
+  iconKey: zod.union([
+    zod.enum([
+      "groceries",
+      "meals",
+      "clothes",
+      "sport",
+      "car",
+      "home",
+      "leisure",
+      "mobile",
+      "internet",
+      "gifts",
+      "public-transport",
+      "pets",
+      "subscriptions",
+      "games",
+      "education",
+      "travel",
+      "taxi",
+      "apartment",
+      "health",
+      "beauty",
+    ]),
+    zod.null(),
+  ]),
 });
 
 export const CategoriesDeleteParams = zod.object({

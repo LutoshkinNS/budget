@@ -59,7 +59,12 @@ export function useCreateCategory() {
     }
 
     try {
-      return await mutation.mutateAsync({ data: validateResult.data });
+      return await mutation.mutateAsync({
+        data: {
+          ...validateResult.data,
+          iconKey: validateResult.data.iconKey ?? null,
+        },
+      });
     } catch (error) {
       const errorMessage = getCreateCategoryErrorMessage(error);
 

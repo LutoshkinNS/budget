@@ -2,6 +2,29 @@ import "@typespec/http";
 
 using Http;
 
+enum CategoryIconKey {
+  groceries,
+  meals,
+  clothes,
+  sport,
+  car,
+  home,
+  leisure,
+  mobile,
+  internet,
+  gifts,
+  publicTransport: "public-transport",
+  pets,
+  subscriptions,
+  games,
+  education,
+  travel,
+  taxi,
+  apartment,
+  health,
+  beauty,
+}
+
 model Category {
   @minValue(1)
   id: integer;
@@ -13,6 +36,8 @@ model Category {
 
   @minLength(1)
   name: string;
+
+  iconKey: CategoryIconKey | null;
 }
 
 model CategoryCreate {
@@ -20,6 +45,12 @@ model CategoryCreate {
 
   @minLength(1)
   name: string;
+
+  iconKey?: CategoryIconKey | null;
+}
+
+model CategoryUpdate {
+  iconKey: CategoryIconKey | null;
 }
 
 model CategoryErrorResponse {

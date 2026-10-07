@@ -5,8 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { CategoryCreateDTOType } from "./categoryCreateDTOType";
+import type { CategoryIconKeyDTO } from "./categoryIconKeyDTO";
 
 export interface CategoryCreateDTO {
+  iconKey?: CategoryIconKeyDTO | null;
   /** @minLength 1 */
   name: string;
   type: CategoryCreateDTOType;

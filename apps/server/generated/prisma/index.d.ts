@@ -6154,6 +6154,7 @@ export namespace Prisma {
     accountId: number | null
     type: string | null
     name: string | null
+    iconKey: string | null
     nameNormalized: string | null
     deletedAt: Date | null
   }
@@ -6163,6 +6164,7 @@ export namespace Prisma {
     accountId: number | null
     type: string | null
     name: string | null
+    iconKey: string | null
     nameNormalized: string | null
     deletedAt: Date | null
   }
@@ -6172,6 +6174,7 @@ export namespace Prisma {
     accountId: number
     type: number
     name: number
+    iconKey: number
     nameNormalized: number
     deletedAt: number
     _all: number
@@ -6193,6 +6196,7 @@ export namespace Prisma {
     accountId?: true
     type?: true
     name?: true
+    iconKey?: true
     nameNormalized?: true
     deletedAt?: true
   }
@@ -6202,6 +6206,7 @@ export namespace Prisma {
     accountId?: true
     type?: true
     name?: true
+    iconKey?: true
     nameNormalized?: true
     deletedAt?: true
   }
@@ -6211,6 +6216,7 @@ export namespace Prisma {
     accountId?: true
     type?: true
     name?: true
+    iconKey?: true
     nameNormalized?: true
     deletedAt?: true
     _all?: true
@@ -6307,6 +6313,7 @@ export namespace Prisma {
     accountId: number
     type: string
     name: string
+    iconKey: string | null
     nameNormalized: string
     deletedAt: Date | null
     _count: TransactionCategoryCountAggregateOutputType | null
@@ -6335,6 +6342,7 @@ export namespace Prisma {
     accountId?: boolean
     type?: boolean
     name?: boolean
+    iconKey?: boolean
     nameNormalized?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -6348,6 +6356,7 @@ export namespace Prisma {
     accountId?: boolean
     type?: boolean
     name?: boolean
+    iconKey?: boolean
     nameNormalized?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -6358,6 +6367,7 @@ export namespace Prisma {
     accountId?: boolean
     type?: boolean
     name?: boolean
+    iconKey?: boolean
     nameNormalized?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -6368,11 +6378,12 @@ export namespace Prisma {
     accountId?: boolean
     type?: boolean
     name?: boolean
+    iconKey?: boolean
     nameNormalized?: boolean
     deletedAt?: boolean
   }
 
-  export type TransactionCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountId" | "type" | "name" | "nameNormalized" | "deletedAt", ExtArgs["result"]["transactionCategory"]>
+  export type TransactionCategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountId" | "type" | "name" | "iconKey" | "nameNormalized" | "deletedAt", ExtArgs["result"]["transactionCategory"]>
   export type TransactionCategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     transactions?: boolean | TransactionCategory$transactionsArgs<ExtArgs>
@@ -6398,6 +6409,7 @@ export namespace Prisma {
       accountId: number
       type: string
       name: string
+      iconKey: string | null
       nameNormalized: string
       deletedAt: Date | null
     }, ExtArgs["result"]["transactionCategory"]>
@@ -6830,6 +6842,7 @@ export namespace Prisma {
     readonly accountId: FieldRef<"TransactionCategory", 'Int'>
     readonly type: FieldRef<"TransactionCategory", 'String'>
     readonly name: FieldRef<"TransactionCategory", 'String'>
+    readonly iconKey: FieldRef<"TransactionCategory", 'String'>
     readonly nameNormalized: FieldRef<"TransactionCategory", 'String'>
     readonly deletedAt: FieldRef<"TransactionCategory", 'DateTime'>
   }
@@ -9594,6 +9607,7 @@ export namespace Prisma {
     accountId: 'accountId',
     type: 'type',
     name: 'name',
+    iconKey: 'iconKey',
     nameNormalized: 'nameNormalized',
     deletedAt: 'deletedAt'
   };
@@ -9942,6 +9956,7 @@ export namespace Prisma {
     accountId?: IntFilter<"TransactionCategory"> | number
     type?: StringFilter<"TransactionCategory"> | string
     name?: StringFilter<"TransactionCategory"> | string
+    iconKey?: StringNullableFilter<"TransactionCategory"> | string | null
     nameNormalized?: StringFilter<"TransactionCategory"> | string
     deletedAt?: DateTimeNullableFilter<"TransactionCategory"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -9954,6 +9969,7 @@ export namespace Prisma {
     accountId?: SortOrder
     type?: SortOrder
     name?: SortOrder
+    iconKey?: SortOrderInput | SortOrder
     nameNormalized?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
@@ -9969,6 +9985,7 @@ export namespace Prisma {
     accountId?: IntFilter<"TransactionCategory"> | number
     type?: StringFilter<"TransactionCategory"> | string
     name?: StringFilter<"TransactionCategory"> | string
+    iconKey?: StringNullableFilter<"TransactionCategory"> | string | null
     nameNormalized?: StringFilter<"TransactionCategory"> | string
     deletedAt?: DateTimeNullableFilter<"TransactionCategory"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -9981,6 +9998,7 @@ export namespace Prisma {
     accountId?: SortOrder
     type?: SortOrder
     name?: SortOrder
+    iconKey?: SortOrderInput | SortOrder
     nameNormalized?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: TransactionCategoryCountOrderByAggregateInput
@@ -9998,6 +10016,7 @@ export namespace Prisma {
     accountId?: IntWithAggregatesFilter<"TransactionCategory"> | number
     type?: StringWithAggregatesFilter<"TransactionCategory"> | string
     name?: StringWithAggregatesFilter<"TransactionCategory"> | string
+    iconKey?: StringNullableWithAggregatesFilter<"TransactionCategory"> | string | null
     nameNormalized?: StringWithAggregatesFilter<"TransactionCategory"> | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"TransactionCategory"> | Date | string | null
   }
@@ -10377,6 +10396,7 @@ export namespace Prisma {
   export type TransactionCategoryCreateInput = {
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTransactionCategoriesInput
@@ -10389,6 +10409,7 @@ export namespace Prisma {
     accountId: number
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
@@ -10398,6 +10419,7 @@ export namespace Prisma {
   export type TransactionCategoryUpdateInput = {
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTransactionCategoriesNestedInput
@@ -10410,6 +10432,7 @@ export namespace Prisma {
     accountId?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
@@ -10421,6 +10444,7 @@ export namespace Prisma {
     accountId: number
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
   }
@@ -10428,6 +10452,7 @@ export namespace Prisma {
   export type TransactionCategoryUpdateManyMutationInput = {
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -10437,6 +10462,7 @@ export namespace Prisma {
     accountId?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -11002,6 +11028,7 @@ export namespace Prisma {
     accountId?: SortOrder
     type?: SortOrder
     name?: SortOrder
+    iconKey?: SortOrder
     nameNormalized?: SortOrder
     deletedAt?: SortOrder
   }
@@ -11016,6 +11043,7 @@ export namespace Prisma {
     accountId?: SortOrder
     type?: SortOrder
     name?: SortOrder
+    iconKey?: SortOrder
     nameNormalized?: SortOrder
     deletedAt?: SortOrder
   }
@@ -11025,6 +11053,7 @@ export namespace Prisma {
     accountId?: SortOrder
     type?: SortOrder
     name?: SortOrder
+    iconKey?: SortOrder
     nameNormalized?: SortOrder
     deletedAt?: SortOrder
   }
@@ -12120,6 +12149,7 @@ export namespace Prisma {
   export type TransactionCategoryCreateWithoutAccountInput = {
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     transactions?: TransactionCreateNestedManyWithoutCategoryInput
@@ -12130,6 +12160,7 @@ export namespace Prisma {
     id?: number
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
@@ -12268,6 +12299,7 @@ export namespace Prisma {
     accountId?: IntFilter<"TransactionCategory"> | number
     type?: StringFilter<"TransactionCategory"> | string
     name?: StringFilter<"TransactionCategory"> | string
+    iconKey?: StringNullableFilter<"TransactionCategory"> | string | null
     nameNormalized?: StringFilter<"TransactionCategory"> | string
     deletedAt?: DateTimeNullableFilter<"TransactionCategory"> | Date | string | null
   }
@@ -12648,6 +12680,7 @@ export namespace Prisma {
   export type TransactionCategoryCreateWithoutSubcategoriesInput = {
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTransactionCategoriesInput
@@ -12659,6 +12692,7 @@ export namespace Prisma {
     accountId: number
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutCategoryInput
@@ -12683,6 +12717,7 @@ export namespace Prisma {
   export type TransactionCategoryUpdateWithoutSubcategoriesInput = {
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTransactionCategoriesNestedInput
@@ -12694,6 +12729,7 @@ export namespace Prisma {
     accountId?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
@@ -12730,6 +12766,7 @@ export namespace Prisma {
   export type TransactionCategoryCreateWithoutTransactionsInput = {
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTransactionCategoriesInput
@@ -12741,6 +12778,7 @@ export namespace Prisma {
     accountId: number
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
     subcategories?: SubcategoryUncheckedCreateNestedManyWithoutCategoryInput
@@ -12822,6 +12860,7 @@ export namespace Prisma {
   export type TransactionCategoryUpdateWithoutTransactionsInput = {
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTransactionCategoriesNestedInput
@@ -12833,6 +12872,7 @@ export namespace Prisma {
     accountId?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     subcategories?: SubcategoryUncheckedUpdateManyWithoutCategoryNestedInput
@@ -12974,6 +13014,7 @@ export namespace Prisma {
     id?: number
     type?: string
     name: string
+    iconKey?: string | null
     nameNormalized: string
     deletedAt?: Date | string | null
   }
@@ -13015,6 +13056,7 @@ export namespace Prisma {
   export type TransactionCategoryUpdateWithoutAccountInput = {
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUpdateManyWithoutCategoryNestedInput
@@ -13025,6 +13067,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutCategoryNestedInput
@@ -13035,6 +13078,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    iconKey?: NullableStringFieldUpdateOperationsInput | string | null
     nameNormalized?: StringFieldUpdateOperationsInput | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }

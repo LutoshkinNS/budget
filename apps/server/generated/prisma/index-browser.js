@@ -155,6 +155,7 @@ exports.Prisma.TransactionCategoryScalarFieldEnum = {
   accountId: 'accountId',
   type: 'type',
   name: 'name',
+  iconKey: 'iconKey',
   nameNormalized: 'nameNormalized',
   deletedAt: 'deletedAt'
 };

@@ -25,7 +25,7 @@ const syncModelImportProxies = () => {
     generatedModelFiles.map((fileName) => fileName.replace(/\.gen\.ts$/, "")),
   );
   const importedModelNames = new Set<string>();
-  const importPattern = /from "\.\/([^"]+)";/g;
+  const importPattern = /from ["']\.\/([^"']+)["'];/g;
   const proxyFiles = readdirSync(modelDir).filter(
     (fileName) => fileName.endsWith(".ts") && !fileName.endsWith(".gen.ts"),
   );

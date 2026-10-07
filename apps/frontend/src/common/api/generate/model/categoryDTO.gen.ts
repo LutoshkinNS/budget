@@ -5,10 +5,12 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { CategoryDTOType } from "./categoryDTOType";
+import type { CategoryIconKeyDTO } from "./categoryIconKeyDTO";
 
 export interface CategoryDTO {
   /** @minimum 1 */
   accountId: number;
+  iconKey: CategoryIconKeyDTO | null;
   /** @minimum 1 */
   id: number;
   /** @minLength 1 */

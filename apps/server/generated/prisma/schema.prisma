@@ -62,6 +62,7 @@ model TransactionCategory {
   // Stored as text because this project uses SQLite; valid values start with "expense".
   type           String        @default("expense")
   name           String
+  iconKey        String?
   nameNormalized String
   deletedAt      DateTime?
   transactions   Transaction[]

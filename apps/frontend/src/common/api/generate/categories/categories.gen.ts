@@ -25,6 +25,7 @@ import type {
   CategoriesListParams,
   CategoryCreateDTO,
   CategoryDTO,
+  CategoryUpdateDTO,
   ConflictErrorDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
@@ -440,6 +441,92 @@ export const invalidateCategoriesGet = async (
   return queryClient;
 };
 
+export const getCategoriesUpdateUrl = (categoryId: number) => {
+  return `/api/v1/categories/${categoryId}`;
+};
+
+export const categoriesUpdate = async (
+  categoryId: number,
+  categoryUpdateDTO: CategoryUpdateDTO,
+  options?: RequestInit,
+): Promise<CategoryDTO> => {
+  return fetcher<CategoryDTO>(getCategoriesUpdateUrl(categoryId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(categoryUpdateDTO),
+  });
+};
+
+export const getCategoriesUpdateMutationOptions = <
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof categoriesUpdate>>,
+    TError,
+    { categoryId: number; data: CategoryUpdateDTO },
+    TContext
+  >;
+  request?: SecondParameter<typeof fetcher>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof categoriesUpdate>>,
+  TError,
+  { categoryId: number; data: CategoryUpdateDTO },
+  TContext
+> => {
+  const mutationKey = ["categoriesUpdate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof categoriesUpdate>>,
+    { categoryId: number; data: CategoryUpdateDTO }
+  > = (props) => {
+    const { categoryId, data } = props ?? {};
+
+    return categoriesUpdate(categoryId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CategoriesUpdateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof categoriesUpdate>>
+>;
+export type CategoriesUpdateMutationBody = CategoryUpdateDTO;
+export type CategoriesUpdateMutationError =
+  | ValidationErrorDTO
+  | NotFoundErrorDTO
+  | InternalServerErrorDTO;
+
+export const useCategoriesUpdate = <
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof categoriesUpdate>>,
+      TError,
+      { categoryId: number; data: CategoryUpdateDTO },
+      TContext
+    >;
+    request?: SecondParameter<typeof fetcher>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof categoriesUpdate>>,
+  TError,
+  { categoryId: number; data: CategoryUpdateDTO },
+  TContext
+> => {
+  return useMutation(getCategoriesUpdateMutationOptions(options), queryClient);
+};
 export const getCategoriesDeleteUrl = (categoryId: number) => {
   return `/api/v1/categories/${categoryId}`;
 };

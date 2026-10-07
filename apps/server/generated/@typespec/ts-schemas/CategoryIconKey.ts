@@ -1,0 +1,27 @@
+const CategoryIconKey = {
+  "type": "string",
+  "enum": [
+    "groceries",
+    "meals",
+    "clothes",
+    "sport",
+    "car",
+    "home",
+    "leisure",
+    "mobile",
+    "internet",
+    "gifts",
+    "public-transport",
+    "pets",
+    "subscriptions",
+    "games",
+    "education",
+    "travel",
+    "taxi",
+    "apartment",
+    "health",
+    "beauty"
+  ]
+} as const;
+
+export default CategoryIconKey;
