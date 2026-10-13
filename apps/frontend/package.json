@@ -7,7 +7,7 @@
     "dev": "vite",
     "build:local": "pnpm run api:generate && vite build",
     "build:prod": "pnpm run api:generate && vite build",
-    "ts:check": "tsc -b",
+    "ts:check": "tsc -b tsconfig.check.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",

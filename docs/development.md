@@ -210,11 +210,16 @@ pnpm --filter @budget/frontend test
 
 For frontend browser flows:
 
-`pnpm --filter @budget/frontend ts:check` also checks E2E specs, fixtures and
+`pnpm --filter @budget/frontend ts:check` uses `tsconfig.check.json` to check the
+application together with E2E specs, fixtures and
 `playwright.config.ts` through `apps/frontend/e2e/tsconfig.json`. Server helpers
 in `e2e/support/*.mts` use a separate NodeNext config in `e2e/support/tsconfig.json`,
 which inherits backend settings and includes Fastify type declarations. Both
 configs keep strict checks enabled and do not emit JavaScript.
+
+The default frontend `tsconfig.json` references only application and frontend
+tooling configs. Orval and Vite use it during production builds, so the frontend
+Docker image does not need backend sources or the E2E server configuration.
 
 Income history E2E uses a shared isolated backend with all migrations applied.
 Category icon E2E has a separate setup that creates a historical category before
