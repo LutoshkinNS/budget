@@ -4,8 +4,9 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { after, before, describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
+
+import { afterAll, beforeAll, describe, it } from 'vitest';
 
 import appInit from '#src/appInit.js';
 
@@ -27,7 +28,7 @@ const app = await appInit();
 let accountId = 0;
 let cookie = '';
 
-before(async () => {
+beforeAll(async () => {
   execFileSync(
     process.execPath,
     [
@@ -52,7 +53,7 @@ before(async () => {
   cookie = 'accessToken=' + (await app.inject('/test-token')).body;
 });
 
-after(async () => {
+afterAll(async () => {
   await app.close();
   await app.prisma.$disconnect();
   // Удаляется только каталог, созданный этим тестом внутри системного temp.

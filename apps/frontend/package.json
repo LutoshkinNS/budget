@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
+    "test:watch": "vitest --watch",
     "preview": "vite preview",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write",

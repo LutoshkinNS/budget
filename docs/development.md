@@ -92,6 +92,43 @@ pnpm --filter @budget/server lint
 pnpm --filter @budget/server prisma:studio
 ```
 
+### Unit and API Tests (Vitest)
+
+Frontend and server have separate test commands. Run them from the repository root:
+
+```bash
+pnpm --filter @budget/frontend test
+pnpm --filter @budget/frontend test:watch
+pnpm --filter @budget/server test
+pnpm --filter @budget/server test:watch
+```
+
+`test` runs once and exits; `test:watch` reruns affected tests after changes.
+Press `q` to leave watch mode. To run a single file, pass its package-relative path:
+
+```bash
+pnpm --filter @budget/frontend test src/modules/expenses/model/amount.test.ts
+pnpm --filter @budget/server test src/domains/transactions/balance.test.ts
+```
+
+Frontend tests use `jsdom`, the `@` alias and test environment values from
+`apps/frontend/vitest.config.ts`. Playwright tests in `e2e/` run separately.
+Server tests use Node.js and live next to domain code as `*.test.ts`.
+Import test functions and hooks explicitly from `vitest`; existing Node assertions
+remain supported.
+
+Before the first server test run, generate the required artifacts:
+
+```bash
+pnpm --filter @budget/server typespec
+pnpm --filter @budget/server prisma:generate
+```
+
+The category API integration tests create a temporary SQLite database, apply
+migrations and close the app, disconnect Prisma and remove the database afterward.
+They do not require a running API server or use the development database.
+Server test files and Vitest configuration are excluded from the production build.
+
 ### TypeSpec and API Generation
 
 The API contract lives in `packages/api-contracts/typespec/`.
