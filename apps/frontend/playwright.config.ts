@@ -10,7 +10,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  ...(process.env.CI ? { workers: 1 } : {}),
   reporter: [
     ["list"],
     [
@@ -32,12 +32,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: shouldStartFrontend
+  ...(shouldStartFrontend
     ? {
-        command: "pnpm run dev",
-        url: frontendBaseUrl,
-        reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
+        webServer: {
+          command: "pnpm run dev",
+          url: frontendBaseUrl,
+          reuseExistingServer: !process.env.CI,
+          timeout: 120_000,
+        },
       }
-    : undefined,
+    : {}),
 });

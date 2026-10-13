@@ -144,9 +144,15 @@ Rules of thumb:
 - Generated API hooks are wrapped by module hooks before use in screens.
 - Nested modules are used for internal workflows like filters, sheets, summaries, and lists.
 
+The `transactions` module owns entry, history, daily groups and editing for both
+income and expenses. Its UI uses transaction names and reports edit actions through
+callbacks; pages own navigation. Single-operation loading and mutations are exposed
+through module hooks. The existing `/expenses/:expenseId/edit` URL is retained for
+compatibility and opens the shared transaction editor.
+
 Important frontend pages today:
 
-- `/` for quick transaction entry and recent expenses.
+- `/` for quick transaction entry and today's income and expenses, with editing for both types.
 - `/dashboard` for account-level summary.
 - `/reports` for income and expense category analytics.
 - `/categories` for category management.

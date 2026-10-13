@@ -1,0 +1,92 @@
+import clsx from "clsx";
+
+import {
+  getCurrentMonthValue,
+  type Period,
+  PERIOD_LABELS,
+  type PeriodDateRange,
+  PERIODS,
+} from "../../model/period.ts";
+import { useTransactionSummary } from "../../model/useTransactions.ts";
+
+import s from "./period-summary.module.css";
+
+type PeriodSummaryProps = {
+  range: PeriodDateRange;
+  period: Period;
+  month: string;
+  onPeriodChange: (p: Period) => void;
+  onMonthChange: (month: string) => void;
+};
+
+function formatMoney(value: number, signed = false): string {
+  const sign = signed && value > 0 ? "+" : "";
+  return `${sign}${value.toLocaleString("ru")} ₽`;
+}
+
+export function PeriodSummary({
+  range,
+  period,
+  month,
+  onPeriodChange,
+  onMonthChange,
+}: PeriodSummaryProps) {
+  const { data: summary, isLoading } = useTransactionSummary(range);
+
+  return (
+    <div className={s.summary}>
+      <div className={s.switcher} role="tablist">
+        {PERIODS.map((p) => (
+          <button
+            key={p}
+            type="button"
+            role="tab"
+            aria-selected={p === period}
+            className={clsx(s.switchBtn, p === period && s.switchBtnActive)}
+            onClick={() => onPeriodChange(p)}
+          >
+            {PERIOD_LABELS[p]}
+          </button>
+        ))}
+      </div>
+      {period === "month" && (
+        <input
+          className={s.monthInput}
+          type="month"
+          value={month}
+          max={getCurrentMonthValue()}
+          aria-label="Месяц"
+          onChange={(event) => onMonthChange(event.target.value)}
+        />
+      )}
+      <div className={s.totals}>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Доходы периода</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary ? "—" : formatMoney(summary.incomeTotal)}
+          </span>
+        </div>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Расходы периода</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary ? "—" : formatMoney(summary.expenseTotal)}
+          </span>
+        </div>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Баланс периода</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary
+              ? "—"
+              : formatMoney(summary.periodBalance, true)}
+          </span>
+        </div>
+        <div className={s.totalItem}>
+          <span className={s.totalLabel}>Текущий баланс</span>
+          <span className={s.totalValue}>
+            {isLoading || !summary ? "—" : formatMoney(summary.totalBalance)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

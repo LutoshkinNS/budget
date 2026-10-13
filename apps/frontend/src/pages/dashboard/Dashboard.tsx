@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
-import { ExpensesByDays } from "@/modules/expenses";
+import { TransactionsByDays } from "@/modules/transactions";
 import {
   clampFutureMonth,
-  getExpenseDateRange,
+  getTransactionDateRange,
   PeriodSummary,
-} from "@/modules/expenses/modules/period-summary";
-import { UserFilter } from "@/modules/expenses/modules/user-filter";
+} from "@/modules/transactions";
+import { UserFilter } from "@/modules/transactions";
 
 import type { DashboardSearchChangeHandler } from "./route.ts";
 
@@ -15,14 +16,21 @@ import s from "./Dashboard.module.css";
 type DashboardProps = {
   month: string;
   onSearchChange: DashboardSearchChangeHandler;
-  period: Parameters<typeof getExpenseDateRange>[0];
+  period: Parameters<typeof getTransactionDateRange>[0];
 };
 
 export function Dashboard({ month, onSearchChange, period }: DashboardProps) {
+  const navigate = useNavigate();
+  const handleEdit = (transactionId: number) => {
+    void navigate({
+      to: "/expenses/$expenseId/edit",
+      params: { expenseId: String(transactionId) },
+    });
+  };
   const [userId, setUserId] = useState<number | null>(null);
   const safeMonth = clampFutureMonth(month);
   const range = useMemo(
-    () => getExpenseDateRange(period, safeMonth),
+    () => getTransactionDateRange(period, safeMonth),
     [period, safeMonth],
   );
 
@@ -45,8 +53,8 @@ export function Dashboard({ month, onSearchChange, period }: DashboardProps) {
         }
       />
       <UserFilter value={userId} onChange={setUserId} />
-      <ExpensesByDays
-        mode="transactions"
+      <TransactionsByDays
+        onEdit={handleEdit}
         range={range}
         userId={userId}
         onResetUser={() => setUserId(null)}

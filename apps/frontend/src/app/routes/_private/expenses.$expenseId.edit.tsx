@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { EditExpense } from "@/pages/edit-expense";
+import { EditTransaction } from "@/pages/edit-transaction";
 
 export const Route = createFileRoute("/_private/expenses/$expenseId/edit")({
   component: RouteComponent,
@@ -9,5 +9,5 @@ export const Route = createFileRoute("/_private/expenses/$expenseId/edit")({
 function RouteComponent() {
   const { expenseId } = Route.useParams();
 
-  return <EditExpense expenseId={Number(expenseId)} />;
+  return <EditTransaction transactionId={Number(expenseId)} />;
 }

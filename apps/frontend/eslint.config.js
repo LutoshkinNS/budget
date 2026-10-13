@@ -11,7 +11,7 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 export default defineConfig([
   globalIgnores(["dist", "dev-dist", "**/*.gen.ts"]),
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["**/*.{ts,tsx,mts}"],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,

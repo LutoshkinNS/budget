@@ -1,0 +1,10 @@
+{
+  "extends": "../../../server/tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.e2e-support.tsbuildinfo",
+    "rootDir": "../../..",
+    "types": ["node"]
+  },
+  "include": ["./**/*.mts", "../../../server/src/**/*.d.ts"],
+  "exclude": ["../../../server/node_modules"]
+}

@@ -107,7 +107,7 @@ pnpm --filter @budget/server test:watch
 Press `q` to leave watch mode. To run a single file, pass its package-relative path:
 
 ```bash
-pnpm --filter @budget/frontend test src/modules/expenses/model/amount.test.ts
+pnpm --filter @budget/frontend test src/modules/transactions/model/amount.test.ts
 pnpm --filter @budget/server test src/domains/transactions/balance.test.ts
 ```
 
@@ -192,7 +192,7 @@ pnpm --filter @budget/frontend scaffold frontend-module reports --title "Reports
 Create a nested module:
 
 ```bash
-pnpm --filter @budget/frontend scaffold frontend-module period-summary --parent expenses --title "Period Summary"
+pnpm --filter @budget/frontend scaffold frontend-module history-filter --parent transactions --title "History Filter"
 ```
 
 Use `--dry-run` before writing files and `--force` only when overwriting is intentional.
@@ -209,6 +209,21 @@ pnpm --filter @budget/frontend test
 ```
 
 For frontend browser flows:
+
+`pnpm --filter @budget/frontend ts:check` also checks E2E specs, fixtures and
+`playwright.config.ts` through `apps/frontend/e2e/tsconfig.json`. Server helpers
+in `e2e/support/*.mts` use a separate NodeNext config in `e2e/support/tsconfig.json`,
+which inherits backend settings and includes Fastify type declarations. Both
+configs keep strict checks enabled and do not emit JavaScript.
+
+Income history E2E uses a shared isolated backend with all migrations applied.
+Category icon E2E has a separate setup that creates a historical category before
+the icon migration to verify migration behavior. Both reuse the backend process
+and temporary database lifecycle; their database setups are isolated from each other.
+
+Before the first type check or E2E run that uses the isolated backend, generate
+its artifacts with `pnpm --filter @budget/server typespec` and
+`pnpm --filter @budget/server prisma:generate`.
 
 ```bash
 pnpm --filter @budget/frontend e2e:install

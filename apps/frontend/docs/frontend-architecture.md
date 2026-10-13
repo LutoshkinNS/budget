@@ -96,7 +96,7 @@ import { Dashboard } from "@/pages/dashboard";
 
 ### `modules`
 
-`modules` - основной слой доменных и feature capabilities. Модуль может быть entity-like, feature-like или composed capability. В этом проекте `accounts`, `categories`, `transactions`, `expenses`, `auth`, `user` - modules.
+`modules` - основной слой доменных и feature capabilities. Модуль может быть entity-like, feature-like или composed capability. В этом проекте `accounts`, `categories`, `transactions`, `auth`, `user` - modules.
 
 Базовая структура нового модуля:
 
@@ -148,15 +148,13 @@ Nested module является first-class FEOD module: у него те же г
 Пример:
 
 ```text
-src/modules/expenses/
+src/modules/transactions/
   index.ts
   model/
   ui/
-  modules/
     period-summary/
-      index.ts
-      model/
-      ui/
+    transaction-day/
+  modules/
     user-filter/
       index.ts
       ui/
@@ -263,7 +261,7 @@ common/api/generate/categories/*
 
 ## Naming
 
-- New file and folder names: kebab-case (`expense-list.tsx`, `use-expenses.ts`, `period-summary/`).
+- New file and folder names: kebab-case (`transaction-list.tsx`, `use-transactions.ts`, `period-summary/`).
 - Component identifiers: PascalCase.
 - Hook identifiers: `useSomething`; hook file names still use kebab-case (`use-something.ts`).
 - Public exports live in `index.ts`.
@@ -281,7 +279,7 @@ Existing code may still have historical deviations (legacy exceptions):
 - Existing PascalCase component filenames and camelCase hook filenames may remain until touched. New files use kebab-case.
 - Root module hooks outside `model/` are legacy exceptions. Keep any existing ones working until the module is touched, then prefer moving them into `model/`.
 - Some pages read their own TanStack `Route` object from `app/routes`; new pages must use route adapters and page props/contracts instead.
-- `expenses/modules/*` already uses nested modules and is valid FEOD-style structure.
+- `transactions/modules/*` already uses nested modules and is valid FEOD-style structure.
 
 Do not churn existing files only to move them. When touching a legacy module for real work, prefer moving new code toward:
 
@@ -312,6 +310,6 @@ Create a nested module:
 pnpm --filter @budget/frontend scaffold frontend-module <module-name> --parent <module-path> [--title "<Title>"] [--dry-run] [--force]
 ```
 
-`--parent` is a path relative to `src/modules`: `--parent expenses` creates the module in `src/modules/expenses/modules`, while `--parent expenses/modules/charts` creates it in `src/modules/expenses/modules/charts/modules`. Without `--force`, the scaffold refuses to overwrite existing files; `--dry-run` only previews the planned files.
+`--parent` is a path relative to `src/modules`: `--parent transactions` creates the module in `src/modules/transactions/modules`, while `--parent transactions/modules/charts` creates it in `src/modules/transactions/modules/charts/modules`. Without `--force`, the scaffold refuses to overwrite existing files; `--dry-run` only previews the planned files.
 
 Scaffolds intentionally generate only a boundary and simple placeholders. They should not generate domain behavior until the API contract and module responsibility are clear. `frontend-module` also creates `modules/README.md` as a local reminder for when to extract nested modules; delete it only when the module intentionally does not need nested capabilities.

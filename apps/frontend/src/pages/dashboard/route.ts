@@ -6,7 +6,7 @@ import {
   isMonthValue,
   isPeriod,
   type Period,
-} from "@/modules/expenses/modules/period-summary";
+} from "@/modules/transactions";
 
 export type DashboardSearch = {
   period: Period;

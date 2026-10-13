@@ -1,16 +1,19 @@
-import { makeLazy } from "@/common/ui/makeLazy";
-import { CreateExpense } from "@/modules/expenses";
+import { useNavigate } from "@tanstack/react-router";
 
-const ExpensesByDays = makeLazy(
-  () => import("@/modules/expenses/ExpensesByDays.lazy.ts"),
-  "ExpensesByDays",
-);
+import { CreateTransaction, TransactionsByDays } from "@/modules/transactions";
 
 export function Main() {
+  const navigate = useNavigate();
+  const handleEdit = (transactionId: number) => {
+    void navigate({
+      to: "/expenses/$expenseId/edit",
+      params: { expenseId: String(transactionId) },
+    });
+  };
   return (
     <>
-      <CreateExpense />
-      <ExpensesByDays />
+      <CreateTransaction />
+      <TransactionsByDays onEdit={handleEdit} />
     </>
   );
 }
