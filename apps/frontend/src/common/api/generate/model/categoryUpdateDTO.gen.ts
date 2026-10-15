@@ -7,5 +7,7 @@
 import type { CategoryIconKeyDTO } from "./categoryIconKeyDTO";
 
 export interface CategoryUpdateDTO {
-  iconKey: CategoryIconKeyDTO | null;
+  iconKey?: CategoryIconKeyDTO | null;
+  /** @minLength 1 */
+  name?: string;
 }

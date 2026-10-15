@@ -1,9 +1,10 @@
 const CategoryUpdate = {
   "type": "object",
-  "required": [
-    "iconKey"
-  ],
   "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
     "iconKey": {
       "anyOf": [
         {

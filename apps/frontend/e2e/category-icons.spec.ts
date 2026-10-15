@@ -89,13 +89,13 @@ for (const colorScheme of ["light", "dark"] as const) {
       ).toBeNull();
       await page.reload();
       const editButton = page.getByRole("button", {
-        name: "Изменить иконку категории " + name,
+        name: "Изменить категорию " + name,
         exact: true,
       });
       await expect(editButton.locator("img")).toHaveCount(0);
       await editButton.click();
       const editor = page.getByRole("group", {
-        name: "Иконка категории " + name,
+        name: "Редактирование категории " + name,
         exact: true,
       });
       await editor
@@ -275,7 +275,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expect(
         page
           .getByRole("button", {
-            name: "Изменить иконку категории " + withIconName,
+            name: "Изменить категорию " + withIconName,
             exact: true,
           })
           .locator("img"),

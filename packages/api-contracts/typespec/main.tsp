@@ -63,7 +63,7 @@ interface Categories {
   @patch update(
     @path categoryId: integer,
     @body category: CategoryUpdate,
-  ): Category | CategoryErrorResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | CategoryConflictResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @delete delete(@path categoryId: integer): {
     @statusCode statusCode: 204;

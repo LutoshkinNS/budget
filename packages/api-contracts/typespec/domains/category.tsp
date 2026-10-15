@@ -50,7 +50,9 @@ model CategoryCreate {
 }
 
 model CategoryUpdate {
-  iconKey: CategoryIconKey | null;
+  @minLength(1)
+  name?: string;
+  iconKey?: CategoryIconKey | null;
 }
 
 model CategoryErrorResponse {

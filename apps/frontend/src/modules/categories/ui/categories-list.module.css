@@ -2,6 +2,12 @@
   min-width: 0;
 }
 
+.fieldset input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
 .fieldset legend,
 .name {
   overflow-wrap: anywhere;

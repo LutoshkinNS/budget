@@ -78,6 +78,141 @@ async function createCategory(name: string, iconKey?: string | null) {
 }
 
 describe('category icon API', () => {
+  it('allows only one concurrent rename to the same normalized name', async () => {
+    const first = await createCategory('Параллельная первая');
+    const second = await createCategory('Параллельная вторая');
+    const responses = await Promise.all(
+      [first, second].map((category) =>
+        app.inject({
+          method: 'PATCH',
+          url: '/api/v1/categories/' + category.id,
+          headers: { cookie },
+          payload: { name: 'Общее конкурентное имя' }
+        })
+      )
+    );
+    assert.deepEqual(
+      responses.map((response) => response.statusCode).sort(),
+      [200, 409]
+    );
+    assert.equal(
+      await app.prisma.transactionCategory.count({
+        where: {
+          accountId,
+          type: 'expense',
+          deletedAt: null,
+          nameNormalized: 'общее конкурентное имя'
+        }
+      }),
+      1
+    );
+  });
+
+  it('renames in place, preserving transactions, type and icon, and permits own case changes', async () => {
+    const category = await createCategory('Исходная категория', 'car');
+    const transaction = await app.prisma.transaction.create({
+      data: {
+        accountId,
+        userId: 1n,
+        categoryId: category.id,
+        type: 'expense',
+        amount: 10,
+        date: new Date()
+      }
+    });
+    for (const name of ['  Новое название  ', 'НОВОЕ НАЗВАНИЕ']) {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/api/v1/categories/' + category.id,
+        headers: { cookie },
+        payload: { name }
+      });
+      assert.equal(response.statusCode, 200, response.body);
+      assert.deepEqual(response.json(), {
+        id: category.id,
+        accountId,
+        type: 'expense',
+        name: name.trim(),
+        iconKey: 'car'
+      });
+      const stored = await app.prisma.transaction.findUniqueOrThrow({
+        where: { id: transaction.id },
+        include: { category: true }
+      });
+      assert.equal(stored.categoryId, category.id);
+      assert.equal(stored.category.name, name.trim());
+      assert.equal(stored.category.nameNormalized, 'новое название');
+      assert.equal(stored.amount, 10);
+    }
+  });
+
+  it('rejects empty names and normalized duplicates without partially changing the icon', async () => {
+    const category = await createCategory('До проверки', 'car');
+    await createCategory('Занято');
+    for (const name of ['', '   ', '\t\n']) {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/api/v1/categories/' + category.id,
+        headers: { cookie },
+        payload: { name }
+      });
+      assert.equal(response.statusCode, 400, response.body);
+    }
+    const conflict = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/categories/' + category.id,
+      headers: { cookie },
+      payload: { name: '  ЗАНЯТО  ', iconKey: 'taxi' }
+    });
+    assert.equal(conflict.statusCode, 409, conflict.body);
+    const stored = await app.prisma.transactionCategory.findUniqueOrThrow({
+      where: { id: category.id }
+    });
+    assert.equal(stored.name, category.name);
+    assert.equal(stored.iconKey, 'car');
+  });
+
+  it('allows names from another type, account or deleted category and simultaneous name/icon edits', async () => {
+    const category = await createCategory('До границ');
+    const otherAccount = await app.prisma.account.create({
+      data: { name: 'Другая область', ownerId: 1n }
+    });
+    await app.prisma.transactionCategory.createMany({
+      data: [
+        {
+          accountId,
+          type: 'income',
+          name: 'Другой тип',
+          nameNormalized: 'другой тип'
+        },
+        {
+          accountId: otherAccount.id,
+          type: 'expense',
+          name: 'Другой счёт',
+          nameNormalized: 'другой счёт'
+        },
+        {
+          accountId,
+          type: 'expense',
+          name: 'Удалённое имя',
+          nameNormalized: 'удалённое имя',
+          deletedAt: new Date()
+        }
+      ]
+    });
+    for (const name of ['Другой тип', 'Другой счёт', 'Удалённое имя']) {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/api/v1/categories/' + category.id,
+        headers: { cookie },
+        payload: { name, iconKey: 'taxi' }
+      });
+      assert.equal(response.statusCode, 200, response.body);
+      assert.equal(response.json<{ name: string }>().name, name);
+      assert.equal(response.json<{ iconKey: string }>().iconKey, 'taxi');
+    }
+  });
+
   it('does not choose icons from a known name and accepts explicit null', async () => {
     const absent = await createCategory('продукты');
     const empty = await createCategory('Без иконки', null);
@@ -220,7 +355,7 @@ describe('category icon API', () => {
         method: 'PATCH',
         url: '/api/v1/categories/' + id,
         headers: { cookie },
-        payload: { iconKey: 'taxi' }
+        payload: { name: 'Недоступное переименование', iconKey: 'taxi' }
       });
       assert.equal(response.statusCode, 404, response.body);
     }

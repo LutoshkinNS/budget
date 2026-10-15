@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import type { CategoryDTO } from "@/common/api/generate/model";
 
+import { CategoryEditor } from "./category-editor";
 import { CategoryIcon } from "./category-icon";
-import { CategoryIconEditor } from "./category-icon-editor";
 
 import styles from "./categories-list.module.css";
 
@@ -17,16 +17,16 @@ export function CategoryListItem({ category }: { category: CategoryDTO }) {
         <button
           type="button"
           className={styles.edit}
-          aria-label={`Изменить иконку категории ${category.name}`}
+          aria-label={`Изменить категорию ${category.name}`}
           onClick={() => setIsEditing(true)}
           disabled={isEditing}
         >
           <CategoryIcon iconKey={category.iconKey} />
-          <span>Иконка</span>
+          <span>Изменить</span>
         </button>
       </div>
       {isEditing && (
-        <CategoryIconEditor
+        <CategoryEditor
           key={category.id}
           category={category}
           onClose={() => setIsEditing(false)}

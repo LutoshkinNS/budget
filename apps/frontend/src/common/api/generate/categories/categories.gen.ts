@@ -459,7 +459,11 @@ export const categoriesUpdate = async (
 };
 
 export const getCategoriesUpdateMutationOptions = <
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | NotFoundErrorDTO
+    | ConflictErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -503,10 +507,15 @@ export type CategoriesUpdateMutationBody = CategoryUpdateDTO;
 export type CategoriesUpdateMutationError =
   | ValidationErrorDTO
   | NotFoundErrorDTO
+  | ConflictErrorDTO
   | InternalServerErrorDTO;
 
 export const useCategoriesUpdate = <
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | NotFoundErrorDTO
+    | ConflictErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {

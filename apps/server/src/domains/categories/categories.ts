@@ -163,19 +163,86 @@ export default async function categoriesModule(app: FastifyApp) {
       schema: {
         params: idObj,
         body: CategoryUpdate,
-        response: { 200: Category, 400: ValidationError, 404: NotFoundError }
+        response: {
+          200: Category,
+          400: ValidationError,
+          404: NotFoundError,
+          409: ConflictError
+        }
       }
     },
     async function (req, reply) {
+      const name = req.body.name?.trim();
+      if (
+        (name === undefined && req.body.iconKey === undefined) ||
+        name === ''
+      ) {
+        return reply.code(400).send({
+          code: 'VALIDATION_ERROR',
+          message: 'Provide a non-empty name or an icon key',
+          statusCode: 400
+        });
+      }
       const where = {
         id: req.params.id,
         accountId: req.user.accountId,
         deletedAt: null
       };
-      const result = await this.prisma.transactionCategory.updateMany({
-        where,
-        data: { iconKey: req.body.iconKey }
+      const existing = await this.prisma.transactionCategory.findFirst({
+        where
       });
+      if (!existing) {
+        return reply.code(404).send({
+          code: 'NOT_FOUND',
+          message: 'Category not found or access denied',
+          statusCode: 404
+        });
+      }
+      const nameNormalized =
+        name === undefined ? undefined : normalizeCategoryName(name);
+      const conflict = () =>
+        reply.code(409).send({
+          code: 'CATEGORY_ALREADY_EXISTS',
+          message: 'Category already exists',
+          statusCode: 409
+        });
+      if (nameNormalized !== undefined) {
+        const duplicate = await this.prisma.transactionCategory.findFirst({
+          where: {
+            accountId: req.user.accountId,
+            type: existing.type,
+            deletedAt: null,
+            nameNormalized,
+            id: { not: existing.id }
+          }
+        });
+        if (duplicate) return conflict();
+      }
+      let result;
+      try {
+        result = await this.prisma.transactionCategory.updateMany({
+          where,
+          data: {
+            ...(name === undefined || nameNormalized === undefined
+              ? {}
+              : { name, nameNormalized }),
+            ...(req.body.iconKey === undefined
+              ? {}
+              : { iconKey: req.body.iconKey })
+          }
+        });
+      } catch (error) {
+        // Уникальный индекс защищает также от одновременных переименований.
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'code' in error &&
+          error.code === 'P2002'
+        ) {
+          return conflict();
+        }
+        throw error;
+      }
       const category =
         result.count > 0
           ? await this.prisma.transactionCategory.findFirst({ where })

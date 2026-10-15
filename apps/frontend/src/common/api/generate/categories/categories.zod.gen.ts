@@ -148,31 +148,34 @@ export const CategoriesUpdateParams = zod.object({
 });
 
 export const CategoriesUpdateBody = zod.object({
-  iconKey: zod.union([
-    zod.enum([
-      "groceries",
-      "meals",
-      "clothes",
-      "sport",
-      "car",
-      "home",
-      "leisure",
-      "mobile",
-      "internet",
-      "gifts",
-      "public-transport",
-      "pets",
-      "subscriptions",
-      "games",
-      "education",
-      "travel",
-      "taxi",
-      "apartment",
-      "health",
-      "beauty",
-    ]),
-    zod.null(),
-  ]),
+  name: zod.string().min(1).optional(),
+  iconKey: zod
+    .union([
+      zod.enum([
+        "groceries",
+        "meals",
+        "clothes",
+        "sport",
+        "car",
+        "home",
+        "leisure",
+        "mobile",
+        "internet",
+        "gifts",
+        "public-transport",
+        "pets",
+        "subscriptions",
+        "games",
+        "education",
+        "travel",
+        "taxi",
+        "apartment",
+        "health",
+        "beauty",
+      ]),
+      zod.null(),
+    ])
+    .optional(),
 });
 
 export const CategoriesUpdateResponse = zod.object({
