@@ -21,6 +21,8 @@ describe("category query invalidation", () => {
       getCategoriesListQueryKey(),
       getCategoriesListQueryKey({ type: "expense" }),
       getCategoriesListQueryKey({ type: "income" }),
+      getCategoriesListQueryKey({ type: "expense", sort: "usage" }),
+      getCategoriesListQueryKey({ type: "income", sort: "usage" }),
     ];
     for (const key of lists) queryClient.setQueryData(key, []);
     queryClient.setQueryData(getCategoriesGetQueryKey(3), { id: 3 });

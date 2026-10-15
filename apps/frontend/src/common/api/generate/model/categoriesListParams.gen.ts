@@ -4,8 +4,10 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { CategoriesListSort } from "./categoriesListSort";
 import type { CategoriesListType } from "./categoriesListType";
 
 export type CategoriesListParams = {
   type?: CategoriesListType;
+  sort?: CategoriesListSort;
 };

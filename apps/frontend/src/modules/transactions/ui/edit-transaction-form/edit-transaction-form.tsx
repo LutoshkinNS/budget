@@ -54,7 +54,10 @@ export function EditTransactionForm({ transaction }: EditTransactionFormProps) {
   const [description, setDescription] = useState(transaction.description ?? "");
   const [categoryId, setCategoryId] = useState(transaction.categoryId);
 
-  const { data: categories } = useCategories({ type: transaction.type });
+  const { data: categories } = useCategories({
+    type: transaction.type,
+    sort: "usage",
+  });
   const { updateTransaction, isLoading } = useUpdateTransaction(transaction.id);
   const amountValue = parseTransactionAmountInput(amount);
   const canSubmit =

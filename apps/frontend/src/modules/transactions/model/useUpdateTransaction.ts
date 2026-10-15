@@ -4,6 +4,7 @@ import type { TransactionUpdateDTO } from "@/common/api/generate/model";
 import { useTransactionsUpdate } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { TransactionsUpdateBody } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
+import { useInvalidateCategories } from "@/modules/categories";
 
 import {
   useInvalidateTransaction,
@@ -18,6 +19,7 @@ export function useUpdateTransaction(transactionId: number) {
     useInvalidateTransactionsCategorySummary();
   const invalidateTransactionsList = useInvalidateTransactionsList();
   const invalidateTransactionSummary = useInvalidateTransactionSummary();
+  const invalidateCategories = useInvalidateCategories();
   const { addNotification } = useNotifications();
 
   const mutation = useTransactionsUpdate({
@@ -35,6 +37,7 @@ export function useUpdateTransaction(transactionId: number) {
           invalidateTransactionSummary(),
           invalidateTransactionsCategorySummary(),
           invalidateTransaction(transactionId),
+          invalidateCategories(),
         ]);
         addNotification({
           id: `updateTransactionSuccess-${transactionId}-${Date.now()}`,

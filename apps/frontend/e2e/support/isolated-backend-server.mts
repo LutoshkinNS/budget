@@ -6,7 +6,7 @@ import { join } from "node:path";
 import appInit, { type FastifyApp } from "../../../server/src/appInit.js";
 import accountsRoutes from "../../../server/src/domains/accounts/routes.js";
 import authRoutes from "../../../server/src/domains/auth/routes.js";
-import categoriesModule from "../../../server/src/domains/categories/categories.js";
+import categoriesRoutes from "../../../server/src/domains/categories/routes.js";
 import transactionsModule from "../../../server/src/domains/transactions/transactions.js";
 
 export function prepareDatabase(excludedMigrations: readonly string[] = []) {
@@ -70,7 +70,7 @@ export async function startTestApp(
 ) {
   await app.register(authRoutes, { prefix: "/api/v1/auth" });
   await app.register(accountsRoutes, { prefix: "/api/v1/accounts" });
-  await app.register(categoriesModule, { prefix: "/api/v1/categories" });
+  await app.register(categoriesRoutes, { prefix: "/api/v1/categories" });
   await app.register(transactionsModule, { prefix: "/api/v1/transactions" });
   const url = await app.listen({ port: 0, host: "127.0.0.1" });
   console.log("E2E_BACKEND_READY=" + JSON.stringify({ url, ...metadata }));

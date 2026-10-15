@@ -4,6 +4,7 @@ import type { TransactionCreateDTO } from "@/common/api/generate/model";
 import { useTransactionsCreate } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { TransactionsCreateBody } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
+import { useInvalidateCategories } from "@/modules/categories";
 
 import {
   useInvalidateTransactionsCategorySummary,
@@ -16,6 +17,7 @@ export function useCreateTransaction() {
     useInvalidateTransactionsCategorySummary();
   const invalidateTransactionsList = useInvalidateTransactionsList();
   const invalidateTransactionSummary = useInvalidateTransactionSummary();
+  const invalidateCategories = useInvalidateCategories();
   const { addNotification } = useNotifications();
 
   const mutation = useTransactionsCreate({
@@ -26,6 +28,7 @@ export function useCreateTransaction() {
           invalidateTransactionsList(),
           invalidateTransactionSummary(),
           invalidateTransactionsCategorySummary(),
+          invalidateCategories(),
         ]);
       },
     },

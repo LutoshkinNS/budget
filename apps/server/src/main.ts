@@ -1,7 +1,7 @@
 import appInit from '#src/appInit.js';
 import accountsRoutes from '#src/domains/accounts/routes.js';
 import authRoutes from '#src/domains/auth/routes.js';
-import categoriesModule from '#src/domains/categories/categories.js';
+import categoriesRoutes from '#src/domains/categories/routes.js';
 import subcategoriesModule from '#src/domains/subcategories/subcategories.js';
 import transactionsModule from '#src/domains/transactions/transactions.js';
 
@@ -9,7 +9,7 @@ const app = await appInit();
 
 app.register(authRoutes, { prefix: '/api/v1/auth' });
 app.register(accountsRoutes, { prefix: '/api/v1/accounts' });
-app.register(categoriesModule, { prefix: '/api/v1/categories' });
+app.register(categoriesRoutes, { prefix: '/api/v1/categories' });
 app.register(subcategoriesModule, { prefix: '/api/v1/subcategories' });
 app.register(transactionsModule, { prefix: '/api/v1/transactions' });
 

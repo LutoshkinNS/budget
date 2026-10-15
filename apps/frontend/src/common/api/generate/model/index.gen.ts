@@ -14,6 +14,7 @@ export * from "./accountUpdateDTO.gen";
 export * from "./authClientEventDTO.gen";
 export * from "./authClientEventNameDTO.gen";
 export * from "./categoriesListParams.gen";
+export * from "./categoriesListSort.gen";
 export * from "./categoriesListType.gen";
 export * from "./categoryCreateDTO.gen";
 export * from "./categoryCreateDTOType.gen";

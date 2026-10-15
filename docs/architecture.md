@@ -64,6 +64,8 @@ Backend path aliases:
 - `#s/*` -> `./generated/@typespec/ts-schemas/*`
 - `#generated/*` -> `./generated/*`
 
+The detailed backend convention for routes, handlers, repositories, types and helpers lives in [../apps/server/docs/backend-architecture.md](../apps/server/docs/backend-architecture.md).
+
 ### `apps/frontend`
 
 React + Vite app.

@@ -17,7 +17,7 @@ export function CategoriesKeyboard({
   value,
   onChange,
 }: CategoriesKeyboardProps) {
-  const { data: categories } = useCategories({ type });
+  const { data: categories } = useCategories({ type, sort: "usage" });
 
   return (
     <div className={className}>

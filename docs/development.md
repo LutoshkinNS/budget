@@ -113,7 +113,10 @@ pnpm --filter @budget/server test src/domains/transactions/balance.test.ts
 
 Frontend tests use `jsdom`, the `@` alias and test environment values from
 `apps/frontend/vitest.config.ts`. Playwright tests in `e2e/` run separately.
-Server tests use Node.js and live next to domain code as `*.test.ts`.
+Server tests use Node.js. Place new or moved `*.test.ts` files in a `test/`
+directory next to the code they exercise; for example, category route tests live
+in `src/domains/categories/test/`. Some existing tests still live directly beside
+their implementation.
 Import test functions and hooks explicitly from `vitest`; existing Node assertions
 remain supported.
 

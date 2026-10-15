@@ -2,6 +2,8 @@
 
 Fastify сервер с SQLite базой данных. Использует Prisma для работы с БД и TypeSpec для генерации API схем.
 
+Правила структуры доменов и зависимостей описаны в [архитектуре backend](docs/backend-architecture.md). Актуальные команды окружения и генерации находятся в [development guide](../../docs/development.md).
+
 ## Требования
 
 - Node.js 20+

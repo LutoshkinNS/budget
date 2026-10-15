@@ -49,7 +49,8 @@ interface Accounts {
 interface Categories {
   @get list(
     @query type?: TransactionType,
-  ): Category[] | CategoryNotFoundResponse | InternalServerErrorResponse;
+    @query sort?: "usage",
+  ): Category[] | CategoryErrorResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
 
   @get get(
     @path categoryId: integer,

@@ -1,5 +1,5 @@
 import { PrismaClient } from '../generated/prisma/index.js';
-import { normalizeCategoryName } from '../src/domains/categories/categoryName.js';
+import { normalizeCategoryName } from '../src/domains/categories/helpers/category-name.js';
 
 const prisma = new PrismaClient();
 const dryRun = process.argv.includes('--dry-run');

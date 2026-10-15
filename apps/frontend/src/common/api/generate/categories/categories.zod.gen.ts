@@ -8,6 +8,7 @@ import * as zod from "zod";
 
 export const CategoriesListQueryParams = zod.object({
   type: zod.enum(["income", "expense"]).optional(),
+  sort: zod.enum(["usage"]).optional(),
 });
 
 export const CategoriesListResponseItem = zod.object({

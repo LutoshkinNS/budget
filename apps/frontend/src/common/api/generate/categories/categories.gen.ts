@@ -68,7 +68,7 @@ export const getCategoriesListQueryKey = (params?: CategoriesListParams) => {
 
 export const getCategoriesListQueryOptions = <
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params?: CategoriesListParams,
   options?: {
@@ -97,12 +97,13 @@ export type CategoriesListQueryResult = NonNullable<
   Awaited<ReturnType<typeof categoriesList>>
 >;
 export type CategoriesListQueryError =
+  | ValidationErrorDTO
   | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params: undefined | CategoriesListParams,
   options: {
@@ -125,7 +126,7 @@ export function useCategoriesList<
 };
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params?: CategoriesListParams,
   options?: {
@@ -148,7 +149,7 @@ export function useCategoriesList<
 };
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params?: CategoriesListParams,
   options?: {
@@ -164,7 +165,7 @@ export function useCategoriesList<
 
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
   params?: CategoriesListParams,
   options?: {

@@ -10,10 +10,13 @@ import { afterAll, beforeAll, describe, it } from 'vitest';
 
 import appInit from '#src/appInit.js';
 
-import categoriesModule from './categories.js';
+import categoriesRoutes from '../routes.js';
 
 const require = createRequire(import.meta.url);
-const serverRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const serverRoot = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../../..'
+);
 const directory = mkdtempSync(join(tmpdir(), 'budget-category-icons-'));
 const databaseUrl = 'file:' + join(directory, 'test.db').split('\\').join('/');
 Object.assign(process.env, {
@@ -45,7 +48,7 @@ beforeAll(async () => {
     data: { name: 'Тест', ownerId: 1n }
   });
   accountId = account.id;
-  await app.register(categoriesModule, { prefix: '/api/v1/categories' });
+  await app.register(categoriesRoutes, { prefix: '/api/v1/categories' });
   app.get('/test-token', async (_request, reply) =>
     reply.accessJwtSign({ userId: 1, accountId })
   );

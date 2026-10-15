@@ -1,5 +1,6 @@
 import { useTransactionsDelete } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
+import { useInvalidateCategories } from "@/modules/categories";
 
 import {
   useInvalidateTransaction,
@@ -14,6 +15,7 @@ export function useDeleteTransaction() {
     useInvalidateTransactionsCategorySummary();
   const invalidateTransactionsList = useInvalidateTransactionsList();
   const invalidateTransactionSummary = useInvalidateTransactionSummary();
+  const invalidateCategories = useInvalidateCategories();
   const { addNotification } = useNotifications();
 
   const mutation = useTransactionsDelete({
@@ -31,6 +33,7 @@ export function useDeleteTransaction() {
           invalidateTransactionSummary(),
           invalidateTransactionsCategorySummary(),
           invalidateTransaction(variables.transactionId),
+          invalidateCategories(),
         ]);
         addNotification({
           id: `deleteTransactionSuccess-${variables.transactionId}-${Date.now()}`,
