@@ -3,10 +3,16 @@
   "scripts": {
     "client": "pnpm --filter @budget/frontend dev",
     "server": "pnpm --filter @budget/server dev",
-    "dev": "concurrently \"pnpm run client\" \"pnpm run server\""
+    "dev": "concurrently \"pnpm run client\" \"pnpm run server\"",
+    "agents:check": "node .agents/supervisor/scripts/agent-results-cli.mjs check",
+    "agents:summary": "node .agents/supervisor/scripts/agent-results-cli.mjs summary",
+    "agents:tokens": "node .agents/supervisor/scripts/agent-tokens-cli.mjs",
+    "agents:test": "node --test .agents/tester/test/agent-results.test.mjs .agents/tester/test/agent-tokens.test.mjs"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "ajv": "8.18.0",
+    "concurrently": "^9.2.1",
+    "yaml": "2.8.2"
   },
   "engines": {
     "pnpm": ">=9"

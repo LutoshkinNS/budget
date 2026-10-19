@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "role",
+    "task",
+    "run",
+    "attempt",
+    "result",
+    "revision",
+    "checks",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "agent-result" },
+    "role": { "enum": ["supervisor", "spec-writer", "developer", "tester", "reviewer"] },
+    "task": {
+      "type": ["string", "null"],
+      "pattern": "^\\.agents/project/tasks/.+\\.md$"
+    },
+    "run": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "attempt": { "type": "integer", "minimum": 0, "maximum": 3 },
+    "result": { "$ref": "#/definitions/result" },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "dirty", "evidence"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "dirty": { "type": "boolean" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/path" },
+          "uniqueItems": true
+        }
+      },
+      "if": { "properties": { "dirty": { "const": true } } },
+      "then": {
+        "properties": { "evidence": { "type": "array", "minItems": 1 } }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "result"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "result": { "$ref": "#/definitions/result" },
+          "command": { "type": "string", "minLength": 1 },
+          "exit_code": { "type": ["integer", "null"] },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "result": { "const": "blocked" } } },
+            "then": { "required": ["reason"], "properties": { "reason": {} } }
+          },
+          {
+            "if": {
+              "required": ["command"],
+              "properties": { "command": {}, "result": { "const": "pass" } }
+            },
+            "then": {
+              "required": ["exit_code"],
+              "properties": { "exit_code": { "const": 0 } }
+            }
+          }
+        ]
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/path" },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "task": { "const": null } } },
+      "then": {
+        "properties": { "role": { "enum": ["spec-writer", "supervisor"] } }
+      }
+    }
+  ],
+  "definitions": {
+    "result": { "enum": ["pass", "fail", "blocked"] },
+    "path": { "type": "string", "minLength": 1 }
+  }
+}
