@@ -54,5 +54,6 @@ git-info.json
 .mcp.json
 .agents/.mcp.json
 .agents/project/
+/projects/
 output/playwright/
 nul

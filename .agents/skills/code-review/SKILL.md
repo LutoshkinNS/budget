@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: "Review changes since a fixed point along two independent axes: Standards (repo rules and code quality) and Spec (the originating task/spec). Report them side by side. Use when the user asks to review a branch, PR, work-in-progress changes, or changes since a commit."
 ---
 
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
@@ -8,9 +8,9 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 - **Standards**: does the code conform to this repo's documented coding standards?
 - **Spec**: does the code faithfully implement the originating issue / spec?
 
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
+Keep Standards and Spec as independent axes on the same pinned snapshot. A local harness may assign separate reviewers; follow its role boundaries and artifact paths.
 
-The issue tracker should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
+Use the repository's local task/spec when present. Use an issue tracker only when the user requests one or the repository workflow requires it; do not block a review that has a local spec or no tracker request.
 
 ## Process
 
@@ -18,18 +18,19 @@ The issue tracker should have been provided to you. If not, tell the user to run
 
 Whatever the user said is the fixed point (a commit SHA, branch name, tag, `main`, `HEAD~5`, etc.). If they didn't specify one, ask for it.
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+Resolve and record the fixed point once with `git rev-parse <fixed-point>`. For committed work, capture `git diff <fixed-point>...HEAD` (three-dot comparison against the merge-base) and `git log <fixed-point>..HEAD --oneline`. If the user explicitly asks to review a dirty working tree, compare staged and unstaged changes to the resolved HEAD SHA with `git diff <HEAD-SHA> -- <task paths>`; record the exact path manifest and hashes for relevant untracked files. Keep the modes distinct and report the precise boundary.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here, not inside two parallel sub-agents.
+Before going further, confirm the fixed point resolves and the selected diff is non-empty. A bad ref or empty diff should fail before review begins.
 
 ### 2. Identify the spec source
 
-Look for the originating spec, in this order:
+Look for the originating task/spec, in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in the tracker doc.
+1. The current task and matching spec under `projects/tasks/<work>/work-items/` and `projects/tasks/<work>/specs/`.
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
-4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
+3. Issue references in commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), using the configured tracker workflow when needed.
+4. A matching spec under general `docs/`, `specs/`, or `.scratch/` directories.
+5. If no spec is available, mark the **Spec** axis skipped with that limitation in the review agreement and final report. Continue **Standards** and correctness review against repository rules and observable behavior; do not infer requirements or block the whole review solely for a missing spec.
 
 ### 3. Identify the standards sources
 
@@ -55,23 +56,23 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 - **Middle Man**: a class or function that mostly just delegates onward. → cut it, call the real target direct.
 - **Refused Bequest**: a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
 
-### 4. Spawn both sub-agents in parallel
+### 4. Run both review axes
 
-Issue both sub-agent calls together, in the foreground, and aggregate the reports they return.
+Run both axes independently on the same pinned snapshot. Do not spawn agents when the caller's workflow forbids it; follow local reviewer roles and authority.
 
-**Standards sub-agent prompt** should include:
+**Standards review** should include:
 
 - The full diff command and commit list.
-- The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full (the sub-agent has no other access to it).
+- The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full (the independent reviewer needs this complete reference).
 - The brief: "Report, per file/hunk where relevant, (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls: documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
-**Spec sub-agent prompt** should include:
+**Spec review** should include:
 
 - The diff command and commit list.
 - The path or fetched contents of the spec.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
 
-If the spec is missing, skip the Spec sub-agent and note this in the final report.
+If the spec is missing, skip only the Spec axis and state that limitation in the review agreement and final report. Continue Standards and correctness review. Consider and try to construct plausible counterexamples in runtime behavior and architecture beyond literal ACs; record the scenarios examined and conclusion, including when no defect is found. Separate confirmed defects outside scope from proposed implementation changes. Request targeted read-only evidence when needed, and report unverified mandatory checks as blocked rather than pass. Avoid rerunning the full suite without a reason.
 
 ### 5. Aggregate
 

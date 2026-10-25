@@ -2,7 +2,7 @@
 schema_version: 1
 kind: agent-result
 role: tester
-task: ".agents/project/tasks/<feature>/<task>.md"
+task: "projects/tasks/<feature>/work-items/<task>.md"
 run: "<run>"
 attempt: 0
 result: blocked
@@ -10,7 +10,7 @@ revision:
   commit: "<полный git rev-parse HEAD>"
   dirty: true
   evidence:
-    - ".agents/project/sessions/<run>/evidence/tester-snapshot.json"
+    - "projects/tasks/<work>/sessions/<run>/evidence/tester-snapshot.json"
 checks:
   - name: acceptance-check
     result: blocked
@@ -20,9 +20,9 @@ artifacts: []
 
 # Отчёт проверки: <задача>
 
-- ТЗ / критерии: <путь `.agents/project/specs/<feature>.md`, ID>.
-- Задача: <путь `.agents/project/tasks/`>.
-- Сессия / дата: <`.agents/project/sessions/<run>/`, время и часовой пояс>.
+- ТЗ / критерии: <путь `projects/tasks/<work>/specs/<feature>.md`, ID>.
+- Задача: <путь `projects/tasks/`>.
+- Сессия / дата: <`projects/tasks/<work>/sessions/<run>/`, время и часовой пояс>.
 - Итог: <pass | fail | blocked> — <основание>.
 
 ## Версия и окружение
@@ -50,6 +50,10 @@ artifacts: []
 | AC-1 | <тест или сценарий> | <pass / fail / blocked> | <артефакт, наблюдение или блокер> |
 
 `pass`: проверка выполнена, результат соответствует ТЗ. `fail`: подтверждено расхождение. `blocked`: проверка невозможна или обязательная проверка не выполнена; причина указана. Общий итог — `fail` при любом нарушении, иначе `blocked` при непроверенных обязательных критериях, иначе `pass`.
+
+## Качество тестов
+
+<Для автотестов Vitest: укажи новые/изменённые тесты, что именно они наблюдают, почему assertions выявляют регрессию, какие моки использованы и почему; назови существенные непроверенные случаи. Для иных проверок — «не применяется» и вид выполненной проверки.>
 
 ## Баги
 

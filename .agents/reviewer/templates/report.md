@@ -2,7 +2,7 @@
 schema_version: 1
 kind: agent-result
 role: reviewer
-task: ".agents/project/tasks/<feature>/<task>.md"
+task: "projects/tasks/<feature>/work-items/<task>.md"
 run: "<run>"
 attempt: 0
 result: blocked
@@ -10,7 +10,7 @@ revision:
   commit: "<полный git rev-parse HEAD>"
   dirty: true
   evidence:
-    - ".agents/project/sessions/<run>/evidence/reviewer-snapshot.json"
+    - "projects/tasks/<work>/sessions/<run>/evidence/reviewer-snapshot.json"
 checks:
   - name: spec-review
     result: blocked
@@ -29,7 +29,7 @@ artifacts: []
 
 ## Проверки и покрытие
 
-<По каждой оси: AC/правило → изученные пути и строки → evidence → pass/fail/blocked. Укажи применимые пункты чеклиста и причины н/п, ограничения и непроверенные области. Для выполненных команд — command, cwd, env, exit code и результат; чужое evidence подпиши владельцем и версией среза.>
+<По каждой оси: AC/правило → изученные пути и строки → evidence → вывод и ограничение → pass/fail/blocked. Для применимых async/context invariants укажи «инвариант → evidence → ограничение». Укажи применимые пункты чеклиста и причины н/п, непроверенные области. Для выполненных команд — command, cwd, env, exit code и результат; чужое evidence подпиши владельцем и версией среза.>
 
 ## Findings
 

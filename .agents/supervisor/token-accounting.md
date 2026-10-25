@@ -4,15 +4,15 @@
 
 ## Рабочий цикл
 
-Из корня репозитория укажи путь задачи, опубликованной в `.agents/project/tasks/`, и thread ID из события `session_meta`:
+Из корня репозитория укажи путь задачи, опубликованной в `projects/tasks/`, и thread ID из события `session_meta`:
 
 ```powershell
-pnpm agents:tokens start .agents/project/sessions/<run> --task .agents/project/tasks/<feature>/<task>.md --thread <supervisor-thread-id>
-pnpm agents:tokens attach .agents/project/sessions/<run> --task .agents/project/tasks/<feature>/<task>.md --thread <developer-thread-id> --role developer --attempt 0 --from-start
-pnpm agents:tokens stop .agents/project/sessions/<run> --thread <developer-thread-id>
-pnpm agents:tokens report .agents/project/sessions/<run> --format markdown
-pnpm agents:tokens stop .agents/project/sessions/<run> --thread <supervisor-thread-id>
-pnpm agents:tokens report .agents/project/sessions/<run> --format json --output .agents/project/sessions/<run>/tokens.json
+pnpm agents:tokens start projects/tasks/<work>/sessions/<run> --task projects/tasks/<feature>/work-items/<task>.md --thread <supervisor-thread-id>
+pnpm agents:tokens attach projects/tasks/<work>/sessions/<run> --task projects/tasks/<feature>/work-items/<task>.md --thread <developer-thread-id> --role developer --attempt 0 --from-start
+pnpm agents:tokens stop projects/tasks/<work>/sessions/<run> --thread <developer-thread-id>
+pnpm agents:tokens report projects/tasks/<work>/sessions/<run> --format markdown
+pnpm agents:tokens stop projects/tasks/<work>/sessions/<run> --thread <supervisor-thread-id>
+pnpm agents:tokens report projects/tasks/<work>/sessions/<run> --format json --output projects/tasks/<work>/sessions/<run>/tokens.json
 ```
 
 Для нового интервала того же потока сначала выполни `stop`, затем `attach` с нужной задачей, ролью и попыткой. `--from-start` применяй только при первом присоединении потока, когда нужен весь доступный журнал. По умолчанию сбор начинается с текущего checkpoint. По умолчанию sessions-root — `~/.codex/sessions`; для изолированного теста передай `--sessions-root <dir>`.

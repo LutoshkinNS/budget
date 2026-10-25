@@ -10,7 +10,7 @@ revision:
   commit: "<полный git rev-parse HEAD>"
   dirty: true
   evidence:
-    - ".agents/project/sessions/<run>/evidence/spec-writer-snapshot.json"
+    - "projects/tasks/<work>/sessions/<run>/evidence/spec-writer-snapshot.json"
 checks:
   - name: requirements-reviewed
     result: blocked
@@ -27,6 +27,8 @@ artifacts: []
 ## Решения и вопросы
 
 <Что подтверждено пользователем, какие вопросы передаются смотрителю. Итог pass говорит о выполнении поручения, согласование пользователем фиксируется отдельно.>
+
+<Ссылка на результат [пересмотра предпосылок](../task-readiness.md#пересмотр-предпосылок) в ТЗ: какие ограничения сохраняются, удаляются или требуют решения; что мешает выдаче developer. Либо `н/п` с причиной.>
 
 ## Передача смотрителю
 

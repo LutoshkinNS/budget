@@ -2,7 +2,7 @@
 
 - Роль и файл инструкций: `<role>`, `.agents/<role>/instructions.md`.
 - Модель и reasoning effort: `<из .codex/agents/<role>.toml; именованная роль либо worker с явными параметрами>`.
-- Сохранённое поручение: `.agents/project/sessions/<run>/assignments/<task>-<role>-<n>.md`; checkpoint: `.agents/project/sessions/<run>/state.md`.
+- Сохранённое поручение: `projects/tasks/<work>/sessions/<run>/assignments/<task>-<role>-<n>.md`; checkpoint: `projects/tasks/<work>/sessions/<run>/state.md`.
 - Этап и цикл исправлений: `<этап>`, `<0 для начальной реализации; 1–3 для исправлений>`.
 - ID потока: `<смотритель заполняет сразу после запуска; затем состояние потока>`.
 - Результат: `<конкретный ожидаемый результат>`.
@@ -12,10 +12,11 @@
 - Подтверждение пользователя и ограничения: `<согласованный объём>`.
 - Исходное состояние: `<HEAD, существующие изменения, worktree>`.
 - Для tester/reviewer: `<фиксированная база, точные проверяемые пути/diff, финальный snapshot и запрет параллельной записи в этот срез>`.
+- Для reviewer: `<разрешённые целевые read-only проверки; как запросить tester при нехватке evidence; карта применимых invariant → evidence>`.
 - Контекст: `<релевантные решения и документация>`.
 - Владение файлами: `<разрешённые пути, отдельно source и tests>`.
 - Файлы результата субагента: `<явно назначенные пути черновиков, отчётов или evidence в каталоге сессии>`.
-- Обязательный ролевой отчёт: `.agents/project/sessions/<run>/results/<task>-<role>-<attempt>.md`; шаблон `.agents/<role>/templates/report.md`, правила `.agents/supervisor/artifacts.md`.
+- Обязательный ролевой отчёт: `projects/tasks/<work>/sessions/<run>/results/<task>-<role>-<attempt>.md`; шаблон `.agents/<role>/templates/report.md`, правила `.agents/supervisor/artifacts.md`.
 - Другие исполнители: `<кто работает рядом и какими файлами владеет>`.
 - Проверки: `<команды, окружение, критерии успешности>`.
 - Формат результата: `<файлы, выполненная работа, проверки с exit code, дефекты и ограничения>`.

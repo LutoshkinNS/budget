@@ -2,7 +2,7 @@
 schema_version: 1
 kind: agent-result
 role: developer
-task: ".agents/project/tasks/<feature>/<task>.md"
+task: "projects/tasks/<feature>/work-items/<task>.md"
 run: "<run>"
 attempt: 0
 result: blocked
@@ -10,7 +10,7 @@ revision:
   commit: "<полный git rev-parse HEAD>"
   dirty: true
   evidence:
-    - ".agents/project/sessions/<run>/evidence/developer-snapshot.json"
+    - "projects/tasks/<work>/sessions/<run>/evidence/developer-snapshot.json"
 checks:
   - name: implementation-check
     result: blocked
