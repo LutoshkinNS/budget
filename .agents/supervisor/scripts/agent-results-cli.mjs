@@ -7,7 +7,7 @@ const help = `Usage:
   node .agents/supervisor/scripts/agent-results-cli.mjs summary <report.md|session>... [--output <path>]
 
 Options:
-  --output <path>  Save summary to .agents/project/sessions/<run>/summary.yaml
+  --output <path>  Save summary to that report session's summary.yaml
   --help           Show this help
 `;
 

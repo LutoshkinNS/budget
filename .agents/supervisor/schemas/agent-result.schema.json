@@ -18,10 +18,12 @@
   "properties": {
     "schema_version": { "const": 1 },
     "kind": { "const": "agent-result" },
-    "role": { "enum": ["supervisor", "spec-writer", "developer", "tester", "reviewer"] },
+    "role": {
+      "enum": ["supervisor", "spec-writer", "developer", "tester", "reviewer"]
+    },
     "task": {
       "type": ["string", "null"],
-      "pattern": "^\\.agents/project/tasks/.+\\.md$"
+      "pattern": "^(?:\\.agents/project/tasks/.+|projects/tasks/[a-z0-9][a-z0-9-]*/work-items/[a-z0-9][a-z0-9-]*)\\.md$"
     },
     "run": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
     "attempt": { "type": "integer", "minimum": 0, "maximum": 3 },

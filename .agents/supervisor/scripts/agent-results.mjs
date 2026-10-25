@@ -18,9 +18,14 @@ export const repositoryRoot = fileURLToPath(
 );
 
 const taskStatuses = new Set(["todo", "in-progress", "done", "blocked"]);
-const sessionPattern = /^\.agents\/project\/sessions\/[a-z0-9][a-z0-9-]*$/;
-const summaryPattern =
+const legacySessionPattern =
+  /^\.agents\/project\/sessions\/[a-z0-9][a-z0-9-]*$/;
+const projectSessionPattern =
+  /^projects\/tasks\/([a-z0-9][a-z0-9-]*)\/sessions\/([a-z0-9][a-z0-9-]*)$/;
+const legacySummaryPattern =
   /^\.agents\/project\/sessions\/([a-z0-9][a-z0-9-]*)\/summary\.yaml$/;
+const projectSummaryPattern =
+  /^projects\/tasks\/([a-z0-9][a-z0-9-]*)\/sessions\/([a-z0-9][a-z0-9-]*)\/summary\.yaml$/;
 const schema = JSON.parse(
   await readFile(
     new URL("../schemas/agent-result.schema.json", import.meta.url),
@@ -30,6 +35,33 @@ const schema = JSON.parse(
 const roles = schema.properties.role.enum;
 const ajv = new Ajv({ allErrors: true, strict: true });
 const validateMetadata = ajv.compile(schema);
+
+function sessionInfo(relative) {
+  if (legacySessionPattern.test(relative))
+    return {
+      path: relative,
+      work: null,
+      run: path.posix.basename(relative),
+    };
+  const match = projectSessionPattern.exec(relative);
+  if (!match) return null;
+  return { path: relative, work: match[1], run: match[2] };
+}
+
+function reportSessionInfo(relative) {
+  if (!relative.endsWith(".md")) return null;
+  const session = sessionInfo(path.posix.dirname(path.posix.dirname(relative)));
+  return session &&
+    relative === `${session.path}/results/${path.posix.basename(relative)}`
+    ? session
+    : null;
+}
+
+function taskWork(task) {
+  return /^projects\/tasks\/([a-z0-9][a-z0-9-]*)\/work-items\/[a-z0-9][a-z0-9-]*\.md$/u.exec(
+    task,
+  )?.[1];
+}
 
 function isInside(root, target) {
   const relative = path.relative(root, target);
@@ -197,7 +229,8 @@ async function collectReports(inputs, root) {
       reports.add(relative);
       continue;
     }
-    if (!info.isDirectory() || !sessionPattern.test(relative)) {
+    const session = sessionInfo(relative);
+    if (!info.isDirectory() || !session) {
       throw new Error(`Expected a report or session directory: ${relative}`);
     }
     const directory = await existingPath(
@@ -229,14 +262,28 @@ export async function loadResults(inputs, { root = repositoryRoot } = {}) {
   for (const relative of paths) {
     const actual = await existingPath(relative, resolvedRoot, "file");
     const metadata = parseReport(await readFile(actual, "utf8"), relative);
-    const directory = `.agents/project/sessions/${metadata.run}/results`;
+    const session = reportSessionInfo(relative);
+    if (!session || session.run !== metadata.run) {
+      throw new Error(`Report run does not match its session: ${relative}`);
+    }
     if (
-      !relative.startsWith(`${directory}/`) ||
+      session.work !== null &&
+      metadata.task !== null &&
+      taskWork(metadata.task) !== session.work
+    ) {
+      throw new Error(
+        `Task must belong to the same work as its session: ${relative}`,
+      );
+    }
+    const directory = `${session.path}/results`;
+    if (
+      relative !== `${directory}/${path.posix.basename(relative)}` ||
       !isInside(path.resolve(resolvedRoot.actual, directory), actual)
     ) {
       throw new Error(`Report must be inside ${directory}: ${relative}`);
     }
     const tuple = JSON.stringify([
+      session.path,
       metadata.run,
       metadata.task,
       metadata.role,
@@ -262,6 +309,9 @@ export async function loadResults(inputs, { root = repositoryRoot } = {}) {
     }
     reports.push({
       path: relative,
+      ...(session.work === null
+        ? {}
+        : { sessionPath: session.path, sessionWork: session.work }),
       metadata,
       taskStatus: statuses.get(metadata.task),
     });
@@ -277,12 +327,18 @@ export function buildSummary(reports) {
   const groups = new Map();
   for (const report of reports) {
     const { metadata, taskStatus } = report;
-    const key = JSON.stringify([metadata.task, metadata.run]);
+    const key = JSON.stringify([
+      report.sessionPath ?? null,
+      metadata.task,
+      metadata.run,
+    ]);
     let group = groups.get(key);
     if (!group) {
       group = {
         task: metadata.task,
         run: metadata.run,
+        _sessionPath: report.sessionPath ?? null,
+        _sessionWork: report.sessionWork ?? null,
         task_status: metadata.task === null ? null : taskStatus,
         reports: Object.fromEntries(roles.map((role) => [role, null])),
         missing_roles: [],
@@ -318,7 +374,19 @@ export function buildSummary(reports) {
   for (const task of tasks) {
     task.missing_roles = roles.filter((role) => task.reports[role] === null);
   }
-  return { schema_version: 1, kind: "agent-summary", tasks };
+  const workScopes = new Set(
+    reports.map((report) => report.sessionWork).filter(Boolean),
+  );
+  const summary = {
+    schema_version: 1,
+    kind: "agent-summary",
+    tasks: tasks.map(({ _sessionPath, _sessionWork, ...task }) =>
+      _sessionPath === null
+        ? task
+        : { ...task, session_path: _sessionPath, work: _sessionWork },
+    ),
+  };
+  return summary;
 }
 
 export async function writeSummary(
@@ -337,10 +405,38 @@ export async function writeSummary(
   validateRelativePath(output);
   const resolvedRoot = await resolveRoot(root);
   const { relative, absolute } = resolveInput(output, resolvedRoot);
-  const run = summaryPattern.exec(relative)?.[1];
+  const legacyMatch = legacySummaryPattern.exec(relative);
+  const projectMatch = projectSummaryPattern.exec(relative);
+  const run = legacyMatch?.[1] ?? projectMatch?.[2];
+  const work = projectMatch?.[1];
   if (!run || summary.tasks.some((task) => task?.run !== run)) {
+    throw new Error("Summary output must be inside the matching task session.");
+  }
+  const summarySessions = new Set(
+    summary.tasks.map((task) => task?.session_path).filter(Boolean),
+  );
+  if (summarySessions.size > 1) {
+    throw new Error("Summary output cannot combine different sessions.");
+  }
+  if (work !== undefined) {
+    const expectedSession = `projects/tasks/${work}/sessions/${run}`;
+    if (
+      summarySessions.size !== 1 ||
+      !summarySessions.has(expectedSession) ||
+      summary.tasks.some(
+        (task) =>
+          task?.session_path !== expectedSession ||
+          task?.work !== work ||
+          (task?.task !== null && taskWork(task?.task) !== work),
+      )
+    ) {
+      throw new Error(
+        "Summary output must belong to the same work as its reports.",
+      );
+    }
+  } else if (summarySessions.size > 0) {
     throw new Error(
-      "Summary output must be .agents/project/sessions/<run>/summary.yaml for every task run.",
+      "A project session summary must be written inside its session.",
     );
   }
   const parent = await realpath(path.dirname(absolute));

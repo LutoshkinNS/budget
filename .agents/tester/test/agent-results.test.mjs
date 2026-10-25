@@ -151,6 +151,128 @@ function summaryEntry(report) {
   };
 }
 
+async function projectFixture(t, work = "feature") {
+  const repository = await fixture(t, { withTask: false });
+  const session = `projects/tasks/${work}/sessions/${run}`;
+  const task = `projects/tasks/${work}/work-items/task.md`;
+  const evidence = `${session}/evidence/snapshot.patch`;
+  const artifact = `${session}/evidence/check.log`;
+  await repository.put(task, "# Project task — status: in-progress\n");
+  await repository.put(evidence, "Verified project snapshot.\n");
+  await repository.put(artifact, "Project checks passed.\n");
+  async function report(overrides = {}, options = {}) {
+    const value = metadata({
+      task,
+      revision: { commit: "a".repeat(40), dirty: true, evidence: [evidence] },
+      artifacts: [artifact],
+      ...overrides,
+    });
+    return repository.report(value, {
+      path: `${session}/results/${value.role}-${value.attempt}.md`,
+      ...options,
+    });
+  }
+  return { ...repository, session, task, report };
+}
+
+test("projects: check and summary accept work-owned reports and preserve canonical inputs", async (t) => {
+  const f = await projectFixture(t);
+  await f.report({ role: "developer" });
+  await f.report({ role: "reviewer" });
+  const before = await snapshot(f.root);
+  const reports = await loadResults([f.session], { root: f.root });
+  assert.equal(reports.length, 2);
+  assert.ok(reports.every((report) => report.taskStatus === "in-progress"));
+  const summary = buildSummary(reports);
+  assert.equal(summary.tasks.length, 1);
+  assert.equal(summary.tasks[0].task, f.task);
+  assert.equal(summary.tasks[0].task_status, "in-progress");
+  const output = `${f.session}/summary.yaml`;
+  await writeSummary(summary, output, { root: f.root });
+  await writeSummary(summary, output, { root: f.root });
+  assert.deepEqual(parse(await readFile(path.join(f.root, output), "utf8")), summary);
+  assert.deepEqual((await snapshot(f.root)).filter(([name]) => name !== output), before);
+});
+
+test("projects: report cannot claim a task from another work or a legacy task", async (t) => {
+  for (const foreign of ["projects/tasks/other/work-items/task.md", taskPath]) {
+    await t.test(foreign, async (t) => {
+      const f = await projectFixture(t);
+      await f.put(foreign, "# Foreign task — status: done\n");
+      const report = await f.report({ task: foreign });
+      const before = await snapshot(f.root);
+      await assert.rejects(() => loadResults([report.path], { root: f.root }));
+      assert.deepEqual(await snapshot(f.root), before);
+    });
+  }
+});
+
+test("projects: same-run intake reports remain separate across work owners", async (t) => {
+  const f = await projectFixture(t, "first");
+  await f.report({ task: null, role: "supervisor" });
+  const second = `projects/tasks/second/sessions/${run}`;
+  await f.put(`${second}/results/supervisor-0.md`, reportSource(metadata({
+    task: null,
+    role: "supervisor",
+  })));
+  const before = await snapshot(f.root);
+  const reports = await loadResults([f.session, second], { root: f.root });
+  const summary = buildSummary(reports);
+  assert.equal(summary.tasks.length, 2);
+  assert.ok(summary.tasks.every((entry) => entry.task === null));
+  assert.deepEqual(new Set(summary.tasks.map((entry) => entry.reports.supervisor.report)), new Set([
+    `${f.session}/results/supervisor-0.md`,
+    `${second}/results/supervisor-0.md`,
+  ]));
+  await assert.rejects(() => writeSummary(summary, `${f.session}/summary.yaml`, { root: f.root }));
+  assert.deepEqual(await snapshot(f.root), before);
+});
+
+test("projects: summary cannot be saved to another work with the same run", async (t) => {
+  const f = await projectFixture(t);
+  await f.report();
+  const summary = buildSummary(await loadResults([f.session], { root: f.root }));
+  const foreign = `projects/tasks/other/sessions/${run}/summary.yaml`;
+  await f.put(foreign, "unrelated: true\n");
+  const before = await snapshot(f.root);
+  await assert.rejects(() => writeSummary(summary, foreign, { root: f.root }));
+  assert.deepEqual(await snapshot(f.root), before);
+});
+
+test("projects: report location must match the exact run and results directory", async (t) => {
+  for (const relative of [
+    `projects/tasks/feature/sessions/${run}/extra/results/tester-0.md`,
+    `projects/tasks/feature/sessions/${run}-other/results/tester-0.md`,
+    `projects/tasks/feature/sessions/${run}/assignments/tester-0.md`,
+    `projects/tasks/feature-suffix/invalid/sessions/${run}/results/tester-0.md`,
+  ]) {
+    await t.test(relative, async (t) => {
+      const f = await projectFixture(t);
+      const report = await f.report({}, { path: relative });
+      await assert.rejects(() => loadResults([report.path], { root: f.root }));
+    });
+  }
+});
+
+test("projects: existing targets do not make traversal references valid", async (t) => {
+  const f = await projectFixture(t);
+  const report = await f.report({ task: "projects/tasks/feature/work-items/../work-items/task.md" });
+  const before = await snapshot(f.root);
+  await assert.rejects(() => loadResults([report.path], { root: f.root }));
+  assert.deepEqual(await snapshot(f.root), before);
+});
+
+test("projects: escaped results junction is refused without touching its target", async (t) => {
+  const f = await projectFixture(t);
+  const foreign = path.join(f.root, "foreign-results");
+  await mkdir(foreign);
+  await writeFile(path.join(foreign, "tester-0.md"), reportSource(metadata({ task: f.task })));
+  const link = path.join(f.root, f.session, "results");
+  await symlink(foreign, link, "junction");
+  await assert.rejects(() => loadResults([f.session], { root: f.root }));
+  assert.deepEqual(await readdir(foreign), ["tester-0.md"]);
+});
+
 test("loads real YAML with multiline checks, BOM and CRLF without changing input files", async (t) => {
   const repository = await fixture(t);
   const value = metadata({

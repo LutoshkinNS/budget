@@ -74,6 +74,20 @@ function assertRelative(value, label) {
     throw new Error(`Invalid ${label} path.`);
 }
 
+function assertManifestWork(manifest, work) {
+  if (
+    work !== null &&
+    manifest.intervals.some((interval) => {
+      const task =
+        /^projects\/tasks\/([a-z0-9][a-z0-9-]*)\/work-items\/[a-z0-9][a-z0-9-]*\.md$/u.exec(
+          interval.task,
+        )?.[1];
+      return task !== work;
+    })
+  )
+    throw new Error("Token manifest contains a task outside its session work.");
+}
+
 async function safePath(root, value, { allowMissing = false } = {}) {
   assertRelative(value, "repository");
   const target = path.resolve(root, value);
@@ -331,7 +345,11 @@ async function taskInfo(repo, value) {
     heading ??
     text.match(/^Status:\s*(todo|in-progress|done|blocked)\s*$/imu)?.[1];
   if (!status) throw new Error("Task file has no valid status.");
-  return { file, status };
+  const work =
+    /^projects\/tasks\/([a-z0-9][a-z0-9-]*)\/work-items\/[a-z0-9][a-z0-9-]*\.md$/u.exec(
+      value,
+    )?.[1] ?? null;
+  return { file, status, work };
 }
 
 export async function runTokens(
@@ -345,15 +363,26 @@ export async function runTokens(
   );
   assertRelative(options.session, "session");
   const run = path.basename(options.session);
+  const normalizedSession = options.session.replaceAll("\\", "/");
+  const sessionMatch =
+    /^projects\/tasks\/([a-z0-9][a-z0-9-]*)\/sessions\/([a-z0-9][a-z0-9-]*)$/u.exec(
+      normalizedSession,
+    );
+  const isLegacySession =
+    /^\.agents\/project\/sessions\/[a-z0-9][a-z0-9-]*$/u.test(
+      normalizedSession,
+    );
   if (
     !runPattern.test(run) ||
-    !options.session
-      .replaceAll("\\", "/")
-      .startsWith(".agents/project/sessions/")
+    (!isLegacySession && !sessionMatch) ||
+    (sessionMatch && sessionMatch[2] !== run)
   )
-    throw new Error("Session path must be .agents/project/sessions/<run>.");
+    throw new Error(
+      "Session path must be a valid task-scoped session directory.",
+    );
   const runPath = await safePath(repo, options.session, { allowMissing: true });
-  if (command === "report") return buildReport(runPath, run, repo, sessions);
+  if (command === "report")
+    return buildReport(runPath, run, repo, sessions, sessionMatch?.[1] ?? null);
   await mkdir(runPath, { recursive: true });
   return withManifest(runPath, async () => {
     const manifestPath = path.join(runPath, "token-manifest.json");
@@ -367,7 +396,9 @@ export async function runTokens(
         throw new Error("Token manifest already exists.");
       if (!options.task || !options.thread)
         throw new Error("start requires --task and --thread.");
-      await taskInfo(repo, options.task);
+      const task = await taskInfo(repo, options.task);
+      if (sessionMatch && task.work !== sessionMatch[1])
+        throw new Error("Task must belong to the same work as its session.");
       const sourcePath = await findSource(sessions, options.thread);
       const metadata = await sourceMetadata(sourcePath);
       const point = await checkpoint(sourcePath, sessions);
@@ -397,6 +428,7 @@ export async function runTokens(
     }
     const { file, manifest } = await loadManifest(runPath, run);
     await validateSavedPrefixes(manifest, sessions);
+    assertManifestWork(manifest, sessionMatch?.[1] ?? null);
     if (command === "attach") {
       if (
         !options.task ||
@@ -409,7 +441,9 @@ export async function runTokens(
         throw new Error(
           "attach requires valid --task, --thread, --role and --attempt.",
         );
-      await taskInfo(repo, options.task);
+      const task = await taskInfo(repo, options.task);
+      if (sessionMatch && task.work !== sessionMatch[1])
+        throw new Error("Task must belong to the same work as its session.");
       if (
         manifest.intervals.some(
           (interval) =>
@@ -480,8 +514,9 @@ export async function runTokens(
   });
 }
 
-async function buildReport(runPath, run, repo, sessions) {
+async function buildReport(runPath, run, repo, sessions, work) {
   const { manifest } = await loadManifest(runPath, run);
+  assertManifestWork(manifest, work);
   const rowsByKey = new Map();
   const diagnostics = [];
   const seen = new Map();

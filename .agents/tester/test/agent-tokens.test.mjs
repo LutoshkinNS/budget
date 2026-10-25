@@ -12,6 +12,7 @@ import {
   symlink,
   writeFile,
 } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -21,10 +22,7 @@ const cli = path.join(
   repository,
   ".agents/supervisor/scripts/agent-tokens-cli.mjs",
 );
-const temporaryParent = path.join(
-  repository,
-  ".agents/project/sessions/2026-10-19-token-accounting/repro",
-);
+const temporaryParent = path.join(os.tmpdir(), "budget-agent-tokens-tests");
 const session = ".agents/project/sessions/fixture-run";
 const taskPath = ".agents/project/tasks/feature/task.md";
 const secondTask = ".agents/project/tasks/feature/second.md";
@@ -219,6 +217,127 @@ async function digestTree(directory) {
   await visit(directory);
   return result;
 }
+
+const projectSession = "projects/tasks/feature/sessions/fixture-run";
+const projectTask = "projects/tasks/feature/work-items/task.md";
+const foreignProjectTask = "projects/tasks/other/work-items/task.md";
+
+async function projectFixture(t) {
+  const f = await fixture(t);
+  await f.put(projectTask, "# Project task — status: in-progress\n");
+  await f.put(foreignProjectTask, "# Foreign project task — status: done\n");
+  await mkdir(path.join(f.root, projectSession), { recursive: true });
+  function call(command, args = [], options = {}) {
+    return f.call(command, args, { run: projectSession, ...options });
+  }
+  function start(thread = "parent", options = {}) {
+    return call("start", ["--task", projectTask, "--thread", thread], options);
+  }
+  function stop(thread = "parent") {
+    return call("stop", ["--thread", thread]);
+  }
+  async function manifest() {
+    return readFile(path.join(f.root, projectSession, "token-manifest.json"), "utf8");
+  }
+  return { ...f, call, start, stop, manifest };
+}
+
+test("projects: token lifecycle accounts same-work parent and child and writes owned reports", async (t) => {
+  const f = await projectFixture(t);
+  await f.source("parent");
+  await f.source("child", [context("turn-a"), record("child", "child", usage(50, 5))], { parent_thread_id: "parent" });
+  f.start();
+  await f.append("parent", [context("turn-a"), record("parent", "parent")]);
+  f.call("attach", ["--task", projectTask, "--thread", "child", "--role", "developer", "--attempt", "0", "--from-start"]);
+  f.stop("child");
+  f.stop();
+  const before = await digestTree(f.root);
+  const report = JSON.parse(f.call("report").stdout);
+  total(report, 165);
+  assert.equal(report.tasks[0].task, projectTask);
+  assert.deepEqual(await digestTree(f.root), before);
+  f.call("report", ["--output", `${projectSession}/tokens.json`]);
+  assert.equal(JSON.parse(await readFile(path.join(f.root, projectSession, "tokens.json"), "utf8")).observed_usage.total_tokens, 165);
+  f.call("report", ["--format", "markdown", "--output", `${projectSession}/tokens.md`]);
+  assert.match(await readFile(path.join(f.root, projectSession, "tokens.md"), "utf8"), /165/u);
+});
+
+test("projects: token start rejects a task owned by another work or legacy scope", async (t) => {
+  for (const foreign of [foreignProjectTask, taskPath]) {
+    await t.test(foreign, async (t) => {
+      const f = await projectFixture(t);
+      await f.source("parent");
+      const before = await digestTree(f.root);
+      f.call("start", ["--task", foreign, "--thread", "parent"], { status: 1 });
+      assert.deepEqual(await digestTree(f.root), before);
+    });
+  }
+});
+
+test("projects: token attach rejects cross-work ownership without changing the manifest", async (t) => {
+  const f = await projectFixture(t);
+  await f.source("parent");
+  await f.source("child", [context("turn-a"), record("child", "child")]);
+  f.start();
+  const before = await f.manifest();
+  f.call("attach", ["--task", foreignProjectTask, "--thread", "child", "--role", "developer", "--attempt", "0", "--from-start"], { status: 1 });
+  assert.equal(await f.manifest(), before);
+});
+
+test("projects: tokens reject malformed session roots before writing files", async (t) => {
+  for (const invalid of [
+    `${projectSession}/extra`,
+    "projects/tasks/feature/sessions/../fixture-run",
+    "projects/tasks/feature/sessions/fixture_run",
+    "projects/tasks/feature-suffix/extra/sessions/fixture-run",
+    "projects/tasks/Feature/sessions/fixture-run",
+  ]) {
+    await t.test(invalid, async (t) => {
+      const f = await projectFixture(t);
+      await f.source("parent");
+      const before = await digestTree(f.root);
+      f.start("parent", { run: invalid, status: 1 });
+      assert.deepEqual(await digestTree(f.root), before);
+    });
+  }
+});
+
+test("projects: token report cannot overwrite a different work with the same run", async (t) => {
+  const f = await projectFixture(t);
+  await f.source("parent");
+  f.start();
+  f.stop();
+  const foreign = "projects/tasks/other/sessions/fixture-run/tokens.json";
+  await f.put(foreign, "{\"unrelated\":true}\n");
+  const before = await digestTree(f.root);
+  f.call("report", ["--output", foreign], { status: 1 });
+  assert.deepEqual(await digestTree(f.root), before);
+});
+
+test("projects: token session junction does not redirect writes", async (t) => {
+  const f = await projectFixture(t);
+  await f.source("parent");
+  const foreign = path.join(f.root, "foreign-session");
+  await mkdir(foreign);
+  const linked = "projects/tasks/feature/sessions/linked-run";
+  await mkdir(path.dirname(path.join(f.root, linked)), { recursive: true });
+  await symlink(foreign, path.join(f.root, linked), "junction");
+  f.start("parent", { run: linked, status: 1 });
+  assert.deepEqual(await readdir(foreign), []);
+});
+
+test("projects: forged manifest cannot attribute another work during report", async (t) => {
+  const f = await projectFixture(t);
+  await f.source("parent");
+  f.start();
+  f.stop();
+  const manifest = JSON.parse(await f.manifest());
+  manifest.intervals[0].task = foreignProjectTask;
+  await f.put(`${projectSession}/token-manifest.json`, JSON.stringify(manifest));
+  const before = await f.manifest();
+  f.call("report", [], { status: 1 });
+  assert.equal(await f.manifest(), before);
+});
 
 test("AC-1/8: lifecycle sums own parent and child responses and leaves inputs unchanged", async (t) => {
   const f = await fixture(t);
