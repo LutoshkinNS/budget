@@ -98,12 +98,6 @@ function toSummaryParams(
   };
 }
 
-/**
- * Публичные параметризованные обёртки: account-scoped ключ и me-guard
- * собираются внутри; данные без валидации — сценарная обработка за
- * потребителем. extraEnabled объединяется с guard по AND. Счёт запроса
- * фиксируется позиционным accountId из выбранного счёта.
- */
 export function useTransactionsListQuery(
   params: TransactionsListParams,
   extraEnabled = true,

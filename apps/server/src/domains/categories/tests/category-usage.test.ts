@@ -16,7 +16,7 @@ import {
   vi
 } from 'vitest';
 
-import appInit from '#src/appInit.js';
+import appInit from '#src/app-init.js';
 
 import subcategoriesModule from '../../subcategories/subcategories.js';
 import transactionsModule from '../../transactions/transactions.js';
@@ -255,7 +255,6 @@ describe('category usage ordering API', () => {
     const boundary = await createCategory('Яблоко на границе');
     await createTransaction(boundary.id, { date });
 
-    // При нулевой частоте алфавитный порядок обратен порядку после использования.
     assert.deepEqual(
       categoryIds(await listCategories()),
       included ? [boundary.id, unused.id] : [unused.id, boundary.id]
@@ -342,7 +341,6 @@ describe('category usage ordering API', () => {
 
   it('rejects account without membership with 403 and keeps the account explicit in the path', async () => {
     await createCategory('Недоступная частота');
-    // Пользователь 3 владеет другим счётом, но не участвует в общем
     const foreign = await app.inject({
       url: `/api/v1/accounts/${accountId}/categories?sort=usage`,
       headers: { cookie: cookies.get(3) }
@@ -350,14 +348,12 @@ describe('category usage ordering API', () => {
     assert.equal(foreign.statusCode, 403, foreign.body);
     assert.equal(foreign.json<{ code: string }>().code, 'FORBIDDEN');
 
-    // Несуществующий счёт неотличим от чужого
     const missing = await app.inject({
       url: '/api/v1/accounts/999999/categories',
       headers: { cookie: cookies.get(1) }
     });
     assert.equal(missing.statusCode, 403, missing.body);
 
-    // Участник по членству AccountUser проходит проверку доступа
     const member = await app.inject({
       url: `/api/v1/accounts/${accountId}/categories`,
       headers: { cookie: cookies.get(2) }
@@ -366,7 +362,6 @@ describe('category usage ordering API', () => {
   });
 
   it('does not read or change an entity of another account under an accessible account path', async () => {
-    // Контрпример ТЗ §6.2: пользователь состоит в A и B, сущность из B
     await app.prisma.accountUser.create({
       data: { accountId: otherAccountId, userId: 1n }
     });
@@ -413,8 +408,7 @@ describe('category usage ordering API', () => {
         headers: { cookie: cookies.get(1) },
         ...('payload' in req ? { payload: req.payload } : {})
       });
-      // Доступ к счёту path есть, но сущность ему не принадлежит — 404,
-      // семантика отсутствующего ресурса вместо 403/500
+      // 404 скрывает существование сущности в другом счёте.
       assert.equal(response.statusCode, 404, `${req.method} ${req.url}`);
     }
 

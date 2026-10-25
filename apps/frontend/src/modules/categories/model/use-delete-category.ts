@@ -11,8 +11,7 @@ import { deleteCategoryFormDataSchema } from "./schemas.ts";
 export function useDeleteCategory() {
   const { mutate, isError, error, status } = useCategoriesDelete({
     mutation: {
-      // Счёт мутации фиксируется её variables — переключение счёта не меняет
-      // ни выполнение запроса, ни область инвалидаций
+      // Поздний ответ инвалидирует кэш счёта из variables вызова.
       onSuccess: async (_data, variables) => {
         await invalidateCategories(variables.accountId);
       },

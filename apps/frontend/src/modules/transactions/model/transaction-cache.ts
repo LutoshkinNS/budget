@@ -7,12 +7,6 @@ import type {
 
 import { transactionKeys } from "./transaction-keys.ts";
 
-/**
- * Публичные cache-команды инвалидации: наружу отдаётся только scope,
- * состав ключей — приватная деталь фабрики transactionKeys. Счёт обязателен:
- * он приходит из variables мутации или выбранного счёта, тихий пропуск
- * невозможен по построению.
- */
 
 export function invalidateTransactionsList(
   accountId: number,

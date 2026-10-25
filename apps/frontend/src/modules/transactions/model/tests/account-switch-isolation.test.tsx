@@ -44,7 +44,7 @@ const tx43 = [
 ];
 
 function seedMe() {
-  // Список счетов пользователя; порядок задаёт выбор по умолчанию (первый)
+  // Первый счёт в списке выбирается по умолчанию.
   queryClient.setQueryData(getAuthMeQueryKey(), {
     userId: 1,
     accounts: [
@@ -54,13 +54,11 @@ function seedMe() {
   });
 }
 
-// Deferred без non-const assertion: резолверы копятся в массиве
 function createDeferredFetch() {
   const pending: Array<{ url: string; resolve: (body: unknown) => void }> = [];
   const fetchMock = vi.fn(
     async (input: RequestInfo | URL): Promise<Response> => {
       const url = String(input);
-      // Каждый запрос обязан нести счёт явно; прочие вызовы — ошибка теста
       if (!url.includes("/api/v1/accounts/")) {
         throw new Error(`unexpected fetch: ${url}`);
       }
@@ -73,7 +71,6 @@ function createDeferredFetch() {
   return {
     fetchMock,
     lastUrl: () => pending.at(-1)?.url,
-    // Ответ адресуется конкретному запросу по счёту в его URL
     resolveFor: (urlPart: string, body: unknown) => {
       const index = pending.findIndex((entry) => entry.url.includes(urlPart));
       const entry = index === -1 ? undefined : pending[index];
@@ -104,8 +101,7 @@ describe("account switch isolation", () => {
     seedMe();
     const http = createDeferredFetch();
 
-    // «Замороженный» наблюдатель поддерева 42: экран прежнего счёта ещё
-    // смонтирован, его запрос остаётся живым при смене счёта
+    // Смонтированный экран счёта 42 сохраняет наблюдатель React Query при переключении.
     const frozenScreen = renderHook(
       () =>
         useTransactionsList(42, RANGE, {
@@ -120,17 +116,13 @@ describe("account switch isolation", () => {
       }),
       { wrapper },
     );
-    // Запрос прежнего счёта (42) ушёл и висит pending; URL несёт счёт явно
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(1));
     expect(http.lastUrl()).toContain("/api/v1/accounts/42/transactions");
 
-    // Пользователь переключается на счёт 43 локально: запрос уходит под
-    // новый ключ сразу, пауза перехода больше не существует
     act(() => switchAccount(43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
     expect(http.lastUrl()).toContain("/api/v1/accounts/43/transactions");
 
-    // Поздний ответ прежнего счёта приходит уже после переключения
     await act(async () => {
       http.resolveFor("/api/v1/accounts/42/transactions", tx42);
     });
@@ -140,14 +132,12 @@ describe("account switch isolation", () => {
       ),
     );
 
-    // Данные текущего счёта не перезаписаны ответом прежнего
     expect(
       queryClient.getQueryData(transactionKeys.list(43, RANGE)),
     ).toBeUndefined();
     expect(result.current.screen.transactions).toHaveLength(0);
     expect(result.current.accountId).toBe(43);
 
-    // Ответ нового счёта приходит и показывается
     await act(async () => {
       http.resolveFor("/api/v1/accounts/43/transactions", tx43);
     });
@@ -156,7 +146,6 @@ describe("account switch isolation", () => {
         202,
       ]),
     );
-    // Поддерево прежнего счёта по-прежнему держит только его данные
     expect(queryClient.getQueryData(transactionKeys.list(42, RANGE))).toEqual(
       tx42,
     );
@@ -177,8 +166,6 @@ describe("account switch isolation", () => {
       expect(result.current.transactions.map((t) => t.id)).toEqual([101]),
     );
 
-    // Уход на счёт 43: покинутое поддерево помечается устаревшим без
-    // фонового рефетча — активных наблюдателей 42 нет, залпа запросов нет
     act(() => switchAccount(43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
     await act(async () => {
@@ -189,7 +176,6 @@ describe("account switch isolation", () => {
     );
     expect(http.fetchMock).toHaveBeenCalledTimes(2);
 
-    // Возврат на счёт 42: кэш отдаётся сразу, параллельно идёт сверка
     act(() => switchAccount(42));
     await waitFor(() =>
       expect(result.current.transactions.map((t) => t.id)).toEqual([101]),
@@ -197,7 +183,6 @@ describe("account switch isolation", () => {
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(3));
     expect(http.lastUrl()).toContain("/api/v1/accounts/42/transactions");
 
-    // Фоновая сверка завершилась свежими данными того же счёта
     await act(async () => {
       http.resolveFor("/api/v1/accounts/42/transactions", [
         { ...tx42[0], amount: 11 },
@@ -209,8 +194,6 @@ describe("account switch isolation", () => {
   });
 
   it("rapid A→B→A switching keeps every request and cache entry in its own account", async () => {
-    // ТЗ §6.5: быстрые локальные переключения — каждый запрос и запись кэша
-    // остаются в собственном счёте, флаг перехода не нужен
     seedMe();
     const http = createDeferredFetch();
 
@@ -223,13 +206,10 @@ describe("account switch isolation", () => {
     );
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(1));
 
-    // A→B: запрос счёта 43 уходит и остаётся в полёте
     act(() => switchAccount(43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
 
-    // B→A до завершения запросов: возврат на помеченное устаревшим поддерево
-    // перечитывает счёт 42; запрос покинутого счёта теряет последнего
-    // наблюдателя и отменяется QueryClient — под чужой ключ он не попадает
+    // Возврат к устаревшему счёту запускает повторную сверку.
     act(() => switchAccount(42));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(3));
     const urls = http.fetchMock.mock.calls.map(([input]) => String(input));
@@ -241,8 +221,6 @@ describe("account switch isolation", () => {
     ).toHaveLength(1);
     expect(result.current.accountId).toBe(42);
 
-    // Оба ответа приходят: отменённый 43 ничего не записывает, живой
-    // перезапрос 42 кладёт данные своего счёта
     await act(async () => {
       http.resolveFor("/api/v1/accounts/43/transactions", tx43);
       http.resolveFor("/api/v1/accounts/42/transactions", tx42);
@@ -262,16 +240,12 @@ describe("account switch isolation", () => {
   });
 
   it("switching does not touch auth: the account of every request lives in its URL", async () => {
-    // Регрессия R-1/R-3 ревью: переключение больше не перевыпускает токены и
-    // не ждёт authMe — окно гонки исчезло вместе с самим переключающим HTTP
     seedMe();
     const http = createDeferredFetch();
 
     const { result } = renderHook(() => useTransactions(RANGE), { wrapper });
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(1));
 
-    // Переключение в момент висящего запроса прежнего счёта: новая выдача
-    // стартует немедленно, обе несут собственный счёт в URL
     act(() => switchAccount(43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
     const requestedUrls = http.fetchMock.mock.calls.map(([input]) =>
@@ -287,8 +261,7 @@ describe("account switch isolation", () => {
         url.includes("/api/v1/accounts/43/transactions"),
       ),
     ).toHaveLength(1);
-    // Ни authMe, ни switch-account не вызывались: fetchmock бросает на любых
-    // прочих URL, тест дошёл до этой строки
+    // Fetch-мок падает на неизвестном URL, подтверждая отсутствие auth-запросов.
     expect(result.current.transactions).toHaveLength(0);
 
     await act(async () => {

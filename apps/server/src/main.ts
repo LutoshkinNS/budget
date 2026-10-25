@@ -1,4 +1,4 @@
-import appInit from '#src/appInit.js';
+import appInit from '#src/app-init.js';
 import accountsRoutes from '#src/domains/accounts/routes.js';
 import authRoutes from '#src/domains/auth/routes.js';
 import categoriesRoutes from '#src/domains/categories/routes.js';

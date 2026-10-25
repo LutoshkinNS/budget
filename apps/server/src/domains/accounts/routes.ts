@@ -4,12 +4,12 @@ import AccountMember from '#s/AccountMember.js';
 import AccountUpdate from '#s/AccountUpdate.js';
 import RedeemInvitationRequest from '#s/RedeemInvitationRequest.js';
 import UnauthorizedError from '#s/UnauthorizedError.js';
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 import { accountsHandler } from './handlers/accounts.handler.js';
-import { createInvitationHandler } from './handlers/createInvitation.handler.js';
+import { createInvitationHandler } from './handlers/create-invitation.handler.js';
 import { listMembersHandler } from './handlers/listMembers.handler.js';
-import { redeemInvitationHandler } from './handlers/redeemInvitation.handler.js';
+import { redeemInvitationHandler } from './handlers/redeem-invitation.handler.js';
 import {
   updateAccountHandler,
   type UpdateBody,

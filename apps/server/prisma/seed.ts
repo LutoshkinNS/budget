@@ -3,7 +3,6 @@ import { Prisma, PrismaClient } from '../generated/prisma/client.js';
 const prisma = new PrismaClient();
 
 export async function main() {
-  // Создаём пользователя с личным аккаунтом
   const user = await prisma.user.create({
     data: {
       id: BigInt(1),
@@ -21,7 +20,6 @@ export async function main() {
 
   const accountId = user.ownedAccounts[0].id;
 
-  // Добавляем пользователя в свой аккаунт
   await prisma.accountUser.create({
     data: {
       userId: user.id,
@@ -29,7 +27,6 @@ export async function main() {
     }
   });
 
-  // Категории для этого аккаунта
   const categoryData: Prisma.TransactionCategoryCreateInput[] = [
     {
       name: 'Продукты',
@@ -63,7 +60,6 @@ export async function main() {
     categories.push(created);
   }
 
-  // Расходы для этого аккаунта
   const expenseData: Prisma.TransactionCreateInput[] = [
     {
       amount: 1500,

@@ -9,15 +9,11 @@ import { transactionKeys } from "@/modules/transactions/model/transaction-keys";
 
 import { useCreateTransaction } from "../use-create-transaction.ts";
 
-// Regression-тест перенесён из
-// projects/tasks/cache-isolation-review/sessions/2026-10-24-src-review/evidence/races.test.tsx:
-// снапшот счёта обязан принадлежать вызову мутации (контекст onMutate), а не
-// hook-экземпляру — иначе поздний ответ первой мутации использует скоп второй.
-// Код приложения не мокируется: подменяются только HTTP (fetch) и уведомления
 vi.mock("@/common/lib/notifications", () => ({
   useNotifications: () => ({ addNotification: vi.fn() }),
 }));
 
+// Каждый ответ инвалидирует счёт своего вызова из variables.
 const RANGE = { from: "2026-10-01", to: "2026-10-02" };
 const DATA = { type: "expense", amount: 10, categoryId: 3 } as const;
 const me = (currentAccountId: number) => ({
@@ -70,8 +66,6 @@ it("keeps each concurrent mutation's original account scope", async () => {
     pending[0]?.();
     await first.promise;
   });
-  // Скоп первой мутации — её собственный снапшот (42): поддерево 42
-  // инвалидировано, поддерево 43 ещё нет (вторая мутация в полёте)
   const firstAccountInvalidated = queryClient.getQueryState(
     transactionKeys.list(42, RANGE),
   )?.isInvalidated;

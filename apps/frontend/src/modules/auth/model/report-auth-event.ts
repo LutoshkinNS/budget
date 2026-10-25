@@ -59,6 +59,6 @@ export async function reportAuthEvent(
       body: JSON.stringify(payload),
     });
   } catch {
-    // Telemetry must never affect authentication.
+    // Сбой телеметрии не должен прерывать вход.
   }
 }

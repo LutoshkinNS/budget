@@ -24,7 +24,6 @@ describe("category query invalidation", () => {
     for (const key of lists) queryClient.setQueryData(key, []);
     queryClient.setQueryData(categoryKeys.detail(42, 3), { id: 3 });
     queryClient.setQueryData(categoryKeys.detail(42, 4), { id: 4 });
-    // Поддерево другого счёта не затрагивается скопированной инвалидацией
     queryClient.setQueryData(categoryKeys.detail(43, 3), { id: 3 });
     queryClient.setQueryData(["unrelated"], []);
     await invalidateCategories(42, 3);

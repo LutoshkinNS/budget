@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 const FORBIDDEN = {
   code: 'FORBIDDEN',
@@ -22,11 +22,7 @@ function readAccountIdParam(params: unknown): number | undefined {
   return undefined;
 }
 
-/**
- * Общая проверка счёт-зависимых маршрутов: счёт приходит из path-параметра
- * запроса, доступ подтверждается владением или членством AccountUser.
- * Токен удостоверяет только пользователя и сессию.
- */
+// Счёт определяется URL, потому что токен удостоверяет только пользователя.
 async function accountAccessPlugin(app: FastifyApp) {
   app.decorate(
     'requireAccountAccess',
@@ -45,7 +41,7 @@ async function accountAccessPlugin(app: FastifyApp) {
         if (account) return;
       }
 
-      // Несуществующий и чужой счёт неотличимы друг от друга намеренно
+      // Единый ответ не раскрывает существование чужого счёта.
       return reply.code(403).send(FORBIDDEN);
     }
   );

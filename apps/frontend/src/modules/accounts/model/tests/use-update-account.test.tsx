@@ -13,11 +13,11 @@ vi.mock("@/common/lib/notifications", () => ({
   useNotifications: () => ({ addNotification: vi.fn() }),
 }));
 
-// Проверяем вызов публичной команды, не строя ключи чужого домена
 const mocks = vi.hoisted(() => ({
   update: vi.fn<() => Promise<{ success: true }>>(),
   invalidateTransactionSummary: vi.fn(),
 }));
+// Тест использует публичную границу, не связываясь с ключами transactions.
 vi.mock("@/modules/transactions", () => ({
   invalidateTransactionSummary: mocks.invalidateTransactionSummary,
 }));
@@ -84,7 +84,6 @@ describe("useUpdateAccount invalidation scope", () => {
     const { result } = renderHook(useUpdateAccount, { wrapper });
     const done: { promise?: Promise<unknown> } = {};
     act(() => {
-      // Редактируется счёт 43 — команда получает именно его скоп
       done.promise = result.current.mutateAsync({
         accountId: 43,
         data: { name: "Новый" },
@@ -94,10 +93,8 @@ describe("useUpdateAccount invalidation scope", () => {
       await done.promise;
     });
 
-    // Summary инвалидируется публичной командой transactions со scope цели
     expect(mocks.invalidateTransactionSummary).toHaveBeenCalledWith(43);
 
-    // Пользовательский скоп: accountsList и authMe инвалидируются как раньше
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: getAccountsListQueryKey(),
     });

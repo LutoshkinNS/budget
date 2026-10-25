@@ -6,10 +6,8 @@ import { queryClient } from "@/common/api/appQuery";
 import { lazyDevComponent } from "@/common/lib/lazyDevComponent";
 import { Notifications } from "@/common/lib/notifications";
 
-// Import the generated route tree
 import { routeTree } from "./routes/routeTree.gen";
 
-// Create a new router instance
 const router = createRouter({ routeTree });
 
 const ReactQueryDevtools = lazyDevComponent(
@@ -17,7 +15,6 @@ const ReactQueryDevtools = lazyDevComponent(
   (module) => module.ReactQueryDevtools,
 );
 
-// Register the router instance for type safety
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;

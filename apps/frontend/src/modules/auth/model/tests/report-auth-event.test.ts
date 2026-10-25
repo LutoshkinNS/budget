@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { reportAuthEvent } from "../src/modules/auth/model/reportAuthEvent.ts";
+import { reportAuthEvent } from "../report-auth-event.ts";
 
 describe("reportAuthEvent", () => {
   it("sends build and runtime context without Telegram user data", async () => {

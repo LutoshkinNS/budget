@@ -39,8 +39,7 @@ function getCreateCategoryErrorMessage(error: unknown) {
 export function useCreateCategory() {
   const mutation = useCategoriesCreate({
     mutation: {
-      // Счёт мутации фиксируется её variables — переключение счёта не меняет
-      // ни выполнение запроса, ни область инвалидаций
+      // Поздний ответ инвалидирует кэш счёта из variables вызова.
       onSuccess: async (_data, variables) => {
         await invalidateCategories(variables.accountId);
       },

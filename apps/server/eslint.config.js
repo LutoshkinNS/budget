@@ -33,15 +33,10 @@ export default tseslint.config(
         'error',
         {
           groups: [
-            // Node.js builtins
             ['^node:'],
-            // Packages
             ['^@?\\w'],
-            // Internal packages
             ['^#'],
-            // Parent imports
             ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
-            // Other relative imports
             ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$']
           ]
         }

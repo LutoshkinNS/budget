@@ -169,7 +169,7 @@ async function sourceMetadata(file) {
           forked_from_id: event.payload.forked_from_id ?? null,
         };
     } catch {
-      /* Поиск продолжается до первой валидной session_meta. */
+      /* Некорректные JSONL-события пропускаются. */
     }
   }
   throw new Error("Session source has no valid session_meta event.");
@@ -194,7 +194,7 @@ async function checkpoint(file, sessions) {
       if (event.type === "event_msg" && event.payload?.type === "task_complete")
         activeTurnId = null;
     } catch {
-      /* Повреждённые строки диагностируются при построении отчёта. */
+      /* Некорректные JSONL-события пропускаются. */
     }
   }
   return {

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 import { normalizeCategoryName } from '../helpers/category-name.js';
 import { serializeCategory } from '../helpers/category-serializer.js';

@@ -1,4 +1,3 @@
-# Logs
 logs
 *.log
 npm-debug.log*
@@ -7,10 +6,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Local documentation drafts and generated planning notes
 docs/_drafts/
 
-# Package manager
 package-lock.json
 
 node_modules
@@ -21,7 +18,6 @@ dist-ssr
 .env
 .env*
 
-# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -36,17 +32,14 @@ coverage
 
 git-info.json
 
-# server
 /apps/server/generated/**
 /apps/server/prisma/*.db
 /apps/server/prisma/*.db.*
 /apps/server/prisma/*.db-journal
 /packages/api-contracts/generated/**
 
-# client
 .tanstak
 
-# Claude Code workspace artifacts
 .claude/
 .codex/
 .playwright-cli/

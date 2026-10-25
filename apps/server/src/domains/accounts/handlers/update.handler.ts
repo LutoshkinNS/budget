@@ -3,7 +3,7 @@ import type { FromSchema } from 'json-schema-to-ts';
 
 import AccountId from '#s/AccountId.js';
 import AccountUpdate from '#s/AccountUpdate.js';
-import type { FastifyApp } from '#src/appInit.ts';
+import type { FastifyApp } from '#src/app-init.js';
 
 export type UpdateBody = FromSchema<typeof AccountUpdate>;
 export type UpdateParams = { accountId: FromSchema<typeof AccountId> };

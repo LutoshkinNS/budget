@@ -71,8 +71,6 @@ describe("selected account resolution", () => {
   });
 
   it("is undefined with an empty accounts list: no scoped request can start", async () => {
-    // Пользователь без счетов вошёл: счёт не выбран, запросы к данным
-    // не отправляются, пока счёт не появится (например, через приглашение)
     seedMe([]);
     const { result } = renderHook(() => useCurrentAccountId(), { wrapper });
     await waitFor(() => expect(result.current).toBeUndefined());
@@ -80,13 +78,10 @@ describe("selected account resolution", () => {
   });
 
   it("does not reuse the previous user's selection after logout and a new login", async () => {
-    // ТЗ §6.3: выбор принадлежит текущему пользователю — сохранённый id
-    // прежней сессии не публикуется до проверки списка нового пользователя
     seedMe();
     act(() => switchAccount(43));
     expect(window.localStorage.getItem("budget.selected-account")).toBe("43");
 
-    // Logout очищает пользовательский кэш; входит другой пользователь
     queryClient.clear();
     seedMe([
       { id: 50, name: "Новый пользователь", initialBalance: 0, isOwner: true },

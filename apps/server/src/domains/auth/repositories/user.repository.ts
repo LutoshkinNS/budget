@@ -1,8 +1,5 @@
 import type { PrismaClient } from '#generated/prisma/index.js';
 
-/**
- * Находит пользователя по ID с его аккаунтами
- */
 export async function findUserWithAccounts(
   prisma: PrismaClient,
   userId: bigint
@@ -18,9 +15,6 @@ export async function findUserWithAccounts(
   });
 }
 
-/**
- * Создаёт нового пользователя с персональным аккаунтом
- */
 export async function createUserWithAccount(
   prisma: PrismaClient,
   userId: bigint
@@ -43,10 +37,6 @@ export async function createUserWithAccount(
   });
 }
 
-/**
- * Upsert пользователя по Telegram payload — обновляет firstName/photoUrl
- * на каждом login.
- */
 export async function upsertUserFromTelegram(
   prisma: PrismaClient,
   payload: { id: bigint; first_name: string; photo_url?: string | undefined }
@@ -76,9 +66,6 @@ export async function upsertUserFromTelegram(
   });
 }
 
-/**
- * Находит или создаёт пользователя по Telegram ID
- */
 export async function findOrCreateUser(prisma: PrismaClient, userId: bigint) {
   let user = await findUserWithAccounts(prisma, userId);
 
@@ -89,9 +76,6 @@ export async function findOrCreateUser(prisma: PrismaClient, userId: bigint) {
   return user;
 }
 
-/**
- * Получает первый доступный accountId для пользователя
- */
 export function getFirstAccountId(
   user: Awaited<ReturnType<typeof findUserWithAccounts>>
 ) {
@@ -99,9 +83,6 @@ export function getFirstAccountId(
   return user.ownedAccounts[0]?.id || user.accounts[0]?.accountId || null;
 }
 
-/**
- * Получает информацию о пользователе и его аккаунтах
- */
 export async function getUserInfo(prisma: PrismaClient, userId: number) {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: BigInt(userId) },

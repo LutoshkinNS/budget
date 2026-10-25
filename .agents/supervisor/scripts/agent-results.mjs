@@ -461,7 +461,7 @@ export async function writeSummary(
       `Refusing to overwrite a nonregular or linked summary: ${relative}`,
     );
   }
-  // Дескриптор привязывает проверку содержимого к тому же файлу, который будет перезаписан.
+  // Один дескриптор исключает подмену файла между проверкой и записью.
   const handle = await open(
     target,
     existing ? constants.O_RDWR | (constants.O_NOFOLLOW ?? 0) : "wx",
@@ -469,7 +469,7 @@ export async function writeSummary(
   try {
     if (existing) {
       const opened = await handle.stat({ bigint: true });
-      // На Windows lstat может вернуть dev=0; inode сравнивается без потери точности.
+      // Windows может вернуть dev=0, поэтому inode проверяется отдельно.
       if (
         opened.ino !== existing.ino ||
         (existing.dev !== 0n && opened.dev !== existing.dev)

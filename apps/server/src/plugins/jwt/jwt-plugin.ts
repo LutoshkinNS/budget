@@ -1,7 +1,7 @@
 import fastifyJwt from '@fastify/jwt';
 import fp from 'fastify-plugin';
 
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 const accessTokenMessages = {
   badRequestErrorMessage: 'Неверный формат access токена',
@@ -25,7 +25,6 @@ const refreshTokenMessages = {
 };
 
 async function jwtPlugin(app: FastifyApp) {
-  // Access token JWT
   await app.register(fastifyJwt, {
     secret: app.envs.JWT_SECRET,
     namespace: 'accessJwt',
@@ -38,7 +37,6 @@ async function jwtPlugin(app: FastifyApp) {
     messages: accessTokenMessages
   });
 
-  // Refresh token JWT
   await app.register(fastifyJwt, {
     secret: app.envs.JWT_SECRET,
     namespace: 'refreshJwt',

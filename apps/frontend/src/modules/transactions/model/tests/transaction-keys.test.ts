@@ -14,7 +14,6 @@ describe("transactionKeys", () => {
       "transactions",
       "list",
     ]);
-    // Неизвестные params приводятся к фиксированному null — ключ стабилен
     expect(transactionKeys.list(42)).toEqual([
       "account",
       42,
@@ -110,8 +109,6 @@ describe("transactionKeys", () => {
   });
 
   it("does not mix families and accounts", () => {
-    // Ключи одного семейства другого счёта не совпадают и не являются
-    // префиксом: изоляция поддеревьев
     expect(transactionKeys.list(42)).not.toEqual(transactionKeys.list(43));
     expect(transactionKeys.detail(42, 5)).not.toEqual(
       transactionKeys.detail(43, 5),

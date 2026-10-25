@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import { afterAll, beforeAll, describe, it } from 'vitest';
 
-import appInit from '#src/appInit.js';
+import appInit from '#src/app-init.js';
 
 import authRoutes from '../routes.js';
 
@@ -32,7 +32,7 @@ const app = await appInit();
 
 function readCookie(response: { headers: Record<string, unknown> }, name: string) {
   const setCookie: unknown = response.headers['set-cookie'];
-  // lightMyRequest отдаёт одиночную set-cookie строкой, а не массивом
+  // Тип ответа зависит от числа cookie, поэтому нормализуем его перед поиском.
   const entries = Array.isArray(setCookie)
     ? setCookie
     : setCookie === undefined
@@ -49,7 +49,6 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
   return JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
 }
 
-// Токен прежнего формата с accountId в payload — подпись HS256 вручную
 function signLegacyJwt(payload: Record<string, unknown>) {
   const encode = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -96,7 +95,6 @@ describe('auth account context', () => {
 
     const accessTokenCookie = readCookie(login, 'accessToken');
     const payload = decodeJwtPayload(accessTokenCookie.split('=')[1]);
-    // В payload не должно остаться счёта: он приходит в каждом запросе явно
     assert.equal(payload.userId, 1);
     assert.equal('accountId' in payload, false);
 
@@ -144,7 +142,6 @@ describe('auth account context', () => {
       iat
     });
 
-    // Старое поле игнорируется: токен проверяется как токен пользователя
     const me = await app.inject({
       url: '/api/v1/auth/me',
       headers: { cookie: 'accessToken=' + legacyAccess }
@@ -152,7 +149,6 @@ describe('auth account context', () => {
     assert.equal(me.statusCode, 200, me.body);
     assert.equal(me.json<{ userId: number }>().userId, 1);
 
-    // Refresh по старому refresh-токену выпускает новый access без accountId
     const refreshed = await app.inject({
       method: 'POST',
       url: '/api/v1/auth/refresh',
@@ -167,8 +163,7 @@ describe('auth account context', () => {
   });
 
   it('signs in a user without accounts; me returns an empty list', async () => {
-    // Вход не требует наличия счёта: без счетов пользователь может
-    // принять приглашение и восстановить доступ
+    // Отсутствие счёта не должно блокировать вход по приглашению.
     await app.prisma.account.deleteMany({ where: { ownerId: 1n } });
 
     const login = await app.inject({

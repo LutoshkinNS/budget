@@ -2,7 +2,7 @@ import type { preValidationAsyncHookHandler } from 'fastify';
 
 import { isCategoryIconKey } from '../helpers/category-icon.js';
 
-// Проверяем исходное значение: AJV может превратить пустую строку в null.
+// Проверка до AJV нужна, чтобы отклонить исходную пустую строку.
 export const validateIconKey: preValidationAsyncHookHandler = async (
   req,
   reply

@@ -8,8 +8,6 @@ afterEach(() => {
 
 describe("fetcher 401 retry", () => {
   it("retries the original account-scoped URL after a delayed refresh", async () => {
-    // ТЗ §6.1/§6.5: повтор после 401/refresh сохраняет исходный URL —
-    // счёт запроса не может измениться переключением или refresh
     const calls: string[] = [];
     let resolveRefresh: ((response: Response) => void) | undefined;
     vi.stubGlobal(
@@ -24,7 +22,6 @@ describe("fetcher 401 retry", () => {
           });
         }
 
-        // Первый GET конкретного URL отклоняется 401, повтор — успешен
         const attempts = calls.filter((call) => call === url).length;
         if (attempts === 1) {
           return Response.json({ statusCode: 401 }, { status: 401 });
@@ -35,7 +32,6 @@ describe("fetcher 401 retry", () => {
 
     const requestUrl = "/api/v1/accounts/42/transactions?from=2026-10-01";
     const pending = fetcher<Array<{ id: number }>>(requestUrl);
-    // refresh уходит и висит pending — запрос ждёт его завершения
     await vi.waitFor(() => expect(calls).toContain("/api/v1/auth/refresh"));
 
     resolveRefresh?.(Response.json({ success: true }));

@@ -9,17 +9,13 @@ export function useTransaction(transactionId: number) {
     Number.isInteger(transactionId) &&
     Number.isFinite(transactionId) &&
     transactionId > 0;
-  // Placeholder 1 при неизвестном счёте/невалидном id не попадает в сеть:
-  // запрос отключён, а ключ строится только для известного счёта
+  // Без выбранного счёта placeholder не отправляется: запрос отключён.
   const query = useTransactionsGet(
     accountId ?? 1,
     isValidTransactionId ? transactionId : 1,
     {
       query: {
-        // Ключ detail живёт в поддереве счёта — иначе инвалидация после
-        // useUpdateTransaction перестанет затрагивать живой запрос экрана
-        // редактирования. Условный spread вместо queryKey: undefined —
-        // exactOptionalPropertyTypes
+        // Запрос редактирования должен использовать общий ключ инвалидации.
         ...(accountId !== undefined &&
           isValidTransactionId && {
             queryKey: transactionKeys.detail(accountId, transactionId),

@@ -1,7 +1,7 @@
 import type { FastifyError, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
-import { FastifyApp } from '#src/appInit.js';
+import { FastifyApp } from '#src/app-init.js';
 
 import {
   CUSTOM_ERROR_CODES,
@@ -57,7 +57,7 @@ function getSafeRequestContext(request: FastifyRequest) {
 async function errorHandlerPlugin(app: FastifyApp) {
   app.setErrorHandler((error: FastifyError, request, reply) => {
     const errorResponse: ErrorResponse = {
-      code: error.code as CustomErrorCode, // BAD
+      code: error.code as CustomErrorCode,
       message: error.message,
       statusCode: error.statusCode || 500
     };
@@ -66,14 +66,12 @@ async function errorHandlerPlugin(app: FastifyApp) {
       errorResponse.message = error.name;
     }
 
-    // Fastify validation errors
     if (error.validation) {
       errorResponse.code = CUSTOM_ERROR_CODES.VALIDATION_ERROR;
       errorResponse.statusCode = 400;
       errorResponse.message = error.validation.join(', ');
     }
 
-    // JWT errors
     if (isJwtError(error.code)) {
       errorResponse.statusCode = 401;
       switch (error.code) {

@@ -3,7 +3,7 @@ import { cpSync, mkdirSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import appInit, { type FastifyApp } from "../../../server/src/appInit.js";
+import appInit, { type FastifyApp } from "../../../server/src/app-init.js";
 import accountsRoutes from "../../../server/src/domains/accounts/routes.js";
 import authRoutes from "../../../server/src/domains/auth/routes.js";
 import categoriesRoutes from "../../../server/src/domains/categories/routes.js";

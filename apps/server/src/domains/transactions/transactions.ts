@@ -6,7 +6,7 @@ import TransactionCreate from '#s/TransactionCreate.js';
 import TransactionSummary from '#s/TransactionSummary.js';
 import TransactionUpdate from '#s/TransactionUpdate.js';
 import ValidationError from '#s/ValidationError.js';
-import { FastifyApp } from '#src/appInit.js';
+import { FastifyApp } from '#src/app-init.js';
 
 import { calculateTransactionSummary } from './balance.js';
 import { buildCategorySummaryResponse } from './category-summary.js';
@@ -153,7 +153,6 @@ async function validateCategoryFilter(
 }
 
 export default async function transactionsModule(app: FastifyApp) {
-  // Токен удостоверяет пользователя; доступ к счёту из path проверяется отдельно
   app.addHook('preHandler', app.authenticate);
   app.addHook('preHandler', app.requireAccountAccess);
 

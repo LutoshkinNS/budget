@@ -52,7 +52,7 @@ Fastify API server.
 Key paths:
 
 - `src/main.ts` registers domain routes under `/api/v1/*`.
-- `src/appInit.ts` wires env, CORS, cookies, Prisma, JWT, and the error handler.
+- `src/app-init.ts` wires env, CORS, cookies, Prisma, JWT, and the error handler.
 - `src/domains/` contains domain route handlers and domain helpers.
 - `src/plugins/` contains Fastify plugins for env, Prisma, JWT, and errors.
 - `prisma/schema.prisma` defines the SQLite data model.

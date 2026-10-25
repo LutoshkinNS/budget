@@ -37,7 +37,6 @@ for (const colorScheme of ["light", "dark"] as const) {
     async ({ page, categoryBackend }, testInfo) => {
       test.setTimeout(60000);
       await page.emulateMedia({ colorScheme });
-      // Проксируем HTTP в настоящий изолированный backend, не подменяя данные API.
       await page.route("**/api/v1/**", async (route) => {
         const original = new URL(route.request().url());
         const response = await route.fetch({

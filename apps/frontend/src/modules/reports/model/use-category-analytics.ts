@@ -115,7 +115,6 @@ export function useReportsCategoryTransactions({
   type,
 }: ReportsCategoryTransactionsParams) {
   const params = toCategoryTransactionsParams({ categoryId, from, to, type });
-  // Без выбранной категории запрос операций не отправляется
   const { data, isError, error, isLoading } = useTransactionsListQuery(
     params,
     categoryId !== null,

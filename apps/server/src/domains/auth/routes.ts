@@ -3,7 +3,7 @@ import LoginRequest from '#s/LoginRequest.js';
 import SuccessResponse from '#s/SuccessResponse.js';
 import UnauthorizedError from '#s/UnauthorizedError.js';
 import UserInfo from '#s/UserInfo.js';
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 import { clientEventHandler } from './handlers/clientEvent.handler.js';
 import { devLoginHandler } from './handlers/devLogin.handler.js';

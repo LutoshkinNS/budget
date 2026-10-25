@@ -28,13 +28,9 @@ vi.mock("@/modules/categories", () => ({
   invalidateCategories: mocks.invalidateCategories,
 }));
 
-// Контекст мутации теперь содержит снапшот счёта конкретного вызова
 type MutationContext = { accountId: number | undefined } | undefined;
 
-// Мутации управляются тестом: резолв отложен, чтобы менять authMe между
-// вызовом мутации (снятие снапшота в onMutate) и onSuccess (применение
-// инвалидаций). Порядок фаз повторяет TanStack: onMutate → mutationFn →
-// onSuccess с контекстом третьим аргументом
+// Отложенный ответ проверяет сохранение accountId из variables после переключения.
 const pendingMutations: Array<() => void> = [];
 
 vi.mock(
@@ -129,7 +125,6 @@ function seedMe(currentAccountId: number) {
   });
 }
 
-// Сиды поддеревьев обоих счетов + несвязанный ключ
 function seedTrees() {
   queryClient.setQueryData(transactionKeys.list(42, LIST_PARAMS), []);
   queryClient.setQueryData(transactionKeys.summary(42, SUMMARY_PARAMS), []);
@@ -149,15 +144,11 @@ function seedTrees() {
   queryClient.setQueryData(["unrelated"], []);
 }
 
-// Базовый состав собственных инвалидаций transactions: list, summary,
-// category-summary (детали — ниже; у create нет detail-семейства по ТЗ §4);
-// категорийные ключи инвалидируются командой categories — spy mocks
 const baseKeys42 = [
   transactionKeys.list(42, LIST_PARAMS),
   transactionKeys.summary(42, SUMMARY_PARAMS),
   transactionKeys.categorySummary(42, CATEGORY_SUMMARY_PARAMS),
 ];
-// update и delete дополнительно инвалидируют detail изменённой операции
 const detailKey42 = transactionKeys.detail(42, 5);
 const keys43 = [
   transactionKeys.list(43, LIST_PARAMS),
@@ -176,8 +167,6 @@ const wrapper = ({ children }: PropsWithChildren) => (
 
 type Operation = "create" | "update" | "delete";
 
-// Резолвер появляется на микротик позже старта mutateAsync (mock ждёт
-// завершения await onMutate): ждём его появления, иначе shift() промахнётся
 async function resolveMutation(done: Promise<unknown>) {
   await act(async () => {
     await waitFor(() => expect(pendingMutations.length).toBeGreaterThan(0));
@@ -255,14 +244,12 @@ describe("transaction mutations invalidate only the executing account subtree", 
 
       for (const key of baseKeys42) expect(invalidated(key)).toBe(true);
       if (operation === "create") {
-        // У create нет detail-семейства в составе инвалидаций
         expect(invalidated(detailKey42)).toBe(false);
       } else {
         expect(invalidated(detailKey42)).toBe(true);
       }
       for (const key of keys43) expect(invalidated(key)).toBe(false);
       expect(invalidated(["unrelated"])).toBe(false);
-      // Категорийный кэш инвалидируется командой со скопом выполнения
       expect(mocks.invalidateCategories).toHaveBeenCalledWith(42);
       expect(mocks.invalidateCategories).not.toHaveBeenCalledWith(43);
     },
@@ -272,7 +259,6 @@ describe("transaction mutations invalidate only the executing account subtree", 
     seedMe(42);
     seedTrees();
 
-    // Мутация запущена на счёте 42 — снапшот уже снят до отправки
     const { result } = renderHook(useCreateTransaction, { wrapper });
     let done: Promise<unknown> = Promise.resolve();
     act(() => {
@@ -284,12 +270,10 @@ describe("transaction mutations invalidate only the executing account subtree", 
       });
     });
 
-    // Счёт сменился, пока мутация в полёте
     act(() => seedMe(43));
 
     await resolveMutation(done);
 
-    // Инвалидации применены к поддереву счёта выполнения (42), а не нового
     for (const key of baseKeys42) expect(invalidated(key)).toBe(true);
     for (const key of keys43) expect(invalidated(key)).toBe(false);
     expect(mocks.invalidateCategories).toHaveBeenCalledWith(42);

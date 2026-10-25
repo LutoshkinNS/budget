@@ -5,7 +5,7 @@ import ConflictError from '#s/ConflictError.js';
 import ForbiddenError from '#s/ForbiddenError.js';
 import NotFoundError from '#s/NotFoundError.js';
 import ValidationError from '#s/ValidationError.js';
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 import { createCategoryHandler } from './handlers/create.handler.js';
 import { deleteCategoryHandler } from './handlers/delete.handler.js';
@@ -27,7 +27,6 @@ import type {
 } from './types/category.js';
 
 export default async function categoriesRoutes(app: FastifyApp) {
-  // Токен удостоверяет пользователя; доступ к счёту из path проверяется отдельно
   app.addHook('preHandler', app.authenticate);
   app.addHook('preHandler', app.requireAccountAccess);
 

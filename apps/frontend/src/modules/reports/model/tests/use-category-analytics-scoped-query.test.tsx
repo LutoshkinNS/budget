@@ -141,11 +141,8 @@ describe("useReportsCategorySummary me-guard and scoped key", () => {
     await waitFor(() =>
       expect(result.current.summary?.transactionCount).toBe(4),
     );
-    // Ровно один запрос — дублирования generated-ключа нет
     expect(categorySummaryCalls()).toHaveLength(1);
 
-    // Данные лежат в инвалидируемом семействе счёта: после команды активный
-    // query перечитывается
     await invalidateTransactionsCategorySummary(42, SUMMARY_PARAMS);
     await waitFor(() =>
       expect(categorySummaryCalls()).toHaveLength(2),

@@ -16,7 +16,6 @@ afterEach(() => {
 });
 
 it("invalidates own cache after renaming and reports the scope to the composer", async () => {
-  // Снапшот счёта снимается из кэша authMe до отправки мутации
   queryClient.setQueryData(getAuthMeQueryKey(), {
     accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
     userId: 1,
@@ -48,11 +47,9 @@ it("invalidates own cache after renaming and reports the scope to the composer",
       data: { name: "Новое имя" },
     });
   });
-  // Собственный кэш модуля инвалидирован; чужой — нет
   for (const key of keys)
     expect(queryClient.getQueryState(key)?.isInvalidated).toBe(true);
   expect(queryClient.getQueryState(["unrelated"])?.isInvalidated).toBe(false);
-  // Callback получает скоп вызова, а не текущий счёт на момент ответа
   expect(onCategoryUpdated).toHaveBeenCalledWith({
     accountId: 42,
     categoryId: 3,
@@ -64,7 +61,6 @@ it("awaits the composer callback before resolving the mutation scenario", async 
     accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
     userId: 1,
   });
-  // Deferred: резолв колбэка управляется тестом
   let resolveCallback: () => void = () => {};
   const callbackDone = new Promise<void>(
     (resolve) => (resolveCallback = resolve),
@@ -97,7 +93,6 @@ it("awaits the composer callback before resolving the mutation scenario", async 
       scenarioDone = true;
       settleMutation();
     });
-    // Сценарий не завершён, пока не резолвнут callback мутации
     await waitFor(() => expect(onCategoryUpdated).toHaveBeenCalled());
     expect(scenarioDone).toBe(false);
     resolveCallback();

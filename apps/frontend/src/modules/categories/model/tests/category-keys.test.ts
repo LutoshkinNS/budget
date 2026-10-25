@@ -14,7 +14,6 @@ describe("categoryKeys", () => {
       "categories",
       "list",
     ]);
-    // Неизвестные params приводятся к фиксированному null — ключ стабилен
     expect(categoryKeys.list(42)).toEqual([
       "account",
       42,

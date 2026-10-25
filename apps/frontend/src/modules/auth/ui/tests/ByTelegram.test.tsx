@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ByTelegram } from "./ByTelegram.tsx";
+import { ByTelegram } from "../ByTelegram.tsx";
 
 const mocks = vi.hoisted(() => {
   const addNotification = vi.fn();
@@ -41,11 +41,11 @@ vi.mock("@/common/lib/notifications", () => ({
       : mocks.notificationContext,
 }));
 
-vi.mock("../model/reportAuthEvent.ts", () => ({
+vi.mock("../../model/report-auth-event.ts", () => ({
   reportAuthEvent: (...args: unknown[]) => mocks.reportAuthEvent(...args),
 }));
 
-vi.mock("../model/useLogin.ts", () => ({
+vi.mock("../../model/useLogin.ts", () => ({
   useLogin: () =>
     mocks.unstableHookReferences
       ? {

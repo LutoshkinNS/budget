@@ -1,11 +1,6 @@
 import type { CategoriesListParams } from "@/common/api/generate/model";
 import { accountKeys } from "@/common/api/query-keys";
 
-/**
- * Иерархия ключей категорий внутри поддерева счёта (tkdodo):
- * all → lists/list, details/detail. Неизвестные params приводятся к null,
- * чтобы ключ оставался стабильным.
- */
 export const categoryKeys = {
   all: (accountId: number) =>
     [...accountKeys.root(accountId), "categories"] as const,

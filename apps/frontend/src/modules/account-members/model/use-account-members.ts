@@ -9,11 +9,10 @@ import { memberKeys } from "./member-keys.ts";
 
 export function useAccountMembers() {
   const accountId = useCurrentAccountId();
-  // Placeholder 1 при неизвестном счёте не попадает в сеть: запрос отключён
+  // Placeholder безопасен при отключённом запросе.
   const { data, isError, error } = useAccountsListMembers(accountId ?? 1, {
     query: {
-      // Ключ строим только для известного счёта; с exactOptionalPropertyTypes
-      // нельзя передать queryKey: undefined, поэтому условный spread
+      // exactOptionalPropertyTypes запрещает queryKey: undefined.
       ...(accountId !== undefined && { queryKey: memberKeys.all(accountId) }),
       enabled: accountId != null,
     },

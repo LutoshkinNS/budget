@@ -58,7 +58,6 @@ describe("CategoryEditor", () => {
       categoryId: category.id,
       data: { name: "Новое имя", iconKey: category.iconKey },
     });
-    // Смысловой колбэк композиции передан в хук переименования
     expect(mocks.receivedOptions?.onCategoryUpdated).toBe(onCategoryUpdated);
   });
 

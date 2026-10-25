@@ -44,8 +44,6 @@ describe("invalidateTransactionsCategorySummary", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    // Скопированная инвалидация без params действует префиксом семейства:
-    // накрывает все варианты params внутри счёта
     await invalidateTransactionsCategorySummary(42);
 
     expect(invalidateQueries).toHaveBeenCalledWith({

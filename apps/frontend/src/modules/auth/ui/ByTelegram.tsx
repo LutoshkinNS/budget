@@ -8,7 +8,7 @@ import { AuthLoginBody } from "@/common/api/generate/authentication/authenticati
 import { useNotifications } from "@/common/lib/notifications";
 
 import { INVITE_CODE_KEY } from "../model/constants.ts";
-import { reportAuthEvent } from "../model/reportAuthEvent.ts";
+import { reportAuthEvent } from "../model/report-auth-event.ts";
 import { useLogin } from "../model/useLogin.ts";
 
 import s from "./ByTelegram.module.css";

@@ -6,7 +6,6 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     clearMocks: true,
     restoreMocks: true,
-    // Интеграционные тесты применяют миграции к временной SQLite.
     hookTimeout: 30_000
   }
 });

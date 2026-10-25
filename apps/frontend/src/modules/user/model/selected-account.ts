@@ -13,13 +13,6 @@ type AccountListener = () => void;
 
 const listeners = new Set<AccountListener>();
 
-/**
- * Выбранный счёт — локальное состояние устройства (localStorage), а не часть
- * серверной сессии: смысл каждого запроса задаёт его собственный accountId,
- * поэтому переключение не требует HTTP и не затрагивает другие вкладки.
- * localStorage — единственное хранилище выбора; недоступное хранилище
- * оставляет приложение на первом счёте списка me.accounts.
- */
 function readSelectedAccountId(): number | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -49,10 +42,6 @@ function readMeAccounts(): UserInfoDTO["accounts"] | undefined {
   return queryClient.getQueryData<UserInfoDTO>(getAuthMeQueryKey())?.accounts;
 }
 
-/**
- * Сохранённый счёт валидируется по списку me.accounts: протухший выбор
- * (например, после выхода из приглашённого счёта) откатывается к первому.
- */
 function resolveAccountId(
   accounts: UserInfoDTO["accounts"],
   stored: number | null,
@@ -76,11 +65,7 @@ export function useCurrentAccountId(): number | undefined {
   return resolveAccountId(me?.accounts ?? [], stored);
 }
 
-/**
- * Синхронное чтение текущего счёта вне React: снапшот снимается в момент
- * вызова мутации и задаёт её неизменяемый скоп — позднее переключение счёта
- * не меняет ни выполнение запроса, ни область инвалидаций.
- */
+/** Снимок accountId при вызове сохраняет область инвалидации после переключения. */
 export function getCurrentAccountIdSnapshot(): number | undefined {
   return resolveAccountId(readMeAccounts() ?? [], readSelectedAccountId());
 }
@@ -93,11 +78,7 @@ export function requireCurrentAccountId(): number {
   return accountId;
 }
 
-/**
- * Локальное переключение счёта: без HTTP и без отмены летящих запросов —
- * их смысл зафиксирован собственным accountId. Прежнее поддерево кэша
- * помечается устаревшим без фонового рефетча: сверка случится при возврате.
- */
+/** Покинутое поддерево сверяется при возврате, без фонового рефетча. */
 export function switchAccount(accountId: number) {
   const previousAccountId = getCurrentAccountIdSnapshot();
   if (previousAccountId === accountId) return;

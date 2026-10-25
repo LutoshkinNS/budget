@@ -63,7 +63,6 @@ function seedMe(currentAccountId: number) {
   });
 }
 
-// fetch-мок, различающий эндпоинты по URL; ответ authMe управляется тестом
 function stubFetch(handlers: { authMe: () => Response | Promise<Response> }) {
   const fetchMock = vi.fn(
     async (input: RequestInfo | URL): Promise<Response> => {
@@ -112,7 +111,6 @@ afterEach(() => {
 
 describe("useTransactions / useTransactionSummary me-guard", () => {
   it("does not run list or summary queries while me is loading", async () => {
-    // authMe не отвечает — счёт неизвестен, account-scoped запросы отключены
     const { calls } = stubFetch({
       authMe: () => new Promise<Response>(() => {}),
     });
@@ -152,7 +150,6 @@ describe("useTransactions / useTransactionSummary me-guard", () => {
       expect(result.current.summary.data?.totalBalance).toBe(90),
     );
 
-    // Данные легли под скопированными ключами поддерева счёта 42
     expect(queryClient.getQueryData(transactionKeys.list(42, RANGE))).toEqual(
       transactionsPayload,
     );
@@ -161,12 +158,10 @@ describe("useTransactions / useTransactionSummary me-guard", () => {
         transactionKeys.summary(42, { from: RANGE.from, to: RANGE.to }),
       ),
     ).toEqual(summaryPayload);
-    // Сгенерированный ключ без счёта не используется
     expect(
       queryClient.getQueryState(["transactionsList", RANGE]),
     ).toBeUndefined();
 
-    // Ре-рендер не порождает лишних запросов
     rerender();
     expect(calls(LIST_URL)).toHaveLength(1);
     expect(calls(SUMMARY_URL)).toHaveLength(1);
@@ -184,7 +179,6 @@ describe("useTransactions / useTransactionSummary me-guard", () => {
     first.unmount();
 
     const second = renderHook(() => useTransactions(RANGE), { wrapper });
-    // Кэш отдаётся сразу, без нового GET — семантика staleTime сохранена
     await waitFor(() =>
       expect(second.result.current.transactions).toHaveLength(1),
     );
@@ -212,8 +206,6 @@ describe("useTransactionsCategorySummaryQuery me-guard and scoped key", () => {
     );
 
     await waitFor(() => expect(result.current.data).toBeDefined());
-    // Данные легли под скопированным ключом поддерева счёта 42; соседнее
-    // поддерево и generated-ключ без счёта не используются
     expect(
       queryClient.getQueryData(
         transactionKeys.categorySummary(42, CATEGORY_SUMMARY_PARAMS),
@@ -257,8 +249,6 @@ describe("useTransaction (detail) me-guard and scoped key", () => {
     const zeroId = renderHook(() => useTransaction(0), { wrapper });
     const fractionalId = renderHook(() => useTransaction(1.5), { wrapper });
 
-    // Счёт известен (сид в кэше), но id невалиден — AND-объединение
-    // enabled-условий не даёт отправить запрос
     await waitFor(() => expect(calls("/api/v1/auth/me")).toHaveLength(0));
     expect(zeroId.result.current.isValidTransactionId).toBe(false);
     expect(zeroId.result.current.fetchStatus).toBe("idle");

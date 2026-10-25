@@ -1,7 +1,6 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Wiring межмодульной инвалидации проверяется в точке композиции — странице
 const mocks = vi.hoisted(() => ({
   capturedCallback: null as
     | ((scope: { accountId: number | undefined; categoryId: number }) => void)

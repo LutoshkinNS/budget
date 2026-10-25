@@ -59,7 +59,6 @@ model TransactionCategory {
   id             Int           @id @default(autoincrement())
   accountId      Int
   account        Account       @relation(fields: [accountId], references: [id])
-  // Stored as text because this project uses SQLite; valid values start with "expense".
   type           String        @default("expense")
   name           String
   iconKey        String?
@@ -68,7 +67,7 @@ model TransactionCategory {
   transactions   Transaction[]
   subcategories  Subcategory[]
 
-  // Active uniqueness is enforced by a partial SQL index in migrations.
+  // Частичный SQL-индекс в миграциях ограничивает уникальность активных категорий.
   @@index([accountId, type, nameNormalized])
 }
 
@@ -88,7 +87,7 @@ model Transaction {
   category    TransactionCategory @relation(fields: [categoryId], references: [id])
   userId      BigInt
   user        User                @relation(fields: [userId], references: [id])
-  // Stored as text because this project uses SQLite; existing rows migrate as "expense".
+  // Старые операции получают тип «expense», чтобы сохранить исторический смысл.
   type        String              @default("expense")
   amount      Float
   description String?

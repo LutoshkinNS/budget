@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 const ERRORS = {
   NOT_FOUND: {
@@ -35,7 +35,6 @@ export async function redeemInvitationHandler(
   const { userId } = req.user;
   const { code } = req.body as { code: string };
 
-  // Ищем активный инвайт
   const invitation = await this.prisma.accountInvitation.findFirst({
     where: {
       code,
@@ -48,7 +47,6 @@ export async function redeemInvitationHandler(
     return reply.code(404).send(ERRORS.NOT_FOUND);
   }
 
-  // Проверяем что пользователь ещё не состоит в аккаунте
   const userIdBig = BigInt(userId);
   const alreadyMember = await this.prisma.account.findFirst({
     where: {
@@ -61,7 +59,6 @@ export async function redeemInvitationHandler(
     return reply.send(formatInvitation(invitation));
   }
 
-  // Добавляем пользователя в аккаунт и помечаем инвайт использованным
   const [, updatedInvitation] = await this.prisma.$transaction([
     this.prisma.accountUser.create({
       data: { userId: userIdBig, accountId: invitation.accountId }

@@ -18,8 +18,6 @@ export function AccountsSelect() {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const accountId = Number(e.target.value);
     if (accountId && accountId !== currentAccountId) {
-      // Локальное переключение: смысл любого запроса задан его собственным
-      // accountId, поэтому HTTP и перевыпуск токенов не нужны
       switchAccount(accountId);
     }
   };

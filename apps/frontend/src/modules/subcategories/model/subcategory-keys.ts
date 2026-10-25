@@ -1,9 +1,5 @@
 import { accountKeys } from "@/common/api/query-keys";
 
-/**
- * Иерархия ключей подкатегорий внутри поддерева счёта:
- * ['account', accountId, 'subcategories', 'list', categoryId].
- */
 export const subcategoryKeys = {
   all: (accountId: number) =>
     [...accountKeys.root(accountId), "subcategories"] as const,

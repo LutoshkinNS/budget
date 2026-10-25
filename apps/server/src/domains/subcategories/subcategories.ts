@@ -2,7 +2,7 @@ import ForbiddenError from '#s/ForbiddenError.js';
 import NotFoundError from '#s/NotFoundError.js';
 import Subcategory from '#s/Subcategory.js';
 import SubcategoryCreate from '#s/SubcategoryCreate.js';
-import { FastifyApp } from '#src/appInit.js';
+import { FastifyApp } from '#src/app-init.js';
 
 const categoryParamsSchema = {
   type: 'object',
@@ -32,7 +32,6 @@ const notFound = {
 };
 
 export default async function subcategoriesModule(app: FastifyApp) {
-  // Токен удостоверяет пользователя; доступ к счёту из path проверяется отдельно
   app.addHook('preHandler', app.authenticate);
   app.addHook('preHandler', app.requireAccountAccess);
 
@@ -115,7 +114,6 @@ export default async function subcategoriesModule(app: FastifyApp) {
       }
     },
     async function (req, reply) {
-      // Категория должна быть активной и принадлежать счёту из path
       const category = await this.prisma.transactionCategory.findFirst({
         where: {
           id: req.params.categoryId,

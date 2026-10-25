@@ -16,7 +16,6 @@ describe("accountKeys", () => {
     const second = accountKeys.root(43);
 
     expect(first).not.toEqual(second);
-    // Корень одного счёта не является префиксом поддерева другого
     expect(second.slice(0, first.length)).not.toEqual(first);
   });
 });

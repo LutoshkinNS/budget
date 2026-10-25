@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 import { serializeCategory } from '../helpers/category-serializer.js';
 import { findActiveCategory } from '../repositories/categories.repository.js';
@@ -13,7 +13,7 @@ export async function getCategoryHandler(
   req: FastifyRequest<{ Params: CategoryParams }>,
   reply: FastifyReply
 ) {
-  // Сущность вне счёта из path неотличима от отсутствующей — 404, не 500
+  // 404 скрывает существование сущности в другом счёте.
   const category = await findActiveCategory(this.prisma, {
     id: req.params.id,
     accountId: req.params.accountId

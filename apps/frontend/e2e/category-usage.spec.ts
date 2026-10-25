@@ -286,8 +286,6 @@ for (const colorScheme of ["light", "dark"] as const) {
     const { alpha, beta, gamma, delta, createCategory, createOperation } =
       await setup(page, backend.url, backend.primaryAccountId, "expense");
 
-    // Данные второго счёта создаются напрямую с его accountId в path:
-    // переключать серверный контекст больше не нужно
     const secondaryRare = await createCategory(
       "Другой редкий расход",
       backend.secondaryAccountId,

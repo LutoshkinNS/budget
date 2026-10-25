@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import type { FastifyApp } from '#src/appInit.js';
+import type { FastifyApp } from '#src/app-init.js';
 
 const INVITATION_TTL_HOURS = 72;
 
@@ -22,7 +22,6 @@ export async function createInvitationHandler(
   const { accountId: accountIdParam } = req.params as { accountId: string };
   const accountId = Number(accountIdParam);
 
-  // Только владелец может создавать инвайты
   const account = await this.prisma.account.findFirst({
     where: { id: accountId, ownerId: BigInt(userId) }
   });

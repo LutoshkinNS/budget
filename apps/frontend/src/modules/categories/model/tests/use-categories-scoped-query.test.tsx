@@ -91,7 +91,6 @@ describe("useCategories me-guard and scoped key", () => {
     expect(
       queryClient.getQueryData(categoryKeys.list(42, { type: "expense" })),
     ).toEqual(categoryPayload);
-    // Ключ соседнего счёта и generated-ключ без счёта не используются
     expect(
       queryClient.getQueryState(categoryKeys.list(43, { type: "expense" })),
     ).toBeUndefined();
@@ -100,7 +99,6 @@ describe("useCategories me-guard and scoped key", () => {
     ).toBeUndefined();
 
     rerender();
-    // authMe взят из сида кэша: ровно один GET категорий, без повторов
     expect(calls()).toHaveLength(1);
   });
 });

@@ -5,8 +5,8 @@ import fastify from 'fastify';
 
 import accountAccessPlugin from './plugins/account-access/account-access.plugin.js';
 import envPlugin from './plugins/env/envPlugin.js';
-import errorHandlerPlugin from './plugins/errorHandler/errorHandlerPlugin.js';
-import jwtPlugin from './plugins/jwt/jwtPlugin.js';
+import errorHandlerPlugin from './plugins/errorHandler/error-handler-plugin.js';
+import jwtPlugin from './plugins/jwt/jwt-plugin.js';
 import prismaPlugin from './plugins/prisma/prismaPlugin.js';
 
 export default async function appInit() {
@@ -30,7 +30,6 @@ export default async function appInit() {
   await app.register(jwtPlugin);
   await app.register(accountAccessPlugin);
 
-  // error handler последний
   await app.register(errorHandlerPlugin);
 
   return app;

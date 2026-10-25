@@ -10,14 +10,13 @@ import { subcategoryKeys } from "./subcategory-keys.ts";
 
 export function useSubcategories(categoryId: number) {
   const accountId = useCurrentAccountId();
-  // Placeholder 1 при неизвестном счёте не попадает в сеть: запрос отключён
+      // Placeholder безопасен при отключённом запросе.
   const { data, isError, error } = useCategorySubcategoriesList(
     accountId ?? 1,
     categoryId,
     {
       query: {
-        // Ключ строим только для известного счёта; с exactOptionalPropertyTypes
-        // нельзя передать queryKey: undefined, поэтому условный spread
+        // exactOptionalPropertyTypes запрещает queryKey: undefined.
         ...(accountId !== undefined && {
           queryKey: subcategoryKeys.list(accountId, categoryId),
         }),

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 import { afterAll, beforeAll, describe, it } from 'vitest';
 
-import appInit from '#src/appInit.js';
+import appInit from '#src/app-init.js';
 
 import categoriesRoutes from '../routes.js';
 

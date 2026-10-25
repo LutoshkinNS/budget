@@ -19,8 +19,7 @@ export function useCreateTransaction() {
   const mutation = useTransactionsCreate({
     mutation: {
       onError: () => {},
-      // Счёт мутации фиксируется её variables — позднее переключение не меняет
-      // ни выполнение запроса, ни область инвалидаций
+      // Поздний ответ инвалидирует кэш счёта из variables вызова.
       onSuccess: async (_data, variables) => {
         const accountId = variables.accountId;
         await Promise.all([

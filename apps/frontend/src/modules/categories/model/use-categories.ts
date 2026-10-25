@@ -12,9 +12,7 @@ export function useCategories(params?: CategoriesListParams) {
   const accountId = useCurrentAccountId();
   const { data, isError, error } = useCategoriesList(accountId ?? 1, params, {
     query: {
-      // До загрузки me запрос отключён, ключ остаётся на generated-варианте;
-      // с exactOptionalPropertyTypes нельзя передать queryKey: undefined,
-      // поэтому условный spread
+      // exactOptionalPropertyTypes запрещает queryKey: undefined.
       ...(accountId !== undefined && {
         queryKey: categoryKeys.list(accountId, params),
       }),

@@ -5,12 +5,6 @@ import type {
 } from "@/common/api/generate/model";
 import { accountKeys } from "@/common/api/query-keys";
 
-/**
- * Иерархия ключей операций внутри поддерева счёта (tkdodo):
- * all → lists/list, details/detail, summaries/summary, categorySummaries/
- * category-summary. Неизвестные params приводятся к null, чтобы ключ
- * оставался стабильным.
- */
 export const transactionKeys = {
   all: (accountId: number) =>
     [...accountKeys.root(accountId), "transactions"] as const,

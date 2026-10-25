@@ -17,7 +17,6 @@ const mocks = vi.hoisted(() => ({
   invalidateCategories: vi.fn(),
 }));
 
-// Контекст мутации содержит снапшот счёта конкретного вызова (onMutate)
 type MutationContext = { accountId: number | undefined } | undefined;
 
 vi.mock("@/modules/categories", () => ({
@@ -31,7 +30,6 @@ vi.mock(
       await importOriginal<
         typeof import("@/common/api/generate/transactions/transactions.gen.ts")
       >();
-    // Фазы повторяют TanStack: onMutate → mutationFn → onSuccess с контекстом
     return {
       ...actual,
       useTransactionsCreate: (options: {
@@ -101,7 +99,6 @@ beforeEach(() => {
   mocks.update.mockReset();
   mocks.delete.mockReset();
   mocks.invalidateCategories.mockReset();
-  // Снапшот счёта снимается из кэша authMe до отправки мутации
   queryClient.setQueryData(getAuthMeQueryKey(), {
     accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
     userId: 1,
