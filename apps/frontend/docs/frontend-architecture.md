@@ -250,11 +250,21 @@ modules -> internals of sibling modules
 4. UI components use module hooks/components through module public API.
 5. Pages compose modules and route state.
 
+### Query keys and cross-module effects
+
+Query-key structure is private to the owning module's `model/`. Consumers use its public query hooks and cache commands; each module maintains its own cache invariants. A page may compose a cross-module consequence through a semantic callback when it owns the scenario. The mutation invocation supplies immutable scope to that callback and awaits it when completion includes the consequence.
+
+For example, `Categories` passes `onCategoryUpdated` to the public `CategoriesList` component. The category mutation carries its `accountId` in the request variables, invalidates its own cache with that scope, and awaits the callback; the page calls the public `invalidateTransactionsCategorySummary(accountId)` command exported by `transactions`. The page chooses the scenario-level connection while each module keeps its keys and cache logic private. Keep dependency direction consistent with [Dependency Rules](#dependency-rules).
+
+### Account context
+
+The JWT cookie identifies only the user. Every account-scoped request names its account in the path (`/api/v1/accounts/{accountId}/...`), and the server verifies access to it, so the meaning of a request cannot change mid-flight. The `user` module owns the selected account: it resolves the current account from the device-local selection (localStorage) validated against `me.accounts`, falling back to the first account. Switching accounts (`switchAccount`) is a local operation — no HTTP, no token reissue; it marks the previous account's cache subtree stale without a background refetch. Account-scoped query wrappers stay disabled until the current account is known; mutations capture the account into their variables at invocation time via `getCurrentAccountIdSnapshot()`/`requireCurrentAccountId()`.
+
 Example:
 
 ```text
 common/api/generate/categories/*
-  -> modules/categories/model/useCreateCategory.ts
+  -> modules/categories/model/use-create-category.ts
   -> modules/categories/index.ts
   -> pages/categories/categories.tsx
 ```
@@ -267,6 +277,10 @@ common/api/generate/categories/*
 - Public exports live in `index.ts`.
 - CSS modules live next to component and use the same kebab-case base name: `expense-list.module.css`.
 
+### Test placement
+
+Follow the application test-location rule in [AGENTS.md](../../../AGENTS.md#код-и-проверка): new and edited unit/component tests live in a local `tests/` directory, while E2E scenarios stay in `e2e/`. For example, `model/use-transactions.ts` is tested by `model/tests/use-transactions.test.ts`; `ui/category-editor.tsx` by `ui/tests/category-editor.test.tsx`. Existing tests move when edited, with their imports and other affected paths updated. Unchanged legacy tests stay in place until touched.
+
 ## React Rules
 
 - Use `useEffect` only for code that must run because the component was displayed to the user.
@@ -276,7 +290,7 @@ common/api/generate/categories/*
 
 Existing code may still have historical deviations (legacy exceptions):
 
-- Existing PascalCase component filenames and camelCase hook filenames may remain until touched. New files use kebab-case.
+- Existing PascalCase component filenames are legacy exceptions. For an edited handwritten camelCase file, apply the mandatory rename-on-edit rule in [AGENTS.md](../../../AGENTS.md#код-и-проверка). New files use kebab-case.
 - Root module hooks outside `model/` are legacy exceptions. Keep any existing ones working until the module is touched, then prefer moving them into `model/`.
 - Some pages read their own TanStack `Route` object from `app/routes`; new pages must use route adapters and page props/contracts instead.
 - `transactions/modules/*` already uses nested modules and is valid FEOD-style structure.

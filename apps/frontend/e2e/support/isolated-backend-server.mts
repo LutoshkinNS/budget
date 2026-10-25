@@ -70,8 +70,12 @@ export async function startTestApp(
 ) {
   await app.register(authRoutes, { prefix: "/api/v1/auth" });
   await app.register(accountsRoutes, { prefix: "/api/v1/accounts" });
-  await app.register(categoriesRoutes, { prefix: "/api/v1/categories" });
-  await app.register(transactionsModule, { prefix: "/api/v1/transactions" });
+  await app.register(categoriesRoutes, {
+    prefix: "/api/v1/accounts/:accountId/categories",
+  });
+  await app.register(transactionsModule, {
+    prefix: "/api/v1/accounts/:accountId/transactions",
+  });
   const url = await app.listen({ port: 0, host: "127.0.0.1" });
   console.log("E2E_BACKEND_READY=" + JSON.stringify({ url, ...metadata }));
   process.stdin.once("data", async () => {

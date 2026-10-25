@@ -4,11 +4,11 @@ import { AccountAvatar } from "@/common/ui/account-avatar/AccountAvatar";
 import { Input } from "@/common/ui/input/Input";
 import { NumericKeyboard } from "@/common/ui/numeric-keyboard/ui/numeric-keyboard.tsx";
 import { CategoriesKeyboard } from "@/modules/categories";
-import { useMe } from "@/modules/user";
+import { useCurrentAccountId, useMe } from "@/modules/user";
 
 import { parseTransactionAmountInput } from "../../model/amount.ts";
-import { useCreateTransaction } from "../../model/useCreateTransaction.ts";
-import type { TransactionType } from "../../model/useTransactions.ts";
+import { useCreateTransaction } from "../../model/use-create-transaction.ts";
+import type { TransactionType } from "../../model/use-transactions.ts";
 
 import s from "./create-transaction.module.css";
 
@@ -25,7 +25,8 @@ export function CreateTransaction() {
 
   const { createTransaction } = useCreateTransaction();
   const { data: me } = useMe();
-  const currentAccount = me?.accounts.find((a) => a.id === me.currentAccountId);
+  const currentAccountId = useCurrentAccountId();
+  const currentAccount = me?.accounts.find((a) => a.id === currentAccountId);
 
   const handleSubmit = async (selectedCategoryId: number) => {
     const amountValue = parseTransactionAmountInput(amount);

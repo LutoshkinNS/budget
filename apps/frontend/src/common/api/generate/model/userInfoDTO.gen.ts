@@ -9,7 +9,5 @@ import type { AccountInfoDTO } from "./accountInfoDTO";
 export interface UserInfoDTO {
   accounts: AccountInfoDTO[];
   /** @minimum 1 */
-  currentAccountId: number;
-  /** @minimum 1 */
   userId: number;
 }

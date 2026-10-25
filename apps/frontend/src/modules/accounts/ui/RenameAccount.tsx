@@ -2,16 +2,17 @@ import { useState } from "react";
 
 import type { AccountUpdateDTO } from "@/common/api/generate/model";
 import { FormBlock } from "@/common/ui/form-block/FormBlock.tsx";
-import { useMe } from "@/modules/user";
+import { useCurrentAccountId, useMe } from "@/modules/user";
 
-import { useUpdateAccount } from "../model/useUpdateAccount.ts";
+import { useUpdateAccount } from "../model/use-update-account.ts";
 
 import s from "./RenameAccount.module.css";
 
 export function RenameAccount() {
   const { data: me } = useMe();
+  const currentAccountId = useCurrentAccountId();
   const currentAccount = me?.accounts.find(
-    (account) => account.id === me.currentAccountId,
+    (account) => account.id === currentAccountId,
   );
   const { mutate, isPending } = useUpdateAccount();
   const [isEditing, setIsEditing] = useState(false);

@@ -7,6 +7,7 @@
 import * as zod from "zod";
 
 export const CategorySubcategoriesListParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
 });
 
@@ -20,11 +21,11 @@ export const CategorySubcategoriesListResponse = zod.array(
 );
 
 export const CategorySubcategoriesCreateParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
 });
 
 export const CategorySubcategoriesCreateBody = zod.object({
-  categoryId: zod.number().min(1),
   name: zod.string().min(1),
 });
 
@@ -35,6 +36,7 @@ export const CategorySubcategoriesCreateResponse = zod.object({
 });
 
 export const CategorySubcategoriesGetParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
   subcategoryId: zod.number(),
 });
@@ -46,6 +48,7 @@ export const CategorySubcategoriesGetResponse = zod.object({
 });
 
 export const CategorySubcategoriesDeleteParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
   subcategoryId: zod.number(),
 });

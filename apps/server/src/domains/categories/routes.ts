@@ -2,7 +2,7 @@ import CategorySchema from '#s/Category.js';
 import CategoryCreate from '#s/CategoryCreate.js';
 import CategoryUpdate from '#s/CategoryUpdate.js';
 import ConflictError from '#s/ConflictError.js';
-import idObj from '#s/idObj.js';
+import ForbiddenError from '#s/ForbiddenError.js';
 import NotFoundError from '#s/NotFoundError.js';
 import ValidationError from '#s/ValidationError.js';
 import type { FastifyApp } from '#src/appInit.js';
@@ -14,7 +14,12 @@ import { listCategoriesHandler } from './handlers/list.handler.js';
 import { updateCategoryHandler } from './handlers/update.handler.js';
 import { validateIconKey } from './handlers/validate-icon-key.hook.js';
 import { categoryListQuerySchema } from './schemas/category-list-query.js';
+import {
+  accountParamsSchema,
+  categoryParamsSchema
+} from './schemas/category-params.js';
 import type {
+  AccountParams,
   CategoryCreateBody,
   CategoryListQuery,
   CategoryParams,
@@ -22,14 +27,20 @@ import type {
 } from './types/category.js';
 
 export default async function categoriesRoutes(app: FastifyApp) {
+  // Токен удостоверяет пользователя; доступ к счёту из path проверяется отдельно
   app.addHook('preHandler', app.authenticate);
+  app.addHook('preHandler', app.requireAccountAccess);
 
-  app.get<{ Querystring: CategoryListQuery }>(
+  app.get<{ Querystring: CategoryListQuery; Params: AccountParams }>(
     '/',
     {
       schema: {
+        params: accountParamsSchema,
         querystring: categoryListQuerySchema,
-        response: { 200: { type: 'array', items: CategorySchema } }
+        response: {
+          200: { type: 'array', items: CategorySchema },
+          403: ForbiddenError
+        }
       }
     },
     listCategoriesHandler
@@ -37,19 +48,26 @@ export default async function categoriesRoutes(app: FastifyApp) {
 
   app.get<{ Params: CategoryParams }>(
     '/:id',
-    { schema: { params: idObj, response: { 200: CategorySchema } } },
+    {
+      schema: {
+        params: categoryParamsSchema,
+        response: { 200: CategorySchema, 403: ForbiddenError }
+      }
+    },
     getCategoryHandler
   );
 
-  app.post<{ Body: CategoryCreateBody }>(
+  app.post<{ Body: CategoryCreateBody; Params: AccountParams }>(
     '/',
     {
       preValidation: validateIconKey,
       schema: {
+        params: accountParamsSchema,
         body: CategoryCreate,
         response: {
           200: CategorySchema,
           400: ValidationError,
+          403: ForbiddenError,
           409: ConflictError
         }
       }
@@ -62,11 +80,12 @@ export default async function categoriesRoutes(app: FastifyApp) {
     {
       preValidation: validateIconKey,
       schema: {
-        params: idObj,
+        params: categoryParamsSchema,
         body: CategoryUpdate,
         response: {
           200: CategorySchema,
           400: ValidationError,
+          403: ForbiddenError,
           404: NotFoundError,
           409: ConflictError
         }
@@ -77,7 +96,12 @@ export default async function categoriesRoutes(app: FastifyApp) {
 
   app.delete<{ Params: CategoryParams }>(
     '/:id',
-    { schema: { params: idObj, response: { 204: { type: 'null' } } } },
+    {
+      schema: {
+        params: categoryParamsSchema,
+        response: { 204: { type: 'null' }, 403: ForbiddenError }
+      }
+    },
     deleteCategoryHandler
   );
 }

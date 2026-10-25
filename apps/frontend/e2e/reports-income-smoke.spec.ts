@@ -44,7 +44,6 @@ async function mockAuthenticatedReportsApi(page: Page) {
     await route.fulfill({
       json: {
         userId: 1,
-        currentAccountId: 1,
         accounts: [
           {
             id: 1,
@@ -58,7 +57,7 @@ async function mockAuthenticatedReportsApi(page: Page) {
   });
 
   await page.route(
-    /\/api\/v1\/transactions\/category-summary\?/,
+    /\/api\/v1\/accounts\/1\/transactions\/category-summary\?/,
     async (route) => {
       const requestUrl = new URL(route.request().url());
       const type = requestUrl.searchParams.get("type") ?? "expense";
@@ -70,7 +69,7 @@ async function mockAuthenticatedReportsApi(page: Page) {
     },
   );
 
-  await page.route(/\/api\/v1\/transactions\?/, async (route) => {
+  await page.route(/\/api\/v1\/accounts\/1\/transactions\?/, async (route) => {
     const requestUrl = new URL(route.request().url());
     const type = requestUrl.searchParams.get("type") ?? "expense";
     const categoryId = requestUrl.searchParams.get("categoryId") ?? "";

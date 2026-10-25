@@ -39,9 +39,6 @@ model UserInfo {
   @minValue(1)
   userId: integer;
 
-  @minValue(1)
-  currentAccountId: integer;
-
   accounts: AccountInfo[];
 }
 
@@ -56,24 +53,6 @@ model UnauthorizedError {
 model AuthUnauthorizedResponse {
   @statusCode statusCode: 401;
   @body error: UnauthorizedError;
-}
-
-@error
-model NoAccountError {
-  code: ErrorCode.NO_ACCOUNT;
-  message: string;
-  statusCode: 409;
-}
-
-@error
-model NoAccountResponse {
-  @statusCode statusCode: 409;
-  @body error: NoAccountError;
-}
-
-model SwitchAccountRequest {
-  @minValue(1)
-  accountId: integer;
 }
 
 model SuccessResponse {

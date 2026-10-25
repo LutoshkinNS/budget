@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateCategory } from "./CreateCategory";
 
 const mocks = vi.hoisted(() => ({ createCategory: vi.fn() }));
-vi.mock("../model/useCreateCategory.ts", () => ({
+vi.mock("../model/use-create-category.ts", () => ({
   useCreateCategory: () => ({
     createCategory: mocks.createCategory,
     isPending: false,

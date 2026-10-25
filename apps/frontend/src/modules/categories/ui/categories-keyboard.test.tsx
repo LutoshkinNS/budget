@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => {
   return { categories, useCategories: vi.fn() };
 });
 
-vi.mock("../model/useCategories.ts", () => ({
+vi.mock("../model/use-categories.ts", () => ({
   useCategories: (params: unknown) => {
     mocks.useCategories(params);
     return { data: mocks.categories };

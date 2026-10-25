@@ -1,7 +1,7 @@
 import type { TransactionDTO } from "@/common/api/generate/model";
 import { CategoryIcon, useCategories } from "@/modules/categories";
 
-import { useDeleteTransaction } from "../../model/useDeleteTransaction.ts";
+import { useDeleteTransaction } from "../../model/use-delete-transaction.ts";
 
 import s from "./transaction-day.module.css";
 

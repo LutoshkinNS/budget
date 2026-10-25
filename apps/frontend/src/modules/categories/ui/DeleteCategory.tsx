@@ -3,7 +3,7 @@ import { useState } from "react";
 import { FormBlock } from "@/common/ui/form-block/FormBlock.tsx";
 
 import type { CategoryType, DeleteCategoryFormData } from "../model/types.ts";
-import { useDeleteCategory } from "../model/useDeleteCategory.ts";
+import { useDeleteCategory } from "../model/use-delete-category.ts";
 
 import { CategoriesSelect } from "./CategoriesSelect.tsx";
 

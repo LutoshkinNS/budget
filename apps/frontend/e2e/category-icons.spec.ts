@@ -23,7 +23,7 @@ async function assertMobileLayout(page: Page) {
 }
 
 async function category(page: Page, apiUrl: string, id: number) {
-  const response = await page.request.get(apiUrl + "/api/v1/categories/" + id);
+  const response = await page.request.get(apiUrl + "/api/v1/accounts/1/categories/" + id);
   expect(response.ok()).toBeTruthy();
   const data: unknown = await response.json();
   if (typeof data !== "object" || data === null || !("iconKey" in data))
@@ -67,7 +67,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const created = page.waitForResponse(
         (response) =>
           response.request().method() === "POST" &&
-          new URL(response.url()).pathname === "/api/v1/categories",
+          new URL(response.url()).pathname === "/api/v1/accounts/1/categories",
       );
       await create
         .getByRole("button", { name: "Создать", exact: true })
@@ -138,7 +138,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         /groceries\.png/,
       );
       const createdTransaction = await page.request.post(
-        categoryBackend.url + "/api/v1/transactions",
+        categoryBackend.url + "/api/v1/accounts/1/transactions",
         {
           data: {
             categoryId: id,

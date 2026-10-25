@@ -6,6 +6,10 @@
  */
 import * as zod from "zod";
 
+export const CategoriesListParams = zod.object({
+  accountId: zod.number(),
+});
+
 export const CategoriesListQueryParams = zod.object({
   type: zod.enum(["income", "expense"]).optional(),
   sort: zod.enum(["usage"]).optional(),
@@ -43,6 +47,10 @@ export const CategoriesListResponseItem = zod.object({
   ]),
 });
 export const CategoriesListResponse = zod.array(CategoriesListResponseItem);
+
+export const CategoriesCreateParams = zod.object({
+  accountId: zod.number(),
+});
 
 export const CategoriesCreateBody = zod.object({
   type: zod.enum(["income", "expense"]),
@@ -109,6 +117,7 @@ export const CategoriesCreateResponse = zod.object({
 });
 
 export const CategoriesGetParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
 });
 
@@ -145,6 +154,7 @@ export const CategoriesGetResponse = zod.object({
 });
 
 export const CategoriesUpdateParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
 });
 
@@ -212,5 +222,6 @@ export const CategoriesUpdateResponse = zod.object({
 });
 
 export const CategoriesDeleteParams = zod.object({
+  accountId: zod.number(),
   categoryId: zod.number(),
 });

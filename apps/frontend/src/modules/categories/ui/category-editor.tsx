@@ -4,7 +4,10 @@ import type { CategoryDTO } from "@/common/api/generate/model";
 import { SimpleError } from "@/common/ui/simple-error/SimpleError";
 
 import type { CategoryIconKey } from "../model/category-icons";
-import { useUpdateCategory } from "../model/use-update-category";
+import {
+  type CategoryUpdatedCallback,
+  useUpdateCategory,
+} from "../model/use-update-category";
 
 import { CategoryIconPicker } from "./category-icon-picker";
 
@@ -13,9 +16,14 @@ import styles from "./categories-list.module.css";
 interface CategoryEditorProps {
   category: CategoryDTO;
   onClose: () => void;
+  onCategoryUpdated: CategoryUpdatedCallback;
 }
 
-export function CategoryEditor({ category, onClose }: CategoryEditorProps) {
+export function CategoryEditor({
+  category,
+  onClose,
+  onCategoryUpdated,
+}: CategoryEditorProps) {
   const nameId = useId();
   const [name, setName] = useState(category.name);
   const [iconKey, setIconKey] = useState<CategoryIconKey | null>(
@@ -24,7 +32,7 @@ export function CategoryEditor({ category, onClose }: CategoryEditorProps) {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitting = useRef(false);
-  const { mutateAsync, isPending } = useUpdateCategory();
+  const { mutateAsync, isPending } = useUpdateCategory({ onCategoryUpdated });
   const pending = isPending || isSubmitting;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

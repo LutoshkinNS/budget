@@ -23,6 +23,7 @@ import type {
 
 import type {
   CategorySummaryDTO,
+  ForbiddenErrorDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
   TransactionCreateDTO,
@@ -39,7 +40,10 @@ import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getTransactionsListUrl = (params: TransactionsListParams) => {
+export const getTransactionsListUrl = (
+  accountId: number,
+  params: TransactionsListParams,
+) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -51,30 +55,37 @@ export const getTransactionsListUrl = (params: TransactionsListParams) => {
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/api/v1/transactions?${stringifiedParams}`
-    : `/api/v1/transactions`;
+    ? `/api/v1/accounts/${accountId}/transactions?${stringifiedParams}`
+    : `/api/v1/accounts/${accountId}/transactions`;
 };
 
 export const transactionsList = async (
+  accountId: number,
   params: TransactionsListParams,
   options?: RequestInit,
 ): Promise<TransactionDTO[]> => {
-  return fetcher<TransactionDTO[]>(getTransactionsListUrl(params), {
+  return fetcher<TransactionDTO[]>(getTransactionsListUrl(accountId, params), {
     ...options,
     method: "GET",
   });
 };
 
 export const getTransactionsListQueryKey = (
+  accountId: number,
   params?: TransactionsListParams,
 ) => {
-  return ["transactionsList", ...(params ? [params] : [])] as const;
+  return [
+    "transactionsList",
+    ...(params ? [params] : []),
+    ...(accountId ? [accountId] : []),
+  ] as const;
 };
 
 export const getTransactionsListQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsListParams,
   options?: {
     query?: Partial<
@@ -90,13 +101,19 @@ export const getTransactionsListQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getTransactionsListQueryKey(params);
+    queryOptions?.queryKey ?? getTransactionsListQueryKey(accountId, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof transactionsList>>
-  > = ({ signal }) => transactionsList(params, { signal, ...requestOptions });
+  > = ({ signal }) =>
+    transactionsList(accountId, params, { signal, ...requestOptions });
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!accountId,
+    ...queryOptions,
+  } as UseQueryOptions<
     Awaited<ReturnType<typeof transactionsList>>,
     TError,
     TData
@@ -108,13 +125,14 @@ export type TransactionsListQueryResult = NonNullable<
 >;
 export type TransactionsListQueryError =
   | ValidationErrorDTO
-  | NotFoundErrorDTO
+  | ForbiddenErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsListParams,
   options: {
     query: Partial<
@@ -140,8 +158,9 @@ export function useTransactionsList<
 };
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsListParams,
   options?: {
     query?: Partial<
@@ -167,8 +186,9 @@ export function useTransactionsList<
 };
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsListParams,
   options?: {
     query?: Partial<
@@ -187,8 +207,9 @@ export function useTransactionsList<
 
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsListParams,
   options?: {
     query?: Partial<
@@ -204,7 +225,11 @@ export function useTransactionsList<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getTransactionsListQueryOptions(params, options);
+  const queryOptions = getTransactionsListQueryOptions(
+    accountId,
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -216,26 +241,28 @@ export function useTransactionsList<
 
 export const invalidateTransactionsList = async (
   queryClient: QueryClient,
+  accountId: number,
   params: TransactionsListParams,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getTransactionsListQueryKey(params) },
+    { queryKey: getTransactionsListQueryKey(accountId, params) },
     options,
   );
 
   return queryClient;
 };
 
-export const getTransactionsCreateUrl = () => {
-  return `/api/v1/transactions`;
+export const getTransactionsCreateUrl = (accountId: number) => {
+  return `/api/v1/accounts/${accountId}/transactions`;
 };
 
 export const transactionsCreate = async (
+  accountId: number,
   transactionCreateDTO: TransactionCreateDTO,
   options?: RequestInit,
 ): Promise<TransactionDTO> => {
-  return fetcher<TransactionDTO>(getTransactionsCreateUrl(), {
+  return fetcher<TransactionDTO>(getTransactionsCreateUrl(accountId), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -244,20 +271,24 @@ export const transactionsCreate = async (
 };
 
 export const getTransactionsCreateMutationOptions = <
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof transactionsCreate>>,
     TError,
-    { data: TransactionCreateDTO },
+    { accountId: number; data: TransactionCreateDTO },
     TContext
   >;
   request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof transactionsCreate>>,
   TError,
-  { data: TransactionCreateDTO },
+  { accountId: number; data: TransactionCreateDTO },
   TContext
 > => {
   const mutationKey = ["transactionsCreate"];
@@ -271,11 +302,11 @@ export const getTransactionsCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof transactionsCreate>>,
-    { data: TransactionCreateDTO }
+    { accountId: number; data: TransactionCreateDTO }
   > = (props) => {
-    const { data } = props ?? {};
+    const { accountId, data } = props ?? {};
 
-    return transactionsCreate(data, requestOptions);
+    return transactionsCreate(accountId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -287,18 +318,23 @@ export type TransactionsCreateMutationResult = NonNullable<
 export type TransactionsCreateMutationBody = TransactionCreateDTO;
 export type TransactionsCreateMutationError =
   | ValidationErrorDTO
+  | ForbiddenErrorDTO
   | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export const useTransactionsCreate = <
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof transactionsCreate>>,
       TError,
-      { data: TransactionCreateDTO },
+      { accountId: number; data: TransactionCreateDTO },
       TContext
     >;
     request?: SecondParameter<typeof fetcher>;
@@ -307,7 +343,7 @@ export const useTransactionsCreate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof transactionsCreate>>,
   TError,
-  { data: TransactionCreateDTO },
+  { accountId: number; data: TransactionCreateDTO },
   TContext
 > => {
   return useMutation(
@@ -316,6 +352,7 @@ export const useTransactionsCreate = <
   );
 };
 export const getTransactionsCategorySummaryUrl = (
+  accountId: number,
   params: TransactionsCategorySummaryParams,
 ) => {
   const normalizedParams = new URLSearchParams();
@@ -329,16 +366,17 @@ export const getTransactionsCategorySummaryUrl = (
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/api/v1/transactions/category-summary?${stringifiedParams}`
-    : `/api/v1/transactions/category-summary`;
+    ? `/api/v1/accounts/${accountId}/transactions/category-summary?${stringifiedParams}`
+    : `/api/v1/accounts/${accountId}/transactions/category-summary`;
 };
 
 export const transactionsCategorySummary = async (
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options?: RequestInit,
 ): Promise<CategorySummaryDTO> => {
   return fetcher<CategorySummaryDTO>(
-    getTransactionsCategorySummaryUrl(params),
+    getTransactionsCategorySummaryUrl(accountId, params),
     {
       ...options,
       method: "GET",
@@ -347,15 +385,21 @@ export const transactionsCategorySummary = async (
 };
 
 export const getTransactionsCategorySummaryQueryKey = (
+  accountId: number,
   params?: TransactionsCategorySummaryParams,
 ) => {
-  return ["transactionsCategorySummary", ...(params ? [params] : [])] as const;
+  return [
+    "transactionsCategorySummary",
+    ...(params ? [params] : []),
+    ...(accountId ? [accountId] : []),
+  ] as const;
 };
 
 export const getTransactionsCategorySummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options?: {
     query?: Partial<
@@ -371,14 +415,23 @@ export const getTransactionsCategorySummaryQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getTransactionsCategorySummaryQueryKey(params);
+    queryOptions?.queryKey ??
+    getTransactionsCategorySummaryQueryKey(accountId, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof transactionsCategorySummary>>
   > = ({ signal }) =>
-    transactionsCategorySummary(params, { signal, ...requestOptions });
+    transactionsCategorySummary(accountId, params, {
+      signal,
+      ...requestOptions,
+    });
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!accountId,
+    ...queryOptions,
+  } as UseQueryOptions<
     Awaited<ReturnType<typeof transactionsCategorySummary>>,
     TError,
     TData
@@ -390,12 +443,14 @@ export type TransactionsCategorySummaryQueryResult = NonNullable<
 >;
 export type TransactionsCategorySummaryQueryError =
   | ValidationErrorDTO
+  | ForbiddenErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options: {
     query: Partial<
@@ -421,8 +476,9 @@ export function useTransactionsCategorySummary<
 };
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options?: {
     query?: Partial<
@@ -448,8 +504,9 @@ export function useTransactionsCategorySummary<
 };
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options?: {
     query?: Partial<
@@ -468,8 +525,9 @@ export function useTransactionsCategorySummary<
 
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options?: {
     query?: Partial<
@@ -486,6 +544,7 @@ export function useTransactionsCategorySummary<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getTransactionsCategorySummaryQueryOptions(
+    accountId,
     params,
     options,
   );
@@ -500,11 +559,12 @@ export function useTransactionsCategorySummary<
 
 export const invalidateTransactionsCategorySummary = async (
   queryClient: QueryClient,
+  accountId: number,
   params: TransactionsCategorySummaryParams,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getTransactionsCategorySummaryQueryKey(params) },
+    { queryKey: getTransactionsCategorySummaryQueryKey(accountId, params) },
     options,
   );
 
@@ -512,6 +572,7 @@ export const invalidateTransactionsCategorySummary = async (
 };
 
 export const getTransactionsSummaryUrl = (
+  accountId: number,
   params: TransactionsSummaryParams,
 ) => {
   const normalizedParams = new URLSearchParams();
@@ -525,30 +586,40 @@ export const getTransactionsSummaryUrl = (
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/api/v1/transactions/summary?${stringifiedParams}`
-    : `/api/v1/transactions/summary`;
+    ? `/api/v1/accounts/${accountId}/transactions/summary?${stringifiedParams}`
+    : `/api/v1/accounts/${accountId}/transactions/summary`;
 };
 
 export const transactionsSummary = async (
+  accountId: number,
   params: TransactionsSummaryParams,
   options?: RequestInit,
 ): Promise<TransactionSummaryDTO> => {
-  return fetcher<TransactionSummaryDTO>(getTransactionsSummaryUrl(params), {
-    ...options,
-    method: "GET",
-  });
+  return fetcher<TransactionSummaryDTO>(
+    getTransactionsSummaryUrl(accountId, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getTransactionsSummaryQueryKey = (
+  accountId: number,
   params?: TransactionsSummaryParams,
 ) => {
-  return ["transactionsSummary", ...(params ? [params] : [])] as const;
+  return [
+    "transactionsSummary",
+    ...(params ? [params] : []),
+    ...(accountId ? [accountId] : []),
+  ] as const;
 };
 
 export const getTransactionsSummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsSummaryParams,
   options?: {
     query?: Partial<
@@ -564,14 +635,19 @@ export const getTransactionsSummaryQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getTransactionsSummaryQueryKey(params);
+    queryOptions?.queryKey ?? getTransactionsSummaryQueryKey(accountId, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof transactionsSummary>>
   > = ({ signal }) =>
-    transactionsSummary(params, { signal, ...requestOptions });
+    transactionsSummary(accountId, params, { signal, ...requestOptions });
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!accountId,
+    ...queryOptions,
+  } as UseQueryOptions<
     Awaited<ReturnType<typeof transactionsSummary>>,
     TError,
     TData
@@ -583,13 +659,14 @@ export type TransactionsSummaryQueryResult = NonNullable<
 >;
 export type TransactionsSummaryQueryError =
   | ValidationErrorDTO
-  | NotFoundErrorDTO
+  | ForbiddenErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsSummaryParams,
   options: {
     query: Partial<
@@ -615,8 +692,9 @@ export function useTransactionsSummary<
 };
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsSummaryParams,
   options?: {
     query?: Partial<
@@ -642,8 +720,9 @@ export function useTransactionsSummary<
 };
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsSummaryParams,
   options?: {
     query?: Partial<
@@ -662,8 +741,9 @@ export function useTransactionsSummary<
 
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   params: TransactionsSummaryParams,
   options?: {
     query?: Partial<
@@ -679,7 +759,11 @@ export function useTransactionsSummary<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getTransactionsSummaryQueryOptions(params, options);
+  const queryOptions = getTransactionsSummaryQueryOptions(
+    accountId,
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -691,42 +775,55 @@ export function useTransactionsSummary<
 
 export const invalidateTransactionsSummary = async (
   queryClient: QueryClient,
+  accountId: number,
   params: TransactionsSummaryParams,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getTransactionsSummaryQueryKey(params) },
+    { queryKey: getTransactionsSummaryQueryKey(accountId, params) },
     options,
   );
 
   return queryClient;
 };
 
-export const getTransactionsGetUrl = (transactionId: number) => {
-  return `/api/v1/transactions/${transactionId}`;
+export const getTransactionsGetUrl = (
+  accountId: number,
+  transactionId: number,
+) => {
+  return `/api/v1/accounts/${accountId}/transactions/${transactionId}`;
 };
 
 export const transactionsGet = async (
+  accountId: number,
   transactionId: number,
   options?: RequestInit,
 ): Promise<TransactionDTO> => {
-  return fetcher<TransactionDTO>(getTransactionsGetUrl(transactionId), {
-    ...options,
-    method: "GET",
-  });
+  return fetcher<TransactionDTO>(
+    getTransactionsGetUrl(accountId, transactionId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
-export const getTransactionsGetQueryKey = (transactionId: number) => {
+export const getTransactionsGetQueryKey = (
+  accountId: number,
+  transactionId: number,
+) => {
   return [
     "transactionsGet",
     ...(transactionId ? [transactionId] : []),
+    ...(accountId ? [accountId] : []),
   ] as const;
 };
 
 export const getTransactionsGetQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   transactionId: number,
   options?: {
     query?: Partial<
@@ -742,16 +839,18 @@ export const getTransactionsGetQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getTransactionsGetQueryKey(transactionId);
+    queryOptions?.queryKey ??
+    getTransactionsGetQueryKey(accountId, transactionId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof transactionsGet>>> = ({
     signal,
-  }) => transactionsGet(transactionId, { signal, ...requestOptions });
+  }) =>
+    transactionsGet(accountId, transactionId, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!transactionId,
+    enabled: !!(accountId && transactionId),
     ...queryOptions,
   } as UseQueryOptions<
     Awaited<ReturnType<typeof transactionsGet>>,
@@ -764,13 +863,15 @@ export type TransactionsGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof transactionsGet>>
 >;
 export type TransactionsGetQueryError =
+  | ForbiddenErrorDTO
   | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   transactionId: number,
   options: {
     query: Partial<
@@ -796,8 +897,9 @@ export function useTransactionsGet<
 };
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   transactionId: number,
   options?: {
     query?: Partial<
@@ -823,8 +925,9 @@ export function useTransactionsGet<
 };
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   transactionId: number,
   options?: {
     query?: Partial<
@@ -843,8 +946,9 @@ export function useTransactionsGet<
 
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   transactionId: number,
   options?: {
     query?: Partial<
@@ -860,7 +964,11 @@ export function useTransactionsGet<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getTransactionsGetQueryOptions(transactionId, options);
+  const queryOptions = getTransactionsGetQueryOptions(
+    accountId,
+    transactionId,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -872,49 +980,61 @@ export function useTransactionsGet<
 
 export const invalidateTransactionsGet = async (
   queryClient: QueryClient,
+  accountId: number,
   transactionId: number,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getTransactionsGetQueryKey(transactionId) },
+    { queryKey: getTransactionsGetQueryKey(accountId, transactionId) },
     options,
   );
 
   return queryClient;
 };
 
-export const getTransactionsUpdateUrl = (transactionId: number) => {
-  return `/api/v1/transactions/${transactionId}`;
+export const getTransactionsUpdateUrl = (
+  accountId: number,
+  transactionId: number,
+) => {
+  return `/api/v1/accounts/${accountId}/transactions/${transactionId}`;
 };
 
 export const transactionsUpdate = async (
+  accountId: number,
   transactionId: number,
   transactionUpdateDTO: TransactionUpdateDTO,
   options?: RequestInit,
 ): Promise<TransactionDTO> => {
-  return fetcher<TransactionDTO>(getTransactionsUpdateUrl(transactionId), {
-    ...options,
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(transactionUpdateDTO),
-  });
+  return fetcher<TransactionDTO>(
+    getTransactionsUpdateUrl(accountId, transactionId),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(transactionUpdateDTO),
+    },
+  );
 };
 
 export const getTransactionsUpdateMutationOptions = <
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof transactionsUpdate>>,
     TError,
-    { transactionId: number; data: TransactionUpdateDTO },
+    { accountId: number; transactionId: number; data: TransactionUpdateDTO },
     TContext
   >;
   request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof transactionsUpdate>>,
   TError,
-  { transactionId: number; data: TransactionUpdateDTO },
+  { accountId: number; transactionId: number; data: TransactionUpdateDTO },
   TContext
 > => {
   const mutationKey = ["transactionsUpdate"];
@@ -928,11 +1048,11 @@ export const getTransactionsUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof transactionsUpdate>>,
-    { transactionId: number; data: TransactionUpdateDTO }
+    { accountId: number; transactionId: number; data: TransactionUpdateDTO }
   > = (props) => {
-    const { transactionId, data } = props ?? {};
+    const { accountId, transactionId, data } = props ?? {};
 
-    return transactionsUpdate(transactionId, data, requestOptions);
+    return transactionsUpdate(accountId, transactionId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -944,18 +1064,23 @@ export type TransactionsUpdateMutationResult = NonNullable<
 export type TransactionsUpdateMutationBody = TransactionUpdateDTO;
 export type TransactionsUpdateMutationError =
   | ValidationErrorDTO
+  | ForbiddenErrorDTO
   | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export const useTransactionsUpdate = <
-  TError = ValidationErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof transactionsUpdate>>,
       TError,
-      { transactionId: number; data: TransactionUpdateDTO },
+      { accountId: number; transactionId: number; data: TransactionUpdateDTO },
       TContext
     >;
     request?: SecondParameter<typeof fetcher>;
@@ -964,7 +1089,7 @@ export const useTransactionsUpdate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof transactionsUpdate>>,
   TError,
-  { transactionId: number; data: TransactionUpdateDTO },
+  { accountId: number; transactionId: number; data: TransactionUpdateDTO },
   TContext
 > => {
   return useMutation(
@@ -972,35 +1097,39 @@ export const useTransactionsUpdate = <
     queryClient,
   );
 };
-export const getTransactionsDeleteUrl = (transactionId: number) => {
-  return `/api/v1/transactions/${transactionId}`;
+export const getTransactionsDeleteUrl = (
+  accountId: number,
+  transactionId: number,
+) => {
+  return `/api/v1/accounts/${accountId}/transactions/${transactionId}`;
 };
 
 export const transactionsDelete = async (
+  accountId: number,
   transactionId: number,
   options?: RequestInit,
 ): Promise<void> => {
-  return fetcher<void>(getTransactionsDeleteUrl(transactionId), {
+  return fetcher<void>(getTransactionsDeleteUrl(accountId, transactionId), {
     ...options,
     method: "DELETE",
   });
 };
 
 export const getTransactionsDeleteMutationOptions = <
-  TError = InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof transactionsDelete>>,
     TError,
-    { transactionId: number },
+    { accountId: number; transactionId: number },
     TContext
   >;
   request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof transactionsDelete>>,
   TError,
-  { transactionId: number },
+  { accountId: number; transactionId: number },
   TContext
 > => {
   const mutationKey = ["transactionsDelete"];
@@ -1014,11 +1143,11 @@ export const getTransactionsDeleteMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof transactionsDelete>>,
-    { transactionId: number }
+    { accountId: number; transactionId: number }
   > = (props) => {
-    const { transactionId } = props ?? {};
+    const { accountId, transactionId } = props ?? {};
 
-    return transactionsDelete(transactionId, requestOptions);
+    return transactionsDelete(accountId, transactionId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1028,17 +1157,19 @@ export type TransactionsDeleteMutationResult = NonNullable<
   Awaited<ReturnType<typeof transactionsDelete>>
 >;
 
-export type TransactionsDeleteMutationError = InternalServerErrorDTO;
+export type TransactionsDeleteMutationError =
+  | ForbiddenErrorDTO
+  | InternalServerErrorDTO;
 
 export const useTransactionsDelete = <
-  TError = InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof transactionsDelete>>,
       TError,
-      { transactionId: number },
+      { accountId: number; transactionId: number },
       TContext
     >;
     request?: SecondParameter<typeof fetcher>;
@@ -1047,7 +1178,7 @@ export const useTransactionsDelete = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof transactionsDelete>>,
   TError,
-  { transactionId: number },
+  { accountId: number; transactionId: number },
   TContext
 > => {
   return useMutation(

@@ -1,0 +1,86 @@
+import { z } from "zod";
+
+import { useCategoriesCreate } from "@/common/api/generate/categories/categories.gen.ts";
+import { CategoriesCreateBody } from "@/common/api/generate/categories/categories.zod.gen.ts";
+import type { CategoryCreateDTO } from "@/common/api/generate/model";
+import { errorHandler } from "@/common/lib/error-handler/error-handler.ts";
+import { requireCurrentAccountId } from "@/modules/user";
+
+import { invalidateCategories } from "./category-cache.ts";
+
+export type CategoryCreateData = Omit<CategoryCreateDTO, "type"> & {
+  type?: CategoryCreateDTO["type"] | undefined;
+};
+
+function getCreateCategoryErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = error.code;
+
+    if (code === "CATEGORY_ALREADY_EXISTS") {
+      return "Категория с таким названием уже существует";
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = error.message;
+
+    if (typeof message === "string") {
+      return message;
+    }
+  }
+
+  return undefined;
+}
+
+export function useCreateCategory() {
+  const mutation = useCategoriesCreate({
+    mutation: {
+      // Счёт мутации фиксируется её variables — переключение счёта не меняет
+      // ни выполнение запроса, ни область инвалидаций
+      onSuccess: async (_data, variables) => {
+        await invalidateCategories(variables.accountId);
+      },
+    },
+  });
+
+  const createCategory = async (data: CategoryCreateData) => {
+    const validateResult = CategoriesCreateBody.safeParse({
+      ...data,
+      type: data.type ?? "expense",
+    });
+
+    if (!validateResult.success) {
+      const fieldErrors = z.prettifyError(validateResult.error);
+      errorHandler(fieldErrors);
+      return;
+    }
+
+    try {
+      return await mutation.mutateAsync({
+        accountId: requireCurrentAccountId(),
+        data: {
+          ...validateResult.data,
+          iconKey: validateResult.data.iconKey ?? null,
+        },
+      });
+    } catch (error) {
+      const errorMessage = getCreateCategoryErrorMessage(error);
+
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      }
+
+      throw error;
+    }
+  };
+
+  return {
+    createCategory,
+    errorMessage: getCreateCategoryErrorMessage(mutation.error),
+    ...mutation,
+  };
+}

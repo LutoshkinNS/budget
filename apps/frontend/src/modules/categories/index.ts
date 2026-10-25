@@ -1,8 +1,7 @@
-export {
-  useCategories,
-  useInvalidateCategories,
-} from "./model/useCategories.ts";
-export { CategoriesList } from "./ui/CategoriesList.tsx";
+export { useCategories } from "./model/use-categories.ts";
+export { invalidateCategories } from "./model/category-cache.ts";
+export type { CategoryUpdatedScope } from "./model/use-update-category.ts";
+export { CategoriesList } from "./ui/categories-list.tsx";
 export { CategoriesSelect } from "./ui/CategoriesSelect.tsx";
 export { CategoriesKeyboard } from "./ui/CategoriesKeyboard.tsx";
 export { CreateCategory } from "./ui/CreateCategory.tsx";

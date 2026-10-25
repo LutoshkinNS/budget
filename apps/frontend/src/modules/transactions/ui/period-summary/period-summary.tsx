@@ -7,7 +7,7 @@ import {
   type PeriodDateRange,
   PERIODS,
 } from "../../model/period.ts";
-import { useTransactionSummary } from "../../model/useTransactions.ts";
+import { useTransactionSummary } from "../../model/use-transactions.ts";
 
 import s from "./period-summary.module.css";
 

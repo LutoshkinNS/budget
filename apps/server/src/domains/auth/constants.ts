@@ -12,13 +12,5 @@ export const AUTH_ERRORS = {
   AUTH_DATA_EXPIRED: {
     code: 'UNAUTHORIZED',
     message: 'Данные авторизации истекли'
-  },
-  NO_ACCOUNT: {
-    code: 'NO_ACCOUNT',
-    message: 'У пользователя нет связанных аккаунтов'
-  },
-  FORBIDDEN: {
-    code: 'FORBIDDEN',
-    message: 'Нет доступа к этому аккаунту'
   }
 } as const;

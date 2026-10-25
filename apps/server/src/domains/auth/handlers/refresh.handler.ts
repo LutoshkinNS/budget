@@ -17,9 +17,9 @@ export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
 
   await req.refreshJwtVerify();
 
-  const { userId, accountId } = req.user;
+  const { userId } = req.user;
 
-  const accessToken = await reply.accessJwtSign({ userId, accountId });
+  const accessToken = await reply.accessJwtSign({ userId });
   const secureCookies = process.env.NODE_ENV === 'production';
 
   req.log.info({

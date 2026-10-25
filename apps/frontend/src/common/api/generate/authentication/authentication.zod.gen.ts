@@ -47,7 +47,6 @@ export const AuthLogoutResponse = zod.object({
 
 export const AuthMeResponse = zod.object({
   userId: zod.number().min(1),
-  currentAccountId: zod.number().min(1),
   accounts: zod.array(
     zod.object({
       id: zod.number().min(1),
@@ -59,13 +58,5 @@ export const AuthMeResponse = zod.object({
 });
 
 export const AuthRefreshResponse = zod.object({
-  success: zod.boolean(),
-});
-
-export const AuthSwitchAccountBody = zod.object({
-  accountId: zod.number().min(1),
-});
-
-export const AuthSwitchAccountResponse = zod.object({
   success: zod.boolean(),
 });

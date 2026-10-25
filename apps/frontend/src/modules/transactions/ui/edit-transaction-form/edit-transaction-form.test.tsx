@@ -22,7 +22,7 @@ vi.mock("@/modules/categories", () => ({
     return { data: mocks.categories };
   },
 }));
-vi.mock("../../model/useUpdateTransaction.ts", () => ({
+vi.mock("../../model/use-update-transaction.ts", () => ({
   useUpdateTransaction: () => ({
     updateTransaction: mocks.updateTransaction,
     isLoading: false,

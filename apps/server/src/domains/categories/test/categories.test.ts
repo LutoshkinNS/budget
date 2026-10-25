@@ -48,9 +48,11 @@ beforeAll(async () => {
     data: { name: 'Тест', ownerId: 1n }
   });
   accountId = account.id;
-  await app.register(categoriesRoutes, { prefix: '/api/v1/categories' });
+  await app.register(categoriesRoutes, {
+    prefix: '/api/v1/accounts/:accountId/categories'
+  });
   app.get('/test-token', async (_request, reply) =>
-    reply.accessJwtSign({ userId: 1, accountId })
+    reply.accessJwtSign({ userId: 1 })
   );
   await app.ready();
   cookie = 'accessToken=' + (await app.inject('/test-token')).body;
@@ -68,7 +70,7 @@ afterAll(async () => {
 async function createCategory(name: string, iconKey?: string | null) {
   const response = await app.inject({
     method: 'POST',
-    url: '/api/v1/categories',
+    url: `/api/v1/accounts/${accountId}/categories`,
     headers: { cookie },
     payload: {
       type: 'expense',
@@ -88,7 +90,7 @@ describe('category icon API', () => {
       [first, second].map((category) =>
         app.inject({
           method: 'PATCH',
-          url: '/api/v1/categories/' + category.id,
+          url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
           headers: { cookie },
           payload: { name: 'Общее конкурентное имя' }
         })
@@ -126,7 +128,7 @@ describe('category icon API', () => {
     for (const name of ['  Новое название  ', 'НОВОЕ НАЗВАНИЕ']) {
       const response = await app.inject({
         method: 'PATCH',
-        url: '/api/v1/categories/' + category.id,
+        url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
         headers: { cookie },
         payload: { name }
       });
@@ -155,7 +157,7 @@ describe('category icon API', () => {
     for (const name of ['', '   ', '\t\n']) {
       const response = await app.inject({
         method: 'PATCH',
-        url: '/api/v1/categories/' + category.id,
+        url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
         headers: { cookie },
         payload: { name }
       });
@@ -163,7 +165,7 @@ describe('category icon API', () => {
     }
     const conflict = await app.inject({
       method: 'PATCH',
-      url: '/api/v1/categories/' + category.id,
+      url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
       headers: { cookie },
       payload: { name: '  ЗАНЯТО  ', iconKey: 'taxi' }
     });
@@ -206,7 +208,7 @@ describe('category icon API', () => {
     for (const name of ['Другой тип', 'Другой счёт', 'Удалённое имя']) {
       const response = await app.inject({
         method: 'PATCH',
-        url: '/api/v1/categories/' + category.id,
+        url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
         headers: { cookie },
         payload: { name, iconKey: 'taxi' }
       });
@@ -231,12 +233,12 @@ describe('category icon API', () => {
     const category = await createCategory('Выбранная', 'groceries');
     assert.equal(category.iconKey, 'groceries');
     const detail = await app.inject({
-      url: '/api/v1/categories/' + category.id,
+      url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
       headers: { cookie }
     });
     assert.equal(detail.json<{ iconKey: string }>().iconKey, 'groceries');
     const list = await app.inject({
-      url: '/api/v1/categories?type=expense',
+      url: `/api/v1/accounts/${accountId}/categories?type=expense`,
       headers: { cookie }
     });
     assert.equal(
@@ -248,7 +250,7 @@ describe('category icon API', () => {
     for (const iconKey of ['taxi', null]) {
       const updated = await app.inject({
         method: 'PATCH',
-        url: '/api/v1/categories/' + category.id,
+        url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
         headers: { cookie },
         payload: { iconKey }
       });
@@ -275,7 +277,7 @@ describe('category icon API', () => {
     ]) {
       const response = await app.inject({
         method: 'PATCH',
-        url: '/api/v1/categories/' + category.id,
+        url: `/api/v1/accounts/${accountId}/categories/${category.id}`,
         headers: { cookie },
         payload
       });
@@ -283,7 +285,7 @@ describe('category icon API', () => {
     }
     const invalidCreate = await app.inject({
       method: 'POST',
-      url: '/api/v1/categories',
+      url: `/api/v1/accounts/${accountId}/categories`,
       headers: { cookie },
       payload: { type: 'expense', name: 'Ошибка', iconKey: 'unknown' }
     });
@@ -325,7 +327,7 @@ describe('category icon API', () => {
       for (const iconKey of keys) {
         const response = await app.inject({
           method: 'POST',
-          url: '/api/v1/categories',
+          url: `/api/v1/accounts/${accountId}/categories`,
           headers: { cookie },
           payload: { type, name: type + '-' + iconKey, iconKey }
         });
@@ -356,7 +358,7 @@ describe('category icon API', () => {
     for (const id of [deleted.id, foreign.id, 999999]) {
       const response = await app.inject({
         method: 'PATCH',
-        url: '/api/v1/categories/' + id,
+        url: `/api/v1/accounts/${accountId}/categories/${id}`,
         headers: { cookie },
         payload: { name: 'Недоступное переименование', iconKey: 'taxi' }
       });
@@ -380,7 +382,7 @@ describe('category icon API', () => {
     );
     const unauthenticated = await app.inject({
       method: 'PATCH',
-      url: '/api/v1/categories/' + foreign.id,
+      url: `/api/v1/accounts/${accountId}/categories/${foreign.id}`,
       payload: { iconKey: 'taxi' }
     });
     assert.equal(unauthenticated.statusCode, 401);

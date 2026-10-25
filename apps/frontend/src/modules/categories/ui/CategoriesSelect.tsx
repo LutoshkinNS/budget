@@ -1,7 +1,7 @@
 import clsx from "clsx";
 
 import type { CategoryType } from "../model/types.ts";
-import { useCategories } from "../model/useCategories.ts";
+import { useCategories } from "../model/use-categories.ts";
 
 import styles from "./categories-select.module.css";
 

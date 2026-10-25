@@ -12,7 +12,7 @@ export async function deleteCategoryHandler(
 ) {
   await softDeleteCategory(
     this.prisma,
-    { id: req.params.id, accountId: req.user.accountId },
+    { id: req.params.id, accountId: req.params.accountId },
     new Date()
   );
   return reply.code(204).send(null);

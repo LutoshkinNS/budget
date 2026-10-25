@@ -9,9 +9,15 @@ const app = await appInit();
 
 app.register(authRoutes, { prefix: '/api/v1/auth' });
 app.register(accountsRoutes, { prefix: '/api/v1/accounts' });
-app.register(categoriesRoutes, { prefix: '/api/v1/categories' });
-app.register(subcategoriesModule, { prefix: '/api/v1/subcategories' });
-app.register(transactionsModule, { prefix: '/api/v1/transactions' });
+app.register(categoriesRoutes, {
+  prefix: '/api/v1/accounts/:accountId/categories'
+});
+app.register(subcategoriesModule, {
+  prefix: '/api/v1/accounts/:accountId/categories/:categoryId/subcategories'
+});
+app.register(transactionsModule, {
+  prefix: '/api/v1/accounts/:accountId/transactions'
+});
 
 app.listen(
   {

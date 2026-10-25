@@ -26,7 +26,7 @@ async function setup(page: Page, url: string, suffix: string) {
   });
   const login = await page.request.get(url + "/api/v1/auth/dev-login");
   expect(login.ok()).toBeTruthy();
-  const existing = await page.request.get(url + "/api/v1/transactions", {
+  const existing = await page.request.get(url + "/api/v1/accounts/1/transactions", {
     params: {
       from: "1970-01-01T00:00:00.000Z",
       to: "2100-01-01T00:00:00.000Z",
@@ -37,12 +37,12 @@ async function setup(page: Page, url: string, suffix: string) {
     await existing.json(),
   )) {
     const deleted = await page.request.delete(
-      url + "/api/v1/transactions/" + operation.id,
+      url + "/api/v1/accounts/1/transactions/" + operation.id,
     );
     expect(deleted.ok()).toBeTruthy();
   }
   async function category(type: "income" | "expense", name: string) {
-    const response = await page.request.post(url + "/api/v1/categories", {
+    const response = await page.request.post(url + "/api/v1/accounts/1/categories", {
       data: { type, name: name + " " + suffix },
     });
     expect(response.ok()).toBeTruthy();
@@ -60,7 +60,7 @@ async function createOperation(
   url: string,
   data: TransactionCreateDTO,
 ) {
-  const response = await page.request.post(url + "/api/v1/transactions", {
+  const response = await page.request.post(url + "/api/v1/accounts/1/transactions", {
     data,
   });
   expect(response.ok()).toBeTruthy();
@@ -99,7 +99,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const created = page.waitForResponse(
         (response) =>
           response.request().method() === "POST" &&
-          new URL(response.url()).pathname === "/api/v1/transactions",
+          new URL(response.url()).pathname === "/api/v1/accounts/1/transactions",
       );
       await page
         .getByRole("button", { name: salary.name, exact: true })
@@ -175,7 +175,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         (response) =>
           response.request().method() === "PATCH" &&
           new URL(response.url()).pathname ===
-            "/api/v1/transactions/" + income.id,
+            "/api/v1/accounts/1/transactions/" + income.id,
       );
       await page
         .getByRole("button", { name: "Сохранить", exact: true })
@@ -183,7 +183,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       expect((await saved).ok()).toBeTruthy();
       await expect(page.getByText("Операция сохранена")).toBeVisible();
       const persisted = await page.request.get(
-        backend.url + "/api/v1/transactions/" + income.id,
+        backend.url + "/api/v1/accounts/1/transactions/" + income.id,
       );
       expect(
         TransactionsGetResponse.parse(await persisted.json()),
@@ -252,7 +252,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         (response) =>
           response.request().method() === "PATCH" &&
           new URL(response.url()).pathname ===
-            "/api/v1/transactions/" + expense.id,
+            "/api/v1/accounts/1/transactions/" + expense.id,
       );
       await page
         .getByRole("button", { name: "Сохранить", exact: true })

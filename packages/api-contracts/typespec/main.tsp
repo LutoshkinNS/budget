@@ -44,100 +44,123 @@ interface Accounts {
   ): Account | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
 }
 
-@route("/categories")
+@route("/accounts/{accountId}/categories")
 @tag("Categories")
 interface Categories {
   @get list(
+    @path accountId: integer,
     @query type?: TransactionType,
     @query sort?: "usage",
-  ): Category[] | CategoryErrorResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Category[] | CategoryErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @get get(
+    @path accountId: integer,
     @path categoryId: integer,
-  ): Category | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Category | CategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @post create(
+    @path accountId: integer,
     @body category: CategoryCreate,
-  ): Category | CategoryErrorResponse | CategoryConflictResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | CategoryConflictResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @route("/{categoryId}")
   @patch update(
+    @path accountId: integer,
     @path categoryId: integer,
     @body category: CategoryUpdate,
-  ): Category | CategoryErrorResponse | CategoryConflictResponse | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | CategoryConflictResponse | CategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
-  @delete delete(@path categoryId: integer): {
+  @delete delete(
+    @path accountId: integer,
+    @path categoryId: integer,
+  ): {
     @statusCode statusCode: 204;
-  } | InternalServerErrorResponse;
+  } | AccountForbiddenResponse | InternalServerErrorResponse;
 }
 
-@route("/categories/{categoryId}/subcategories")
+@route("/accounts/{accountId}/categories/{categoryId}/subcategories")
 @tag("Subcategories")
 interface CategorySubcategories {
   @get list(
+    @path accountId: integer,
     @path categoryId: integer,
-  ): Subcategory[] | CategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Subcategory[] | CategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @post create(
+    @path accountId: integer,
     @path categoryId: integer,
     @body subcategory: SubcategoryCreate,
-  ): Subcategory | SubcategoryErrorResponse | InternalServerErrorResponse;
+  ): Subcategory | CategoryErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @get get(
+    @path accountId: integer,
     @path categoryId: integer,
     @path subcategoryId: integer,
-  ): Subcategory | SubcategoryNotFoundResponse | InternalServerErrorResponse;
+  ): Subcategory | SubcategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
-  @delete delete(@path categoryId: integer, @path subcategoryId: integer): {
+  @delete delete(
+    @path accountId: integer,
+    @path categoryId: integer,
+    @path subcategoryId: integer,
+  ): {
     @statusCode statusCode: 204;
-  } | InternalServerErrorResponse;
+  } | AccountForbiddenResponse | InternalServerErrorResponse;
 }
 
-@route("/transactions")
+@route("/accounts/{accountId}/transactions")
 @tag("Transactions")
 interface Transactions {
   @get list(
+    @path accountId: integer,
     @query from: utcDateTime,
     @query to: utcDateTime,
     @query type?: TransactionType,
     @minValue(1)
     @query categoryId?: integer,
-  ): Transaction[] | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
+  ): Transaction[] | TransactionErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @route("/category-summary")
   @get categorySummary(
+    @path accountId: integer,
     @query from: utcDateTime,
     @query to: utcDateTime,
     @query compareFrom: utcDateTime,
     @query compareTo: utcDateTime,
     @query type?: TransactionType,
-  ): CategorySummary | TransactionErrorResponse | InternalServerErrorResponse;
+  ): CategorySummary | TransactionErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @route("/summary")
   @get summary(
+    @path accountId: integer,
     @query from: utcDateTime,
     @query to: utcDateTime,
-  ): TransactionSummary | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
+  ): TransactionSummary | TransactionErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @route("/{transactionId}")
   @get get(
+    @path accountId: integer,
     @path transactionId: integer,
-  ): Transaction | TransactionNotFoundResponse | InternalServerErrorResponse;
+  ): Transaction | TransactionNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @post create(
+    @path accountId: integer,
     @body transaction: TransactionCreate,
-  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
+  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @route("/{transactionId}")
   @patch update(
+    @path accountId: integer,
     @path transactionId: integer,
     @body transaction: TransactionUpdate,
-  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | InternalServerErrorResponse;
+  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 
   @route("/{transactionId}")
-  @delete delete(@path transactionId: integer): {
+  @delete delete(
+    @path accountId: integer,
+    @path transactionId: integer,
+  ): {
     @statusCode statusCode: 204;
-  } | InternalServerErrorResponse;
+  } | AccountForbiddenResponse | InternalServerErrorResponse;
 }
 
 @route("/auth")
@@ -151,7 +174,7 @@ interface Auth {
   @route("/login")
   @post op login(
     @body loginRequest: LoginRequest
-  ): SuccessResponse | AuthUnauthorizedResponse | NotFoundResponse | NoAccountResponse | InternalServerErrorResponse;
+  ): SuccessResponse | AuthUnauthorizedResponse | NotFoundResponse | InternalServerErrorResponse;
 
   @route("/refresh")
   @post op refresh(): SuccessResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
@@ -161,9 +184,4 @@ interface Auth {
 
   @route("/me")
   @get op me(): UserInfo | AuthUnauthorizedResponse | InternalServerErrorResponse;
-
-  @route("/switch-account")
-  @post op switchAccount(
-    @body body: SwitchAccountRequest
-  ): SuccessResponse | AuthUnauthorizedResponse | AccountForbiddenResponse | InternalServerErrorResponse;
 }

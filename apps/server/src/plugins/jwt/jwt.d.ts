@@ -6,7 +6,6 @@ import '@fastify/jwt';
 
 type AccessTokenPayload = {
   userId: number;
-  accountId: number;
 };
 
 type RefreshTokenPayload = AccessTokenPayload & {

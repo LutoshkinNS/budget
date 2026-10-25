@@ -17,5 +17,5 @@ export async function meHandler(this: FastifyApp, req: FastifyRequest) {
     'auth_request'
   );
 
-  return getUserInfo(this.prisma, req.user.userId, req.user.accountId);
+  return getUserInfo(this.prisma, req.user.userId);
 }

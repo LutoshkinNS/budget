@@ -26,7 +26,7 @@ export async function updateCategoryHandler(
   if ((name === undefined && req.body.iconKey === undefined) || name === '') {
     return reply.code(400).send(CATEGORY_INVALID_UPDATE);
   }
-  const scope = { id: req.params.id, accountId: req.user.accountId };
+  const scope = { id: req.params.id, accountId: req.params.accountId };
   const existing = await findActiveCategory(this.prisma, scope);
   if (!existing) return reply.code(404).send(CATEGORY_NOT_FOUND);
 

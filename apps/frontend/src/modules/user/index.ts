@@ -1,2 +1,7 @@
 export { useMe } from "./model/useMe.ts";
-export { useSwitchAccount } from "./model/useSwitchAccount.ts";
+export {
+  getCurrentAccountIdSnapshot,
+  requireCurrentAccountId,
+  switchAccount,
+  useCurrentAccountId,
+} from "./model/selected-account.ts";

@@ -6,7 +6,7 @@ import {
   getTransactionDateRange,
   type PeriodDateRange,
 } from "../../model/period.ts";
-import { useTransactions } from "../../model/useTransactions.ts";
+import { useTransactions } from "../../model/use-transactions.ts";
 import { TransactionDayGroup } from "../transaction-day/transaction-day-group.tsx";
 
 import { EmptyState } from "./empty-state.tsx";

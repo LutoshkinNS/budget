@@ -106,7 +106,7 @@ Server handlers import generated schemas through `#s/*`. Frontend modules wrap g
 
 Current server domains:
 
-- `auth`: Telegram login, refresh/logout, current user, dev login outside production, account switching, client auth event logging.
+- `auth`: Telegram login, refresh/logout, current user, dev login outside production, client auth event logging.
 - `accounts`: account list, account update, members, invitations, invitation redemption.
 - `categories`: income and expense categories, normalized names, soft delete.
 - `subcategories`: subcategories under transaction categories.
@@ -163,9 +163,11 @@ Important frontend pages today:
 
 ## Auth and Accounts
 
-Authentication is Telegram-based. The server validates Telegram auth payloads, issues JWT-backed cookies, and uses the current account in authenticated flows.
+Authentication is Telegram-based. The server validates Telegram auth payloads and issues JWT-backed cookies that identify only the user and the session.
 
-Accounts can be shared through invite codes. Users can switch the active account, which refreshes auth cookies with the selected account context.
+Account-scoped data endpoints live under `/api/v1/accounts/{accountId}/...`; every request names its account explicitly, and the server verifies the user's access to that account through ownership or `AccountUser` membership (403 otherwise). Switching the active account is a local frontend choice persisted on the device — it issues no HTTP request and does not reissue tokens.
+
+Accounts can be shared through invite codes.
 
 ## Styling and UI
 

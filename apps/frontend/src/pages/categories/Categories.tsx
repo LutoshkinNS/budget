@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { CategoryType } from "@/modules/categories";
 import {
@@ -6,9 +6,18 @@ import {
   CreateCategory,
   DeleteCategory,
 } from "@/modules/categories";
+import { invalidateTransactionsCategorySummary } from "@/modules/transactions";
 
 export function Categories() {
   const [type, setType] = useState<CategoryType>("expense");
+
+  // Отчёты показывают имя категории, поэтому после переименования их кэш обновляется.
+  const handleCategoryUpdated = useCallback(
+    async ({ accountId }: { accountId: number }) => {
+      await invalidateTransactionsCategorySummary(accountId);
+    },
+    [],
+  );
 
   return (
     <div>
@@ -29,7 +38,11 @@ export function Categories() {
           доходы
         </button>
       </fieldset>
-      <CategoriesList key={`list-${type}`} type={type} />
+      <CategoriesList
+        key={`list-${type}`}
+        type={type}
+        onCategoryUpdated={handleCategoryUpdated}
+      />
       <CreateCategory key={`create-${type}`} type={type} />
       <DeleteCategory key={`delete-${type}`} type={type} />
     </div>

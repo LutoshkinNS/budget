@@ -8,13 +8,13 @@ import {
   countCategoryUsage,
   findActiveCategories
 } from '../repositories/categories.repository.js';
-import type { CategoryListQuery } from '../types/category.js';
+import type { AccountParams,CategoryListQuery } from '../types/category.js';
 
 export async function listCategoriesHandler(
   this: FastifyApp,
-  req: FastifyRequest<{ Querystring: CategoryListQuery }>
+  req: FastifyRequest<{ Querystring: CategoryListQuery; Params: AccountParams }>
 ) {
-  const filter = { accountId: req.user.accountId, type: req.query.type };
+  const filter = { accountId: req.params.accountId, type: req.query.type };
   if (req.query.sort === 'usage') {
     const now = new Date();
     const from = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);

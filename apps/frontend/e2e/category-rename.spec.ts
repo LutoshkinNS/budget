@@ -33,7 +33,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       const renamed = `После переименования ${type} ${colorScheme}`;
       const occupied = `Занято ${type} ${colorScheme}`;
       const response = await page.request.post(
-        backend.url + "/api/v1/categories",
+        backend.url + "/api/v1/accounts/1/categories",
         {
           data: { name, type, iconKey: "groceries" },
         },
@@ -42,13 +42,13 @@ for (const colorScheme of ["light", "dark"] as const) {
       const category = CategoriesCreateResponse.parse(await response.json());
       expect(
         (
-          await page.request.post(backend.url + "/api/v1/categories", {
+          await page.request.post(backend.url + "/api/v1/accounts/1/categories", {
             data: { name: occupied, type },
           })
         ).ok(),
       ).toBeTruthy();
       const created = await page.request.post(
-        backend.url + "/api/v1/transactions",
+        backend.url + "/api/v1/accounts/1/transactions",
         {
           data: {
             categoryId: category.id,
@@ -116,14 +116,14 @@ for (const colorScheme of ["light", "dark"] as const) {
         }),
       ).toBeVisible();
       const storedResponse = await page.request.get(
-        backend.url + "/api/v1/categories/" + category.id,
+        backend.url + "/api/v1/accounts/1/categories/" + category.id,
       );
       expect(storedResponse.ok()).toBeTruthy();
       expect(
         CategoriesCreateResponse.parse(await storedResponse.json()),
       ).toEqual({ ...category, name: renamed });
       const operationResponse = await page.request.get(
-        backend.url + "/api/v1/transactions/" + transaction.id,
+        backend.url + "/api/v1/accounts/1/transactions/" + transaction.id,
       );
       expect(operationResponse.ok()).toBeTruthy();
       expect(

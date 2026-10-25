@@ -1,1 +1,1 @@
-export { useAccountMembers } from "./model/useAccountMembers.ts";
+export { useAccountMembers } from "./model/use-account-members.ts";

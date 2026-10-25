@@ -1,1 +1,1 @@
-export { useSubcategories } from "./model/useSubcategories.ts";
+export { useSubcategories } from "./model/use-subcategories.ts";

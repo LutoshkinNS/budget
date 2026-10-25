@@ -3,6 +3,7 @@ import fastifyCors from '@fastify/cors';
 import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import fastify from 'fastify';
 
+import accountAccessPlugin from './plugins/account-access/account-access.plugin.js';
 import envPlugin from './plugins/env/envPlugin.js';
 import errorHandlerPlugin from './plugins/errorHandler/errorHandlerPlugin.js';
 import jwtPlugin from './plugins/jwt/jwtPlugin.js';
@@ -27,6 +28,7 @@ export default async function appInit() {
   await app.register(fastifyCookie);
   await app.register(prismaPlugin);
   await app.register(jwtPlugin);
+  await app.register(accountAccessPlugin);
 
   // error handler последний
   await app.register(errorHandlerPlugin);

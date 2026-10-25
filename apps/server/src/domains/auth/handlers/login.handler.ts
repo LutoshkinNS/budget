@@ -10,10 +10,7 @@ import {
   AUTH_ERRORS,
   REFRESH_TOKEN_MAX_AGE_SECONDS
 } from '../constants.js';
-import {
-  getFirstAccountId,
-  upsertUserFromTelegram
-} from '../repositories/user.repository.js';
+import { upsertUserFromTelegram } from '../repositories/user.repository.js';
 import { validateTelegramAuth } from '../validateTelegramAuth.js';
 
 type LoginRequestBody = FromSchema<typeof LoginRequest>;
@@ -52,28 +49,22 @@ export async function loginHandler(
 
   const telegramId = BigInt(req.body.id);
 
-  // Upsert пользователя — обновляем firstName/photoUrl на каждом login
+  // Upsert пользователя — обновляем firstName/photoUrl на каждом login;
+  // новый пользователь получает персональный счёт при создании
   const user = await upsertUserFromTelegram(this.prisma, {
     id: telegramId,
     first_name: req.body.first_name,
     photo_url: req.body.photo_url
   });
 
-  // Определяем первый доступный accountId
-  const accountId = getFirstAccountId(user);
-
-  if (!accountId) {
-    req.log.warn({ event: 'auth_login_failed', reason: 'no_account' });
-    return reply.code(409).send(AUTH_ERRORS.NO_ACCOUNT);
-  }
-
-  // BigInt → Number для JWT (Telegram ID < 2^53, точность не теряется)
+  // Токен удостоверяет только пользователя: наличие счетов на вход
+  // не влияет — их список отдаёт /auth/me, а доступ к конкретному счёту
+  // проверяется в каждом счёт-зависимом запросе отдельно
   const userId = Number(user.id);
 
-  const accessToken = await reply.accessJwtSign({ userId, accountId });
+  const accessToken = await reply.accessJwtSign({ userId });
   const refreshToken = await reply.refreshJwtSign({
     userId,
-    accountId,
     type: 'refresh'
   });
   const secureCookies = process.env.NODE_ENV === 'production';

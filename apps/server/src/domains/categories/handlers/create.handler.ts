@@ -8,16 +8,16 @@ import {
   createCategory,
   findActiveCategoryDuplicate
 } from '../repositories/categories.repository.js';
-import type { CategoryCreateBody } from '../types/category.js';
+import type { AccountParams, CategoryCreateBody } from '../types/category.js';
 
 import { CATEGORY_CONFLICT } from './errors.js';
 
 export async function createCategoryHandler(
   this: FastifyApp,
-  req: FastifyRequest<{ Body: CategoryCreateBody }>,
+  req: FastifyRequest<{ Body: CategoryCreateBody; Params: AccountParams }>,
   reply: FastifyReply
 ) {
-  const accountId = req.user.accountId;
+  const accountId = req.params.accountId;
   const name = req.body.name.trim();
   const nameNormalized = normalizeCategoryName(req.body.name);
   const existing = await findActiveCategoryDuplicate(this.prisma, {

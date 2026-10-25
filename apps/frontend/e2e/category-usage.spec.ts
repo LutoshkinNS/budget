@@ -17,7 +17,12 @@ test.use({
 
 type CategoryType = "income" | "expense";
 
-async function setup(page: Page, backendUrl: string, type: CategoryType) {
+async function setup(
+  page: Page,
+  backendUrl: string,
+  primaryAccountId: number,
+  type: CategoryType,
+) {
   await page.route("**/api/v1/**", async (route) => {
     const original = new URL(route.request().url());
     const response = await route.fetch({
@@ -29,9 +34,12 @@ async function setup(page: Page, backendUrl: string, type: CategoryType) {
   expect(login.ok()).toBeTruthy();
 
   const suffix = `${type}-${Date.now()}`;
-  async function createCategory(name: string) {
+  async function createCategory(
+    name: string,
+    accountId: number = primaryAccountId,
+  ) {
     const response = await page.request.post(
-      backendUrl + "/api/v1/categories",
+      backendUrl + `/api/v1/accounts/${accountId}/categories`,
       { data: { type, name: `${name} ${suffix}` } },
     );
     expect(response.ok()).toBeTruthy();
@@ -42,9 +50,13 @@ async function setup(page: Page, backendUrl: string, type: CategoryType) {
   const gamma = await createCategory("Гамма");
   const delta = await createCategory("Дельта");
 
-  async function createOperation(categoryId: number, description: string) {
+  async function createOperation(
+    categoryId: number,
+    description: string,
+    accountId: number = primaryAccountId,
+  ) {
     const response = await page.request.post(
-      backendUrl + "/api/v1/transactions",
+      backendUrl + `/api/v1/accounts/${accountId}/transactions`,
       {
         data: {
           type,
@@ -64,9 +76,12 @@ async function setup(page: Page, backendUrl: string, type: CategoryType) {
   await createOperation(beta.id, `Операция Бета 2 ${suffix}`);
 
   async function readUsageOrder() {
-    const response = await page.request.get(backendUrl + "/api/v1/categories", {
-      params: { type, sort: "usage" },
-    });
+    const response = await page.request.get(
+      backendUrl + `/api/v1/accounts/${primaryAccountId}/categories`,
+      {
+        params: { type, sort: "usage" },
+      },
+    );
     expect(response.ok()).toBeTruthy();
     return CategoriesListResponse.parse(await response.json());
   }
@@ -116,7 +131,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         readUsageOrder,
         deletionDescription,
         suffix,
-      } = await setup(page, backend.url, type);
+      } = await setup(page, backend.url, backend.primaryAccountId, type);
       expect((await readUsageOrder()).map((category) => category.id)).toEqual([
         beta.id,
         alpha.id,
@@ -157,7 +172,8 @@ for (const colorScheme of ["light", "dark"] as const) {
       const created = page.waitForResponse(
         (response) =>
           response.request().method() === "POST" &&
-          new URL(response.url()).pathname === "/api/v1/transactions",
+          new URL(response.url()).pathname ===
+            `/api/v1/accounts/${backend.primaryAccountId}/transactions`,
       );
       await page.getByRole("button", { name: alpha.name, exact: true }).click();
       expect((await created).ok()).toBeTruthy();
@@ -194,7 +210,9 @@ for (const colorScheme of ["light", "dark"] as const) {
       const updated = page.waitForResponse(
         (response) =>
           response.request().method() === "PATCH" &&
-          new URL(response.url()).pathname.startsWith("/api/v1/transactions/"),
+          new URL(response.url()).pathname.startsWith(
+            `/api/v1/accounts/${backend.primaryAccountId}/transactions/`,
+          ),
       );
       await page
         .getByRole("button", { name: "Сохранить", exact: true })
@@ -223,7 +241,9 @@ for (const colorScheme of ["light", "dark"] as const) {
       const deleted = page.waitForResponse(
         (response) =>
           response.request().method() === "DELETE" &&
-          new URL(response.url()).pathname.startsWith("/api/v1/transactions/"),
+          new URL(response.url()).pathname.startsWith(
+            `/api/v1/accounts/${backend.primaryAccountId}/transactions/`,
+          ),
       );
       await page
         .getByRole("button", {
@@ -264,29 +284,33 @@ for (const colorScheme of ["light", "dark"] as const) {
     test.setTimeout(60000);
     await page.emulateMedia({ colorScheme });
     const { alpha, beta, gamma, delta, createCategory, createOperation } =
-      await setup(page, backend.url, "expense");
+      await setup(page, backend.url, backend.primaryAccountId, "expense");
 
-    async function switchThroughApi(accountId: number) {
-      const response = await page.request.post(
-        backend.url + "/api/v1/auth/switch-account",
-        { data: { accountId } },
-      );
-      expect(response.ok()).toBeTruthy();
-    }
-
-    await switchThroughApi(backend.secondaryAccountId);
-    const secondaryRare = await createCategory("Другой редкий расход");
-    const secondaryFrequent = await createCategory("Другой частый расход");
-    await createOperation(secondaryRare.id, "Редкий расход другого счёта");
+    // Данные второго счёта создаются напрямую с его accountId в path:
+    // переключать серверный контекст больше не нужно
+    const secondaryRare = await createCategory(
+      "Другой редкий расход",
+      backend.secondaryAccountId,
+    );
+    const secondaryFrequent = await createCategory(
+      "Другой частый расход",
+      backend.secondaryAccountId,
+    );
+    await createOperation(
+      secondaryRare.id,
+      "Редкий расход другого счёта",
+      backend.secondaryAccountId,
+    );
     await createOperation(
       secondaryFrequent.id,
       "Частый расход другого счёта 1",
+      backend.secondaryAccountId,
     );
     await createOperation(
       secondaryFrequent.id,
       "Частый расход другого счёта 2",
+      backend.secondaryAccountId,
     );
-    await switchThroughApi(backend.primaryAccountId);
 
     await page.goto("/");
     await expect

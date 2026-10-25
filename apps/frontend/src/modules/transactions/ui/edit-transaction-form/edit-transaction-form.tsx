@@ -5,7 +5,7 @@ import { Input } from "@/common/ui/input/Input";
 import { useCategories } from "@/modules/categories";
 
 import { parseTransactionAmountInput } from "../../model/amount.ts";
-import { useUpdateTransaction } from "../../model/useUpdateTransaction.ts";
+import { useUpdateTransaction } from "../../model/use-update-transaction.ts";
 
 import s from "./edit-transaction-form.module.css";
 

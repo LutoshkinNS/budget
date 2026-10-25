@@ -1,5 +1,5 @@
 import CategorySummary from '#s/CategorySummary.js';
-import idObj from '#s/idObj.js';
+import ForbiddenError from '#s/ForbiddenError.js';
 import NotFoundError from '#s/NotFoundError.js';
 import Transaction from '#s/Transaction.js';
 import TransactionCreate from '#s/TransactionCreate.js';
@@ -14,6 +14,25 @@ import { buildCategorySummaryResponse } from './category-summary.js';
 const transactionTypes = ['income', 'expense'] as const;
 
 type TransactionType = (typeof transactionTypes)[number];
+
+const accountParamsSchema = {
+  type: 'object',
+  properties: {
+    accountId: { type: 'integer', minimum: 1 }
+  },
+  required: ['accountId'],
+  additionalProperties: false
+} as const;
+
+const transactionParamsSchema = {
+  type: 'object',
+  properties: {
+    accountId: { type: 'integer', minimum: 1 },
+    id: { type: 'integer' }
+  },
+  required: ['accountId', 'id'],
+  additionalProperties: false
+} as const;
 
 const notFound = (message: string) => ({
   code: 'NOT_FOUND' as const,
@@ -134,12 +153,15 @@ async function validateCategoryFilter(
 }
 
 export default async function transactionsModule(app: FastifyApp) {
+  // Токен удостоверяет пользователя; доступ к счёту из path проверяется отдельно
   app.addHook('preHandler', app.authenticate);
+  app.addHook('preHandler', app.requireAccountAccess);
 
   app.get(
     '/',
     {
       schema: {
+        params: accountParamsSchema,
         querystring: {
           type: 'object',
           required: ['from', 'to'],
@@ -154,6 +176,7 @@ export default async function transactionsModule(app: FastifyApp) {
         response: {
           200: { type: 'array', items: Transaction },
           400: ValidationError,
+          403: ForbiddenError,
           404: NotFoundError
         }
       }
@@ -184,7 +207,7 @@ export default async function transactionsModule(app: FastifyApp) {
         const category = await validateCategoryFilter(
           this,
           categoryId,
-          req.user.accountId,
+          req.params.accountId,
           type
         );
 
@@ -195,7 +218,7 @@ export default async function transactionsModule(app: FastifyApp) {
 
       const transactions = await this.prisma.transaction.findMany({
         where: {
-          accountId: req.user.accountId,
+          accountId: req.params.accountId,
           date: { gte: dateRange.from, lt: dateRange.to },
           ...(type === undefined ? {} : { type }),
           ...(categoryId === undefined ? {} : { categoryId })
@@ -211,6 +234,7 @@ export default async function transactionsModule(app: FastifyApp) {
     '/category-summary',
     {
       schema: {
+        params: accountParamsSchema,
         querystring: {
           type: 'object',
           required: ['from', 'to', 'compareFrom', 'compareTo'],
@@ -223,7 +247,11 @@ export default async function transactionsModule(app: FastifyApp) {
           },
           additionalProperties: false
         },
-        response: { 200: CategorySummary, 400: ValidationError }
+        response: {
+          200: CategorySummary,
+          400: ValidationError,
+          403: ForbiddenError
+        }
       }
     },
     async function (req, reply) {
@@ -251,7 +279,7 @@ export default async function transactionsModule(app: FastifyApp) {
           );
       }
 
-      const accountId = req.user.accountId;
+      const accountId = req.params.accountId;
       const categorySummaryWhere = {
         accountId,
         type
@@ -313,6 +341,7 @@ export default async function transactionsModule(app: FastifyApp) {
     '/summary',
     {
       schema: {
+        params: accountParamsSchema,
         querystring: {
           type: 'object',
           required: ['from', 'to'],
@@ -325,6 +354,7 @@ export default async function transactionsModule(app: FastifyApp) {
         response: {
           200: TransactionSummary,
           400: ValidationError,
+          403: ForbiddenError,
           404: NotFoundError
         }
       }
@@ -336,7 +366,7 @@ export default async function transactionsModule(app: FastifyApp) {
         return reply.code(400).send(dateRange);
       }
 
-      const accountId = req.user.accountId;
+      const accountId = req.params.accountId;
       const [account, periodGroups] = await Promise.all([
         this.prisma.account.findFirst({
           where: { id: accountId }
@@ -385,15 +415,15 @@ export default async function transactionsModule(app: FastifyApp) {
     '/:id',
     {
       schema: {
-        params: idObj,
-        response: { 200: Transaction, 404: NotFoundError }
+        params: transactionParamsSchema,
+        response: { 200: Transaction, 403: ForbiddenError, 404: NotFoundError }
       }
     },
     async function (req, reply) {
       const transaction = await this.prisma.transaction.findFirst({
         where: {
           id: req.params.id,
-          accountId: req.user.accountId
+          accountId: req.params.accountId
         }
       });
 
@@ -411,12 +441,18 @@ export default async function transactionsModule(app: FastifyApp) {
     '/',
     {
       schema: {
+        params: accountParamsSchema,
         body: TransactionCreate,
-        response: { 200: Transaction, 400: ValidationError, 404: NotFoundError }
+        response: {
+          200: Transaction,
+          400: ValidationError,
+          403: ForbiddenError,
+          404: NotFoundError
+        }
       }
     },
     async function (req, reply) {
-      const accountId = req.user.accountId;
+      const accountId = req.params.accountId;
       const category = await validateCategory(
         this,
         req.body.categoryId,
@@ -448,13 +484,18 @@ export default async function transactionsModule(app: FastifyApp) {
     '/:id',
     {
       schema: {
-        params: idObj,
+        params: transactionParamsSchema,
         body: TransactionUpdate,
-        response: { 200: Transaction, 400: ValidationError, 404: NotFoundError }
+        response: {
+          200: Transaction,
+          400: ValidationError,
+          403: ForbiddenError,
+          404: NotFoundError
+        }
       }
     },
     async function (req, reply) {
-      const accountId = req.user.accountId;
+      const accountId = req.params.accountId;
 
       const transaction = await this.prisma.transaction.findFirst({
         where: {
@@ -519,15 +560,15 @@ export default async function transactionsModule(app: FastifyApp) {
     '/:id',
     {
       schema: {
-        params: idObj,
-        response: { 204: { type: 'null' } }
+        params: transactionParamsSchema,
+        response: { 204: { type: 'null' }, 403: ForbiddenError }
       }
     },
     async function (req, reply) {
       await this.prisma.transaction.deleteMany({
         where: {
           id: req.params.id,
-          accountId: req.user.accountId
+          accountId: req.params.accountId
         }
       });
 

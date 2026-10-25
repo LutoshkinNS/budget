@@ -6,6 +6,10 @@
  */
 import * as zod from "zod";
 
+export const TransactionsListParams = zod.object({
+  accountId: zod.number(),
+});
+
 export const TransactionsListQueryParams = zod.object({
   from: zod.iso.datetime({}),
   to: zod.iso.datetime({}),
@@ -26,6 +30,10 @@ export const TransactionsListResponseItem = zod.object({
   date: zod.iso.datetime({}),
 });
 export const TransactionsListResponse = zod.array(TransactionsListResponseItem);
+
+export const TransactionsCreateParams = zod.object({
+  accountId: zod.number(),
+});
 
 export const transactionsCreateBodyAmountMin = 0.01;
 
@@ -48,6 +56,10 @@ export const TransactionsCreateResponse = zod.object({
   type: zod.enum(["income", "expense"]),
   description: zod.union([zod.string(), zod.null()]).optional(),
   date: zod.iso.datetime({}),
+});
+
+export const TransactionsCategorySummaryParams = zod.object({
+  accountId: zod.number(),
 });
 
 export const TransactionsCategorySummaryQueryParams = zod.object({
@@ -86,6 +98,10 @@ export const TransactionsCategorySummaryResponse = zod.object({
   ),
 });
 
+export const TransactionsSummaryParams = zod.object({
+  accountId: zod.number(),
+});
+
 export const TransactionsSummaryQueryParams = zod.object({
   from: zod.iso.datetime({}),
   to: zod.iso.datetime({}),
@@ -100,6 +116,7 @@ export const TransactionsSummaryResponse = zod.object({
 });
 
 export const TransactionsGetParams = zod.object({
+  accountId: zod.number(),
   transactionId: zod.number(),
 });
 
@@ -117,6 +134,7 @@ export const TransactionsGetResponse = zod.object({
 });
 
 export const TransactionsUpdateParams = zod.object({
+  accountId: zod.number(),
   transactionId: zod.number(),
 });
 
@@ -144,5 +162,6 @@ export const TransactionsUpdateResponse = zod.object({
 });
 
 export const TransactionsDeleteParams = zod.object({
+  accountId: zod.number(),
   transactionId: zod.number(),
 });

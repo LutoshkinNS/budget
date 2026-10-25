@@ -14,9 +14,6 @@ model Subcategory {
 }
 
 model SubcategoryCreate {
-  @minValue(1)
-  categoryId: integer;
-
   @minLength(1)
   name: string;
 }

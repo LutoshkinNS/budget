@@ -1,21 +1,46 @@
-import { queryClient } from "@/common/api/appQuery";
 import { useCategoriesUpdate } from "@/common/api/generate/categories/categories.gen.ts";
-import { getTransactionsCategorySummaryQueryKey } from "@/common/api/generate/transactions/transactions.gen";
+import type { CategoryUpdateDTO } from "@/common/api/generate/model";
+import { requireCurrentAccountId } from "@/modules/user";
 
-import { useInvalidateCategories } from "./useCategories";
+import { invalidateCategories } from "./category-cache.ts";
 
-export function useUpdateCategory() {
-  const invalidateCategories = useInvalidateCategories();
-  return useCategoriesUpdate({
+/** Скоп завершённого обновления категории; счёт неизменяемо принадлежит мутации. */
+export type CategoryUpdatedScope = {
+  accountId: number;
+  categoryId: number;
+};
+
+/** Подключается точкой композиции сценария; Promise ожидается мутацией. */
+export type CategoryUpdatedCallback = (
+  scope: CategoryUpdatedScope,
+) => Promise<void> | void;
+
+export function useUpdateCategory(options?: {
+  onCategoryUpdated?: CategoryUpdatedCallback;
+}) {
+  const { mutateAsync: rawMutateAsync, ...rest } = useCategoriesUpdate({
     mutation: {
+      // Счёт мутации фиксируется её variables — переключение счёта не меняет
+      // ни выполнение запроса, ни область инвалидаций
       onSuccess: async (_category, variables) => {
-        await Promise.all([
-          invalidateCategories(variables.categoryId),
-          queryClient.invalidateQueries({
-            queryKey: getTransactionsCategorySummaryQueryKey(),
-          }),
-        ]);
+        await invalidateCategories(variables.accountId, variables.categoryId);
+        await options?.onCategoryUpdated?.({
+          accountId: variables.accountId,
+          categoryId: variables.categoryId,
+        });
       },
     },
   });
+
+  // accountId внедряется в момент вызова из выбранного счёта
+  const mutateAsync = (
+    variables: { categoryId: number; data: CategoryUpdateDTO },
+    options?: Parameters<typeof rawMutateAsync>[1],
+  ) =>
+    rawMutateAsync(
+      { accountId: requireCurrentAccountId(), ...variables },
+      options,
+    );
+
+  return { mutateAsync, ...rest };
 }

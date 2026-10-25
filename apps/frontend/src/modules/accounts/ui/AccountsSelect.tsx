@@ -1,5 +1,5 @@
 import { FormBlock } from "@/common/ui/form-block/FormBlock.tsx";
-import { useMe, useSwitchAccount } from "@/modules/user";
+import { switchAccount, useCurrentAccountId, useMe } from "@/modules/user";
 
 const IDS = {
   SELECT: "select",
@@ -11,15 +11,16 @@ const FIELD_VALUES = {
 
 export function AccountsSelect() {
   const { data: me } = useMe();
-  const { mutate: switchAccount, isPending } = useSwitchAccount();
+  const currentAccountId = useCurrentAccountId();
 
   const accounts = me?.accounts ?? [];
-  const currentAccountId = me?.currentAccountId;
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const accountId = Number(e.target.value);
     if (accountId && accountId !== currentAccountId) {
-      switchAccount({ data: { accountId } });
+      // Локальное переключение: смысл любого запроса задан его собственным
+      // accountId, поэтому HTTP и перевыпуск токенов не нужны
+      switchAccount(accountId);
     }
   };
 
@@ -30,7 +31,6 @@ export function AccountsSelect() {
         id={IDS.SELECT}
         value={currentAccountId ?? ""}
         onChange={handleChange}
-        disabled={isPending}
       >
         {accounts.length === 0 ? (
           <option value="">Аккаунтов не найдено</option>

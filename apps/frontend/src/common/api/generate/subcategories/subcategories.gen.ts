@@ -22,6 +22,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  ForbiddenErrorDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
   SubcategoryCreateDTO,
@@ -33,16 +34,20 @@ import { fetcher } from "../../fetcher";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getCategorySubcategoriesListUrl = (categoryId: number) => {
-  return `/api/v1/categories/${categoryId}/subcategories`;
+export const getCategorySubcategoriesListUrl = (
+  accountId: number,
+  categoryId: number,
+) => {
+  return `/api/v1/accounts/${accountId}/categories/${categoryId}/subcategories`;
 };
 
 export const categorySubcategoriesList = async (
+  accountId: number,
   categoryId: number,
   options?: RequestInit,
 ): Promise<SubcategoryDTO[]> => {
   return fetcher<SubcategoryDTO[]>(
-    getCategorySubcategoriesListUrl(categoryId),
+    getCategorySubcategoriesListUrl(accountId, categoryId),
     {
       ...options,
       method: "GET",
@@ -50,17 +55,22 @@ export const categorySubcategoriesList = async (
   );
 };
 
-export const getCategorySubcategoriesListQueryKey = (categoryId: number) => {
+export const getCategorySubcategoriesListQueryKey = (
+  accountId: number,
+  categoryId: number,
+) => {
   return [
     "categorySubcategoriesList",
     ...(categoryId ? [categoryId] : []),
+    ...(accountId ? [accountId] : []),
   ] as const;
 };
 
 export const getCategorySubcategoriesListQueryOptions = <
   TData = Awaited<ReturnType<typeof categorySubcategoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   options?: {
     query?: Partial<
@@ -76,17 +86,21 @@ export const getCategorySubcategoriesListQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getCategorySubcategoriesListQueryKey(categoryId);
+    queryOptions?.queryKey ??
+    getCategorySubcategoriesListQueryKey(accountId, categoryId);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof categorySubcategoriesList>>
   > = ({ signal }) =>
-    categorySubcategoriesList(categoryId, { signal, ...requestOptions });
+    categorySubcategoriesList(accountId, categoryId, {
+      signal,
+      ...requestOptions,
+    });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!categoryId,
+    enabled: !!(accountId && categoryId),
     ...queryOptions,
   } as UseQueryOptions<
     Awaited<ReturnType<typeof categorySubcategoriesList>>,
@@ -99,13 +113,15 @@ export type CategorySubcategoriesListQueryResult = NonNullable<
   Awaited<ReturnType<typeof categorySubcategoriesList>>
 >;
 export type CategorySubcategoriesListQueryError =
+  | ForbiddenErrorDTO
   | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export function useCategorySubcategoriesList<
   TData = Awaited<ReturnType<typeof categorySubcategoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   options: {
     query: Partial<
@@ -131,8 +147,9 @@ export function useCategorySubcategoriesList<
 };
 export function useCategorySubcategoriesList<
   TData = Awaited<ReturnType<typeof categorySubcategoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   options?: {
     query?: Partial<
@@ -158,8 +175,9 @@ export function useCategorySubcategoriesList<
 };
 export function useCategorySubcategoriesList<
   TData = Awaited<ReturnType<typeof categorySubcategoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   options?: {
     query?: Partial<
@@ -178,8 +196,9 @@ export function useCategorySubcategoriesList<
 
 export function useCategorySubcategoriesList<
   TData = Awaited<ReturnType<typeof categorySubcategoriesList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   options?: {
     query?: Partial<
@@ -196,6 +215,7 @@ export function useCategorySubcategoriesList<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getCategorySubcategoriesListQueryOptions(
+    accountId,
     categoryId,
     options,
   );
@@ -210,28 +230,33 @@ export function useCategorySubcategoriesList<
 
 export const invalidateCategorySubcategoriesList = async (
   queryClient: QueryClient,
+  accountId: number,
   categoryId: number,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
-    { queryKey: getCategorySubcategoriesListQueryKey(categoryId) },
+    { queryKey: getCategorySubcategoriesListQueryKey(accountId, categoryId) },
     options,
   );
 
   return queryClient;
 };
 
-export const getCategorySubcategoriesCreateUrl = (categoryId: number) => {
-  return `/api/v1/categories/${categoryId}/subcategories`;
+export const getCategorySubcategoriesCreateUrl = (
+  accountId: number,
+  categoryId: number,
+) => {
+  return `/api/v1/accounts/${accountId}/categories/${categoryId}/subcategories`;
 };
 
 export const categorySubcategoriesCreate = async (
+  accountId: number,
   categoryId: number,
   subcategoryCreateDTO: SubcategoryCreateDTO,
   options?: RequestInit,
 ): Promise<SubcategoryDTO> => {
   return fetcher<SubcategoryDTO>(
-    getCategorySubcategoriesCreateUrl(categoryId),
+    getCategorySubcategoriesCreateUrl(accountId, categoryId),
     {
       ...options,
       method: "POST",
@@ -242,20 +267,20 @@ export const categorySubcategoriesCreate = async (
 };
 
 export const getCategorySubcategoriesCreateMutationOptions = <
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof categorySubcategoriesCreate>>,
     TError,
-    { categoryId: number; data: SubcategoryCreateDTO },
+    { accountId: number; categoryId: number; data: SubcategoryCreateDTO },
     TContext
   >;
   request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof categorySubcategoriesCreate>>,
   TError,
-  { categoryId: number; data: SubcategoryCreateDTO },
+  { accountId: number; categoryId: number; data: SubcategoryCreateDTO },
   TContext
 > => {
   const mutationKey = ["categorySubcategoriesCreate"];
@@ -269,11 +294,16 @@ export const getCategorySubcategoriesCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof categorySubcategoriesCreate>>,
-    { categoryId: number; data: SubcategoryCreateDTO }
+    { accountId: number; categoryId: number; data: SubcategoryCreateDTO }
   > = (props) => {
-    const { categoryId, data } = props ?? {};
+    const { accountId, categoryId, data } = props ?? {};
 
-    return categorySubcategoriesCreate(categoryId, data, requestOptions);
+    return categorySubcategoriesCreate(
+      accountId,
+      categoryId,
+      data,
+      requestOptions,
+    );
   };
 
   return { mutationFn, ...mutationOptions };
@@ -285,17 +315,18 @@ export type CategorySubcategoriesCreateMutationResult = NonNullable<
 export type CategorySubcategoriesCreateMutationBody = SubcategoryCreateDTO;
 export type CategorySubcategoriesCreateMutationError =
   | ValidationErrorDTO
+  | ForbiddenErrorDTO
   | InternalServerErrorDTO;
 
 export const useCategorySubcategoriesCreate = <
-  TError = ValidationErrorDTO | InternalServerErrorDTO,
+  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof categorySubcategoriesCreate>>,
       TError,
-      { categoryId: number; data: SubcategoryCreateDTO },
+      { accountId: number; categoryId: number; data: SubcategoryCreateDTO },
       TContext
     >;
     request?: SecondParameter<typeof fetcher>;
@@ -304,7 +335,7 @@ export const useCategorySubcategoriesCreate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof categorySubcategoriesCreate>>,
   TError,
-  { categoryId: number; data: SubcategoryCreateDTO },
+  { accountId: number; categoryId: number; data: SubcategoryCreateDTO },
   TContext
 > => {
   return useMutation(
@@ -313,19 +344,21 @@ export const useCategorySubcategoriesCreate = <
   );
 };
 export const getCategorySubcategoriesGetUrl = (
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
 ) => {
-  return `/api/v1/categories/${categoryId}/subcategories/${subcategoryId}`;
+  return `/api/v1/accounts/${accountId}/categories/${categoryId}/subcategories/${subcategoryId}`;
 };
 
 export const categorySubcategoriesGet = async (
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: RequestInit,
 ): Promise<SubcategoryDTO> => {
   return fetcher<SubcategoryDTO>(
-    getCategorySubcategoriesGetUrl(categoryId, subcategoryId),
+    getCategorySubcategoriesGetUrl(accountId, categoryId, subcategoryId),
     {
       ...options,
       method: "GET",
@@ -334,6 +367,7 @@ export const categorySubcategoriesGet = async (
 };
 
 export const getCategorySubcategoriesGetQueryKey = (
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
 ) => {
@@ -341,13 +375,15 @@ export const getCategorySubcategoriesGetQueryKey = (
     "categorySubcategoriesGet",
     ...(subcategoryId ? [subcategoryId] : []),
     ...(categoryId ? [categoryId] : []),
+    ...(accountId ? [accountId] : []),
   ] as const;
 };
 
 export const getCategorySubcategoriesGetQueryOptions = <
   TData = Awaited<ReturnType<typeof categorySubcategoriesGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: {
@@ -365,12 +401,12 @@ export const getCategorySubcategoriesGetQueryOptions = <
 
   const queryKey =
     queryOptions?.queryKey ??
-    getCategorySubcategoriesGetQueryKey(categoryId, subcategoryId);
+    getCategorySubcategoriesGetQueryKey(accountId, categoryId, subcategoryId);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof categorySubcategoriesGet>>
   > = ({ signal }) =>
-    categorySubcategoriesGet(categoryId, subcategoryId, {
+    categorySubcategoriesGet(accountId, categoryId, subcategoryId, {
       signal,
       ...requestOptions,
     });
@@ -378,7 +414,7 @@ export const getCategorySubcategoriesGetQueryOptions = <
   return {
     queryKey,
     queryFn,
-    enabled: !!(categoryId && subcategoryId),
+    enabled: !!(accountId && categoryId && subcategoryId),
     ...queryOptions,
   } as UseQueryOptions<
     Awaited<ReturnType<typeof categorySubcategoriesGet>>,
@@ -391,13 +427,15 @@ export type CategorySubcategoriesGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof categorySubcategoriesGet>>
 >;
 export type CategorySubcategoriesGetQueryError =
+  | ForbiddenErrorDTO
   | NotFoundErrorDTO
   | InternalServerErrorDTO;
 
 export function useCategorySubcategoriesGet<
   TData = Awaited<ReturnType<typeof categorySubcategoriesGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options: {
@@ -424,8 +462,9 @@ export function useCategorySubcategoriesGet<
 };
 export function useCategorySubcategoriesGet<
   TData = Awaited<ReturnType<typeof categorySubcategoriesGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: {
@@ -452,8 +491,9 @@ export function useCategorySubcategoriesGet<
 };
 export function useCategorySubcategoriesGet<
   TData = Awaited<ReturnType<typeof categorySubcategoriesGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: {
@@ -473,8 +513,9 @@ export function useCategorySubcategoriesGet<
 
 export function useCategorySubcategoriesGet<
   TData = Awaited<ReturnType<typeof categorySubcategoriesGet>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
 >(
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: {
@@ -492,6 +533,7 @@ export function useCategorySubcategoriesGet<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getCategorySubcategoriesGetQueryOptions(
+    accountId,
     categoryId,
     subcategoryId,
     options,
@@ -507,13 +549,18 @@ export function useCategorySubcategoriesGet<
 
 export const invalidateCategorySubcategoriesGet = async (
   queryClient: QueryClient,
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: InvalidateOptions,
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
     {
-      queryKey: getCategorySubcategoriesGetQueryKey(categoryId, subcategoryId),
+      queryKey: getCategorySubcategoriesGetQueryKey(
+        accountId,
+        categoryId,
+        subcategoryId,
+      ),
     },
     options,
   );
@@ -522,19 +569,21 @@ export const invalidateCategorySubcategoriesGet = async (
 };
 
 export const getCategorySubcategoriesDeleteUrl = (
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
 ) => {
-  return `/api/v1/categories/${categoryId}/subcategories/${subcategoryId}`;
+  return `/api/v1/accounts/${accountId}/categories/${categoryId}/subcategories/${subcategoryId}`;
 };
 
 export const categorySubcategoriesDelete = async (
+  accountId: number,
   categoryId: number,
   subcategoryId: number,
   options?: RequestInit,
 ): Promise<void> => {
   return fetcher<void>(
-    getCategorySubcategoriesDeleteUrl(categoryId, subcategoryId),
+    getCategorySubcategoriesDeleteUrl(accountId, categoryId, subcategoryId),
     {
       ...options,
       method: "DELETE",
@@ -543,20 +592,20 @@ export const categorySubcategoriesDelete = async (
 };
 
 export const getCategorySubcategoriesDeleteMutationOptions = <
-  TError = InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof categorySubcategoriesDelete>>,
     TError,
-    { categoryId: number; subcategoryId: number },
+    { accountId: number; categoryId: number; subcategoryId: number },
     TContext
   >;
   request?: SecondParameter<typeof fetcher>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof categorySubcategoriesDelete>>,
   TError,
-  { categoryId: number; subcategoryId: number },
+  { accountId: number; categoryId: number; subcategoryId: number },
   TContext
 > => {
   const mutationKey = ["categorySubcategoriesDelete"];
@@ -570,11 +619,12 @@ export const getCategorySubcategoriesDeleteMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof categorySubcategoriesDelete>>,
-    { categoryId: number; subcategoryId: number }
+    { accountId: number; categoryId: number; subcategoryId: number }
   > = (props) => {
-    const { categoryId, subcategoryId } = props ?? {};
+    const { accountId, categoryId, subcategoryId } = props ?? {};
 
     return categorySubcategoriesDelete(
+      accountId,
       categoryId,
       subcategoryId,
       requestOptions,
@@ -588,17 +638,19 @@ export type CategorySubcategoriesDeleteMutationResult = NonNullable<
   Awaited<ReturnType<typeof categorySubcategoriesDelete>>
 >;
 
-export type CategorySubcategoriesDeleteMutationError = InternalServerErrorDTO;
+export type CategorySubcategoriesDeleteMutationError =
+  | ForbiddenErrorDTO
+  | InternalServerErrorDTO;
 
 export const useCategorySubcategoriesDelete = <
-  TError = InternalServerErrorDTO,
+  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof categorySubcategoriesDelete>>,
       TError,
-      { categoryId: number; subcategoryId: number },
+      { accountId: number; categoryId: number; subcategoryId: number },
       TContext
     >;
     request?: SecondParameter<typeof fetcher>;
@@ -607,7 +659,7 @@ export const useCategorySubcategoriesDelete = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof categorySubcategoriesDelete>>,
   TError,
-  { categoryId: number; subcategoryId: number },
+  { accountId: number; categoryId: number; subcategoryId: number },
   TContext
 > => {
   return useMutation(

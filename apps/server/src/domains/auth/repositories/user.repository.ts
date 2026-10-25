@@ -102,11 +102,7 @@ export function getFirstAccountId(
 /**
  * Получает информацию о пользователе и его аккаунтах
  */
-export async function getUserInfo(
-  prisma: PrismaClient,
-  userId: number,
-  currentAccountId: number
-) {
+export async function getUserInfo(prisma: PrismaClient, userId: number) {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: BigInt(userId) },
     include: {
@@ -134,7 +130,6 @@ export async function getUserInfo(
 
   return {
     userId,
-    currentAccountId,
     accounts
   };
 }

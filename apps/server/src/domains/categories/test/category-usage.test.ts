@@ -18,6 +18,7 @@ import {
 
 import appInit from '#src/appInit.js';
 
+import subcategoriesModule from '../../subcategories/subcategories.js';
 import transactionsModule from '../../transactions/transactions.js';
 import categoriesRoutes from '../routes.js';
 
@@ -70,25 +71,25 @@ beforeAll(async () => {
   await app.prisma.accountUser.create({
     data: { accountId, userId: 2n }
   });
-  await app.register(categoriesRoutes, { prefix: '/api/v1/categories' });
-  await app.register(transactionsModule, { prefix: '/api/v1/transactions' });
-  app.get<{ Querystring: { userId: string; accountId: string } }>(
+  await app.register(categoriesRoutes, {
+    prefix: '/api/v1/accounts/:accountId/categories'
+  });
+  await app.register(subcategoriesModule, {
+    prefix: '/api/v1/accounts/:accountId/categories/:categoryId/subcategories'
+  });
+  await app.register(transactionsModule, {
+    prefix: '/api/v1/accounts/:accountId/transactions'
+  });
+  app.get<{ Querystring: { userId: string } }>(
     '/test-token',
     async (request, reply) =>
       reply.accessJwtSign({
-        userId: Number(request.query.userId),
-        accountId: Number(request.query.accountId)
+        userId: Number(request.query.userId)
       })
   );
   await app.ready();
-  for (const [userId, tokenAccountId] of [
-    [1, accountId],
-    [2, accountId],
-    [3, otherAccountId]
-  ]) {
-    const token = await app.inject(
-      `/test-token?userId=${userId}&accountId=${tokenAccountId}`
-    );
+  for (const userId of [1, 2, 3]) {
+    const token = await app.inject(`/test-token?userId=${userId}`);
     cookies.set(userId, 'accessToken=' + token.body);
   }
 });
@@ -151,9 +152,13 @@ async function createTransaction(
   });
 }
 
-async function listCategories(userId = 1, query = 'sort=usage&type=expense') {
+async function listCategories(
+  userId = 1,
+  query = 'sort=usage&type=expense',
+  scopeAccountId = userId === 3 ? otherAccountId : accountId
+) {
   return app.inject({
-    url: `/api/v1/categories?${query}`,
+    url: `/api/v1/accounts/${scopeAccountId}/categories?${query}`,
     headers: { cookie: cookies.get(userId) }
   });
 }
@@ -270,7 +275,7 @@ describe('category usage ordering API', () => {
 
     const updated = await app.inject({
       method: 'PATCH',
-      url: `/api/v1/transactions/${transaction.id}`,
+      url: `/api/v1/accounts/${accountId}/transactions/${transaction.id}`,
       headers: { cookie: cookies.get(1) },
       payload: {
         type: 'expense',
@@ -289,7 +294,7 @@ describe('category usage ordering API', () => {
 
     const savedAgain = await app.inject({
       method: 'PATCH',
-      url: `/api/v1/transactions/${transaction.id}`,
+      url: `/api/v1/accounts/${accountId}/transactions/${transaction.id}`,
       headers: { cookie: cookies.get(1) },
       payload: {
         type: 'expense',
@@ -308,7 +313,7 @@ describe('category usage ordering API', () => {
 
     const deleted = await app.inject({
       method: 'DELETE',
-      url: `/api/v1/transactions/${transaction.id}`,
+      url: `/api/v1/accounts/${accountId}/transactions/${transaction.id}`,
       headers: { cookie: cookies.get(1) }
     });
     assert.equal(deleted.statusCode, 204, deleted.body);
@@ -325,7 +330,7 @@ describe('category usage ordering API', () => {
   it('keeps the default list path and rejects unsupported sort values', async () => {
     const category = await createCategory('Без сортировки');
     const normal = await app.inject({
-      url: '/api/v1/categories?type=expense',
+      url: `/api/v1/accounts/${accountId}/categories?type=expense`,
       headers: { cookie: cookies.get(1) }
     });
     assert.equal(normal.statusCode, 200, normal.body);
@@ -333,5 +338,95 @@ describe('category usage ordering API', () => {
 
     const invalid = await listCategories(1, 'sort=name');
     assert.equal(invalid.statusCode, 400, invalid.body);
+  });
+
+  it('rejects account without membership with 403 and keeps the account explicit in the path', async () => {
+    await createCategory('Недоступная частота');
+    // Пользователь 3 владеет другим счётом, но не участвует в общем
+    const foreign = await app.inject({
+      url: `/api/v1/accounts/${accountId}/categories?sort=usage`,
+      headers: { cookie: cookies.get(3) }
+    });
+    assert.equal(foreign.statusCode, 403, foreign.body);
+    assert.equal(foreign.json<{ code: string }>().code, 'FORBIDDEN');
+
+    // Несуществующий счёт неотличим от чужого
+    const missing = await app.inject({
+      url: '/api/v1/accounts/999999/categories',
+      headers: { cookie: cookies.get(1) }
+    });
+    assert.equal(missing.statusCode, 403, missing.body);
+
+    // Участник по членству AccountUser проходит проверку доступа
+    const member = await app.inject({
+      url: `/api/v1/accounts/${accountId}/categories`,
+      headers: { cookie: cookies.get(2) }
+    });
+    assert.equal(member.statusCode, 200, member.body);
+  });
+
+  it('does not read or change an entity of another account under an accessible account path', async () => {
+    // Контрпример ТЗ §6.2: пользователь состоит в A и B, сущность из B
+    await app.prisma.accountUser.create({
+      data: { accountId: otherAccountId, userId: 1n }
+    });
+    const foreignCategory = await app.prisma.transactionCategory.create({
+      data: {
+        accountId: otherAccountId,
+        type: 'expense',
+        name: 'Чужая сущность',
+        nameNormalized: 'чужая сущность'
+      }
+    });
+    const foreignTransaction = await app.prisma.transaction.create({
+      data: {
+        accountId: otherAccountId,
+        userId: 3n,
+        categoryId: foreignCategory.id,
+        type: 'expense',
+        amount: 5,
+        date: now
+      }
+    });
+
+    const path = (entity: string) =>
+      `/api/v1/accounts/${accountId}/${entity}`;
+    const requests = [
+      { method: 'GET', url: path(`categories/${foreignCategory.id}`) },
+      {
+        method: 'PATCH',
+        url: path(`categories/${foreignCategory.id}`),
+        payload: { name: 'Не должно сохраниться' }
+      },
+      { method: 'GET', url: path(`transactions/${foreignTransaction.id}`) },
+      {
+        method: 'POST',
+        url: path(`categories/${foreignCategory.id}/subcategories`),
+        payload: { name: 'Подкатегория чужой категории' }
+      }
+    ] as const;
+
+    for (const req of requests) {
+      const response = await app.inject({
+        method: req.method,
+        url: req.url,
+        headers: { cookie: cookies.get(1) },
+        ...('payload' in req ? { payload: req.payload } : {})
+      });
+      // Доступ к счёту path есть, но сущность ему не принадлежит — 404,
+      // семантика отсутствующего ресурса вместо 403/500
+      assert.equal(response.statusCode, 404, `${req.method} ${req.url}`);
+    }
+
+    const stored = await app.prisma.transactionCategory.findUniqueOrThrow({
+      where: { id: foreignCategory.id }
+    });
+    assert.equal(stored.name, 'Чужая сущность');
+    assert.equal(
+      await app.prisma.subcategory.count({
+        where: { categoryId: foreignCategory.id }
+      }),
+      0
+    );
   });
 });

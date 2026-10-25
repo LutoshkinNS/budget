@@ -1,4 +1,4 @@
-import { useCategories } from "../model/useCategories.ts";
+import { useCategories } from "../model/use-categories.ts";
 
 import { CategoryKeyboard } from "./category-keyboard/category-keyboard";
 

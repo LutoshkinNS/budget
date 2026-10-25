@@ -4,13 +4,9 @@ import type { FastifyApp } from '#src/appInit.js';
 
 import {
   ACCESS_TOKEN_MAX_AGE_SECONDS,
-  AUTH_ERRORS,
   REFRESH_TOKEN_MAX_AGE_SECONDS
 } from '../constants.js';
-import {
-  findOrCreateUser,
-  getFirstAccountId
-} from '../repositories/user.repository.js';
+import { findOrCreateUser } from '../repositories/user.repository.js';
 
 const DEV_USER_ID = BigInt(1);
 
@@ -20,17 +16,10 @@ export async function devLoginHandler(
   reply: FastifyReply
 ) {
   const user = await findOrCreateUser(this.prisma, DEV_USER_ID);
-  const accountId = getFirstAccountId(user);
-
-  if (!accountId) {
-    return reply.code(409).send(AUTH_ERRORS.NO_ACCOUNT);
-  }
-
   const userId = Number(user.id);
-  const accessToken = await reply.accessJwtSign({ userId, accountId });
+  const accessToken = await reply.accessJwtSign({ userId });
   const refreshToken = await reply.refreshJwtSign({
     userId,
-    accountId,
     type: 'refresh'
   });
 

@@ -7,14 +7,14 @@ import type {
   TransactionsListParams,
 } from "@/common/api/generate/model";
 import {
-  useTransactionsCategorySummary,
-  useTransactionsList,
-} from "@/common/api/generate/transactions/transactions.gen.ts";
-import {
   TransactionsCategorySummaryResponse,
   TransactionsListResponse,
 } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
+import {
+  useTransactionsCategorySummaryQuery,
+  useTransactionsListQuery,
+} from "@/modules/transactions";
 
 import type { ReportsPeriodRanges } from "./period.ts";
 
@@ -73,7 +73,7 @@ export function useReportsCategorySummary(
 ) {
   const params = toCategorySummaryParams(ranges, type);
   const { data, isError, error, isLoading } =
-    useTransactionsCategorySummary(params);
+    useTransactionsCategorySummaryQuery(params);
   const { addNotification } = useNotifications();
 
   useEffect(() => {
@@ -115,9 +115,11 @@ export function useReportsCategoryTransactions({
   type,
 }: ReportsCategoryTransactionsParams) {
   const params = toCategoryTransactionsParams({ categoryId, from, to, type });
-  const { data, isError, error, isLoading } = useTransactionsList(params, {
-    query: { enabled: categoryId !== null },
-  });
+  // Без выбранной категории запрос операций не отправляется
+  const { data, isError, error, isLoading } = useTransactionsListQuery(
+    params,
+    categoryId !== null,
+  );
   const { addNotification } = useNotifications();
 
   useEffect(() => {

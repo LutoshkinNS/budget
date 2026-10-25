@@ -5,7 +5,7 @@ import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
 
 import { createCategoryFormDataSchema } from "../model/schemas.ts";
 import type { CategoryType, CreateCategoryFormData } from "../model/types.ts";
-import { useCreateCategory } from "../model/useCreateCategory.ts";
+import { useCreateCategory } from "../model/use-create-category.ts";
 
 import { CategoryIconPicker } from "./category-icon-picker";
 
