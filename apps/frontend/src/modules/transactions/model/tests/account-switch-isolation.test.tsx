@@ -44,7 +44,6 @@ const tx43 = [
 ];
 
 function seedMe() {
-  // Первый счёт в списке выбирается по умолчанию.
   queryClient.setQueryData(getAuthMeQueryKey(), {
     userId: 1,
     accounts: [
@@ -74,7 +73,8 @@ function createDeferredFetch() {
     resolveFor: (urlPart: string, body: unknown) => {
       const index = pending.findIndex((entry) => entry.url.includes(urlPart));
       const entry = index === -1 ? undefined : pending[index];
-      if (entry === undefined) throw new Error(`no pending request: ${urlPart}`);
+      if (entry === undefined)
+        throw new Error(`no pending request: ${urlPart}`);
       pending.splice(index, 1);
       entry.resolve(body);
     },
@@ -88,6 +88,8 @@ const wrapper = ({ children }: PropsWithChildren) => (
 beforeEach(() => {
   queryClient.clear();
   window.localStorage.clear();
+  seedMe();
+  switchAccount(42);
 });
 afterEach(() => {
   cleanup();
@@ -234,9 +236,9 @@ describe("account switch isolation", () => {
     expect(
       queryClient.getQueryData(transactionKeys.list(43, RANGE)),
     ).toBeUndefined();
-    expect(
-      queryClient.getQueryData(transactionKeys.list(42, RANGE)),
-    ).toEqual(tx42);
+    expect(queryClient.getQueryData(transactionKeys.list(42, RANGE))).toEqual(
+      tx42,
+    );
   });
 
   it("switching does not touch auth: the account of every request lives in its URL", async () => {

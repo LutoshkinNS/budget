@@ -13,7 +13,9 @@ type AccountListener = () => void;
 
 const listeners = new Set<AccountListener>();
 
-function readSelectedAccountId(): number | null {
+let selectedAccountId: number | null | undefined;
+
+function readStoredAccountId(): number | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const id = raw === null ? Number.NaN : Number(raw);
@@ -21,6 +23,13 @@ function readSelectedAccountId(): number | null {
   } catch {
     return null;
   }
+}
+
+function getSelectedAccountId(): number | null {
+  if (selectedAccountId === undefined) {
+    selectedAccountId = readStoredAccountId();
+  }
+  return selectedAccountId;
 }
 
 function persistAccountId(accountId: number): boolean {
@@ -55,19 +64,16 @@ function resolveAccountId(
 
 export function useCurrentAccountId(): number | undefined {
   const { data: me } = useMe();
-  const stored = useSyncExternalStore(
-    (onStoreChange) => {
-      listeners.add(onStoreChange);
-      return () => listeners.delete(onStoreChange);
-    },
-    () => readSelectedAccountId(),
-  );
+  const stored = useSyncExternalStore((onStoreChange) => {
+    listeners.add(onStoreChange);
+    return () => listeners.delete(onStoreChange);
+  }, getSelectedAccountId);
   return resolveAccountId(me?.accounts ?? [], stored);
 }
 
 /** Снимок accountId при вызове сохраняет область инвалидации после переключения. */
 export function getCurrentAccountIdSnapshot(): number | undefined {
-  return resolveAccountId(readMeAccounts() ?? [], readSelectedAccountId());
+  return resolveAccountId(readMeAccounts() ?? [], getSelectedAccountId());
 }
 
 export function requireCurrentAccountId(): number {
@@ -83,6 +89,7 @@ export function switchAccount(accountId: number) {
   const previousAccountId = getCurrentAccountIdSnapshot();
   if (previousAccountId === accountId) return;
   if (!persistAccountId(accountId)) return;
+  selectedAccountId = accountId;
 
   notifyListeners();
 
