@@ -9,11 +9,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CategoryEditor } from "../category-editor";
 
-const mocks = vi.hoisted(() => ({
-  mutateAsync: vi.fn(),
-  isPending: false,
-  receivedOptions: undefined as { onCategoryUpdated?: unknown } | undefined,
-}));
+const mocks = vi.hoisted(() => {
+  const holder: {
+    mutateAsync: ReturnType<typeof vi.fn>;
+    isPending: boolean;
+    receivedOptions: { onCategoryUpdated?: unknown } | undefined;
+  } = {
+    mutateAsync: vi.fn(),
+    isPending: false,
+    receivedOptions: undefined,
+  };
+  return holder;
+});
 vi.mock("../../model/use-update-category", () => ({
   useUpdateCategory: (options?: { onCategoryUpdated?: unknown }) => {
     mocks.receivedOptions = options;

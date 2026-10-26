@@ -1,12 +1,18 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-  capturedCallback: null as
-    | ((scope: { accountId: number | undefined; categoryId: number }) => void)
-    | null,
-  invalidateTransactionsCategorySummary: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+  const holder: {
+    capturedCallback:
+      | ((scope: { accountId: number | undefined; categoryId: number }) => void)
+      | null;
+    invalidateTransactionsCategorySummary: ReturnType<typeof vi.fn>;
+  } = {
+    capturedCallback: null,
+    invalidateTransactionsCategorySummary: vi.fn(),
+  };
+  return holder;
+});
 vi.mock("@/modules/categories", () => ({
   CategoriesList: ({
     onCategoryUpdated,
