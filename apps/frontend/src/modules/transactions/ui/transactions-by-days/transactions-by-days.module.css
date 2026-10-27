@@ -5,6 +5,11 @@
   padding: 16px;
 }
 
+.loading {
+  display: flex;
+  min-height: 100px;
+}
+
 .emptyState {
   display: flex;
   flex-direction: column;

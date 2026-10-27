@@ -10,15 +10,20 @@ import { categoryKeys } from "./category-keys.ts";
 
 export function useCategories(params?: CategoriesListParams) {
   const accountId = useCurrentAccountId();
-  const { data, isError, error } = useCategoriesList(accountId ?? 1, params, {
-    query: {
-      // exactOptionalPropertyTypes запрещает queryKey: undefined.
-      ...(accountId !== undefined && {
-        queryKey: categoryKeys.list(accountId, params),
-      }),
-      enabled: accountId != null,
+  const query = useCategoriesList(
+    accountId ?? 1,
+    params,
+    {
+      query: {
+        // exactOptionalPropertyTypes запрещает queryKey: undefined.
+        ...(accountId !== undefined && {
+          queryKey: categoryKeys.list(accountId, params),
+        }),
+        enabled: accountId != null,
+      },
     },
-  });
+  );
+  const { data, isError, error } = query;
   const { addNotification } = useNotifications();
 
   useEffect(() => {
@@ -44,5 +49,8 @@ export function useCategories(params?: CategoriesListParams) {
   }, [isError, error, data, addNotification]);
 
   const validation = CategoriesListResponse.safeParse(data);
-  return { data: data && validation.success ? validation.data : [] };
+  return {
+    ...query,
+    data: data && validation.success ? validation.data : [],
+  };
 }

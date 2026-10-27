@@ -3,7 +3,7 @@ export { invalidateCategories } from "./model/category-cache.ts";
 export type { CategoryUpdatedScope } from "./model/use-update-category.ts";
 export { CategoriesList } from "./ui/categories-list.tsx";
 export { CategoriesSelect } from "./ui/CategoriesSelect.tsx";
-export { CategoriesKeyboard } from "./ui/CategoriesKeyboard.tsx";
+export { CategoriesKeyboard } from "./ui/categories-keyboard.tsx";
 export { CreateCategory } from "./ui/CreateCategory.tsx";
 export { DeleteCategory } from "./ui/DeleteCategory.tsx";
 export type { CategoryType, CreateCategoryFormData } from "./model/types.ts";

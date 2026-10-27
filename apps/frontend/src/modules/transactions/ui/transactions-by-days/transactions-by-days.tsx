@@ -66,7 +66,13 @@ export function TransactionsByDays({
       .filter((g) => g.transactions.length > 0);
   }, [groups, categoryId, userId]);
 
-  if (isLoading) return <Loader />;
+  if (isLoading) {
+    return (
+      <div className={s.loading} role="status" aria-label="Загрузка операций">
+        <Loader />
+      </div>
+    );
+  }
 
   if (filtered.length === 0) {
     const variant = categoryId == null && userId == null ? "empty" : "no-match";

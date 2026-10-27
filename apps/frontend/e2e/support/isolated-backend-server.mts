@@ -42,7 +42,11 @@ export function prepareDatabase(excludedMigrations: readonly string[] = []) {
         "--schema",
         join(schemaDirectory, "schema.prisma"),
       ],
-      { env: process.env, stdio: "pipe" },
+      {
+        // Prisma 6.19.2 теряет единственную строку P1003 при RUST_LOG=warn.
+        env: { ...process.env, RUST_LOG: "info" },
+        stdio: "pipe",
+      },
     );
   }
   migrate();

@@ -19,15 +19,13 @@ export function useCreateTransaction() {
   const mutation = useTransactionsCreate({
     mutation: {
       onError: () => {},
-      // Поздний ответ инвалидирует кэш счёта из variables вызова.
-      onSuccess: async (_data, variables) => {
+      // Фоновая инвалидация не должна блокировать следующий ввод.
+      onSuccess: (_data, variables) => {
         const accountId = variables.accountId;
-        await Promise.all([
-          invalidateTransactionsList(accountId),
-          invalidateTransactionSummary(accountId),
-          invalidateTransactionsCategorySummary(accountId),
-          invalidateCategories(accountId),
-        ]);
+        invalidateTransactionsList(accountId);
+        invalidateTransactionSummary(accountId);
+        invalidateTransactionsCategorySummary(accountId);
+        invalidateCategories(accountId);
       },
     },
   });
