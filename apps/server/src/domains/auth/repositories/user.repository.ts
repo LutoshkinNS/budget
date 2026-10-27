@@ -94,6 +94,7 @@ export async function getUserInfo(prisma: PrismaClient, userId: number) {
     }
   });
 
+  const ownedAccountIds = new Set(user.ownedAccounts.map((account) => account.id));
   const accounts = [
     ...user.ownedAccounts.map((acc) => ({
       id: acc.id,
@@ -101,12 +102,14 @@ export async function getUserInfo(prisma: PrismaClient, userId: number) {
       initialBalance: acc.initialBalance,
       isOwner: true as const
     })),
-    ...user.accounts.map((au) => ({
-      id: au.account.id,
-      name: au.account.name,
-      initialBalance: au.account.initialBalance,
-      isOwner: false as const
-    }))
+    ...user.accounts
+      .filter((au) => !ownedAccountIds.has(au.account.id))
+      .map((au) => ({
+        id: au.account.id,
+        name: au.account.name,
+        initialBalance: au.account.initialBalance,
+        isOwner: false as const
+      }))
   ];
 
   return {

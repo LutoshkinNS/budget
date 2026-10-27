@@ -30,7 +30,10 @@ Object.assign(process.env, {
 });
 const app = await appInit();
 
-function readCookie(response: { headers: Record<string, unknown> }, name: string) {
+function readCookie(
+  response: { headers: Record<string, unknown> },
+  name: string
+) {
   const setCookie: unknown = response.headers['set-cookie'];
   // Тип ответа зависит от числа cookie, поэтому нормализуем его перед поиском.
   const entries = Array.isArray(setCookie)
@@ -49,7 +52,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
   return JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
 }
 
-function signLegacyJwt(payload: Record<string, unknown>) {
+function signJwt(payload: Record<string, unknown>) {
   const encode = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
   const header = encode({ alg: 'HS256', typ: 'JWT' });
@@ -90,7 +93,10 @@ afterAll(async () => {
 
 describe('auth account context', () => {
   it('issues tokens that carry only the user, not the account', async () => {
-    const login = await app.inject({ method: 'GET', url: '/api/v1/auth/dev-login' });
+    const login = await app.inject({
+      method: 'GET',
+      url: '/api/v1/auth/dev-login'
+    });
     assert.equal(login.statusCode, 200, login.body);
 
     const accessTokenCookie = readCookie(login, 'accessToken');
@@ -108,7 +114,10 @@ describe('auth account context', () => {
   });
 
   it('returns user info without a baked-in current account', async () => {
-    const login = await app.inject({ method: 'GET', url: '/api/v1/auth/dev-login' });
+    const login = await app.inject({
+      method: 'GET',
+      url: '/api/v1/auth/dev-login'
+    });
     const me = await app.inject({
       url: '/api/v1/auth/me',
       headers: { cookie: readCookie(login, 'accessToken') }
@@ -125,17 +134,90 @@ describe('auth account context', () => {
     assert.equal(body.accounts[0].isOwner, true);
   });
 
+  it('returns every accessible account once and preserves ownership when relations overlap', async () => {
+    const userIds = [2n, 3n];
+
+    try {
+      await app.prisma.user.createMany({
+        data: [{ id: 2n }, { id: 3n }]
+      });
+      const ownedAccount = await app.prisma.account.create({
+        data: { ownerId: 2n, name: 'Собственный', initialBalance: 1250.5 }
+      });
+      const sharedAccount = await app.prisma.account.create({
+        data: { ownerId: 3n, name: 'Совместный', initialBalance: 250.75 }
+      });
+      await app.prisma.account.create({
+        data: { ownerId: 3n, name: 'Недоступный', initialBalance: 999 }
+      });
+      await app.prisma.accountUser.create({
+        data: { userId: 2n, accountId: sharedAccount.id }
+      });
+
+      const token = signJwt({
+        userId: 2,
+        iat: Math.floor(Date.now() / 1000)
+      });
+      const requestUserInfo = () =>
+        app.inject({
+          url: '/api/v1/auth/me',
+          headers: { cookie: 'accessToken=' + token }
+        });
+      const expectedUserInfo = {
+        userId: 2,
+        accounts: [
+          {
+            id: ownedAccount.id,
+            name: 'Собственный',
+            initialBalance: 1250.5,
+            isOwner: true
+          },
+          {
+            id: sharedAccount.id,
+            name: 'Совместный',
+            initialBalance: 250.75,
+            isOwner: false
+          }
+        ]
+      };
+
+      const ordinaryUserInfo = await requestUserInfo();
+      assert.equal(ordinaryUserInfo.statusCode, 200, ordinaryUserInfo.body);
+      assert.deepEqual(ordinaryUserInfo.json(), expectedUserInfo);
+
+      await app.prisma.accountUser.create({
+        data: { userId: 2n, accountId: ownedAccount.id }
+      });
+
+      const overlappingUserInfo = await requestUserInfo();
+      assert.equal(
+        overlappingUserInfo.statusCode,
+        200,
+        overlappingUserInfo.body
+      );
+      assert.deepEqual(overlappingUserInfo.json(), expectedUserInfo);
+    } finally {
+      await app.prisma.accountUser.deleteMany({
+        where: { userId: { in: userIds } }
+      });
+      await app.prisma.account.deleteMany({
+        where: { ownerId: { in: userIds } }
+      });
+      await app.prisma.user.deleteMany({ where: { id: { in: userIds } } });
+    }
+  });
+
   it('accepts a legacy token with accountId; refresh reissues it without the account', async () => {
     const account = await app.prisma.account.findFirstOrThrow({
       where: { ownerId: 1n }
     });
     const iat = Math.floor(Date.now() / 1000);
-    const legacyAccess = signLegacyJwt({
+    const legacyAccess = signJwt({
       userId: 1,
       accountId: account.id,
       iat
     });
-    const legacyRefresh = signLegacyJwt({
+    const legacyRefresh = signJwt({
       userId: 1,
       accountId: account.id,
       type: 'refresh',
@@ -182,6 +264,6 @@ describe('auth account context', () => {
       headers: { cookie: readCookie(login, 'accessToken') }
     });
     assert.equal(me.statusCode, 200, me.body);
-    assert.deepEqual(me.json<{ accounts: unknown[] }>().accounts, []);
+    assert.deepEqual(me.json(), { userId: 1, accounts: [] });
   });
 });

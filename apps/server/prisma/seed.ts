@@ -20,13 +20,6 @@ export async function main() {
 
   const accountId = user.ownedAccounts[0].id;
 
-  await prisma.accountUser.create({
-    data: {
-      userId: user.id,
-      accountId: accountId
-    }
-  });
-
   const categoryData: Prisma.TransactionCategoryCreateInput[] = [
     {
       name: 'Продукты',
