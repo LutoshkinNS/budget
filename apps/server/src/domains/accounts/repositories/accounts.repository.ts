@@ -11,9 +11,12 @@ export async function getAccountsList(prisma: PrismaClient, userId: number) {
     }
   });
 
+  const ownedAccountIds = new Set(user.ownedAccounts.map((account) => account.id));
   const allAccounts = [
     ...user.ownedAccounts,
-    ...user.accounts.map((au) => au.account)
+    ...user.accounts
+      .map((accountUser) => accountUser.account)
+      .filter((account) => !ownedAccountIds.has(account.id))
   ];
 
   return allAccounts.map((acc) => ({

@@ -8,7 +8,7 @@ import type { FastifyApp } from '#src/app-init.js';
 
 import { accountsHandler } from './handlers/accounts.handler.js';
 import { createInvitationHandler } from './handlers/create-invitation.handler.js';
-import { listMembersHandler } from './handlers/listMembers.handler.js';
+import { listMembersHandler } from './handlers/list-members.handler.js';
 import { redeemInvitationHandler } from './handlers/redeem-invitation.handler.js';
 import {
   updateAccountHandler,

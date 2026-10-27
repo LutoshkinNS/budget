@@ -44,10 +44,12 @@ export async function listMembersHandler(
       firstName: account.owner.firstName,
       photoUrl: account.owner.photoUrl
     },
-    ...account.users.map((au) => ({
-      userId: Number(au.user.id),
-      firstName: au.user.firstName,
-      photoUrl: au.user.photoUrl
-    }))
+    ...account.users
+      .filter((accountUser) => accountUser.userId !== account.ownerId)
+      .map((accountUser) => ({
+        userId: Number(accountUser.user.id),
+        firstName: accountUser.user.firstName,
+        photoUrl: accountUser.user.photoUrl
+      }))
   ];
 }
