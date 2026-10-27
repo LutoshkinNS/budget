@@ -11,6 +11,7 @@ import s from "./edit-transaction-form.module.css";
 
 type EditTransactionFormProps = {
   transaction: TransactionDTO;
+  onSaved?: () => void;
 };
 
 function toLocalDateInputValue(isoDate: string) {
@@ -47,7 +48,10 @@ function getSubmittedDateIso(
   return localDateInputToIso(currentDateInputValue);
 }
 
-export function EditTransactionForm({ transaction }: EditTransactionFormProps) {
+export function EditTransactionForm({
+  transaction,
+  onSaved,
+}: EditTransactionFormProps) {
   const initialDateInputValue = toLocalDateInputValue(transaction.date);
   const [amount, setAmount] = useState(String(transaction.amount));
   const [date, setDate] = useState(initialDateInputValue);
@@ -82,6 +86,7 @@ export function EditTransactionForm({ transaction }: EditTransactionFormProps) {
         ),
         description,
       });
+      onSaved?.();
     } catch {
       return;
     }

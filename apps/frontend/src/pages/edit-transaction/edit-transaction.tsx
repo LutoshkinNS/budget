@@ -5,9 +5,13 @@ import s from "./edit-transaction.module.css";
 
 type EditTransactionProps = {
   transactionId: number;
+  onSaved: () => void;
 };
 
-export function EditTransaction({ transactionId }: EditTransactionProps) {
+export function EditTransaction({
+  transactionId,
+  onSaved,
+}: EditTransactionProps) {
   const {
     data: transaction,
     isLoading,
@@ -45,7 +49,11 @@ export function EditTransaction({ transactionId }: EditTransactionProps) {
       <h1 className={s.title}>
         Редактировать {transaction.type === "income" ? "доход" : "расход"}
       </h1>
-      <EditTransactionForm key={transaction.id} transaction={transaction} />
+      <EditTransactionForm
+        key={transaction.id}
+        transaction={transaction}
+        onSaved={onSaved}
+      />
     </div>
   );
 }

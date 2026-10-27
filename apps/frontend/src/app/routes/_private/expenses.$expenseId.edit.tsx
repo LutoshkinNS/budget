@@ -8,6 +8,14 @@ export const Route = createFileRoute("/_private/expenses/$expenseId/edit")({
 
 function RouteComponent() {
   const { expenseId } = Route.useParams();
+  const navigate = Route.useNavigate();
 
-  return <EditTransaction transactionId={Number(expenseId)} />;
+  return (
+    <EditTransaction
+      transactionId={Number(expenseId)}
+      onSaved={() => {
+        void navigate({ to: "/" });
+      }}
+    />
+  );
 }
