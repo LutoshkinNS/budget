@@ -49,6 +49,14 @@
   white-space: nowrap;
 }
 
+.skeletonCard {
+  width: 96px;
+  height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   .card {
     --category-card-background: #2f2d34;

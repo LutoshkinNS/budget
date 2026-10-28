@@ -1,9 +1,6 @@
-import { useEffect } from "react";
-
 import { useCategoriesList } from "@/common/api/generate/categories/categories.gen.ts";
 import { CategoriesListResponse } from "@/common/api/generate/categories/categories.zod.gen.ts";
 import type { CategoriesListParams } from "@/common/api/generate/model";
-import { useNotifications } from "@/common/lib/notifications";
 import { useCurrentAccountId } from "@/modules/user";
 
 import { categoryKeys } from "./category-keys.ts";
@@ -23,34 +20,19 @@ export function useCategories(params?: CategoriesListParams) {
       },
     },
   );
-  const { data, isError, error } = query;
-  const { addNotification } = useNotifications();
-
-  useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useCategoriesError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
-      const validation = CategoriesListResponse.safeParse(data);
-      if (!validation.success) {
-        addNotification({
-          id: "useCategoriesValidation",
-          title: "Некорректные данные",
-          message: "повторите запрос позднее",
-        });
-      }
-    }
-  }, [isError, error, data, addNotification]);
+  const { data, isError } = query;
 
   const validation = CategoriesListResponse.safeParse(data);
+  const hasValidData = data !== undefined && validation.success;
+  const hasInvalidData = data !== undefined && !validation.success;
+
   return {
     ...query,
-    data: data && validation.success ? validation.data : [],
+    data: hasValidData ? validation.data : [],
+    hasAccount: accountId != null,
+    hasValidData,
+    // Disabled query остаётся isPending, поэтому isLoading ограничен счётом.
+    isLoading: accountId != null && query.isLoading,
+    isError: isError || hasInvalidData,
   };
 }

@@ -19,6 +19,8 @@ export function useCreateTransaction() {
   const mutation = useTransactionsCreate({
     mutation: {
       onError: () => {},
+      // Обратная связь мутации локальна форме create, общий overlay исключён.
+      meta: { localFeedback: true },
       // Фоновая инвалидация не должна блокировать следующий ввод.
       onSuccess: (_data, variables) => {
         const accountId = variables.accountId;

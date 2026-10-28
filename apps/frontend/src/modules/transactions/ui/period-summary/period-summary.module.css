@@ -74,6 +74,16 @@
   color: var(--app-text-color);
 }
 
+.totalSkeleton {
+  height: 1.8rem;
+}
+
+.errorState {
+  margin: 0;
+  color: var(--app-error-color);
+  font-size: 14px;
+}
+
 @media (min-width: 640px) {
   .totals {
     grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -21,7 +21,9 @@ export function TransactionDayItem({
 }: TransactionDayItemProps) {
   const { data: categories } = useCategories();
   const category = categories.find((c) => c.id === transaction.categoryId);
-  const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
+  const { deleteTransaction, pendingTransactionId } = useDeleteTransaction();
+  // Ожидание удаления ограничено строкой: соседние действия остаются доступны.
+  const isDeleting = pendingTransactionId === transaction.id;
   const deleteLabel =
     transaction.type === "income" ? "Удалить доход" : "Удалить расход";
 
@@ -39,7 +41,12 @@ export function TransactionDayItem({
 
   return (
     <div className={s.transactionItem}>
-      <button type="button" className={s.transactionMain} onClick={handleEdit}>
+      <button
+        type="button"
+        className={s.transactionMain}
+        disabled={isDeleting}
+        onClick={handleEdit}
+      >
         <div className={s.transactionCategory}>
           <span className={s.transactionCategoryName}>
             <CategoryIcon iconKey={category?.iconKey} />

@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { queryClient } from "@/common/api/appQuery";
@@ -93,7 +93,7 @@ describe("CategoriesKeyboard independent initial loading", () => {
   });
 
   it.each(["empty", "error"] as const)(
-    "removes its status after an %s response",
+    "distinguishes an %s response from loading",
     async (outcome) => {
       let release = () => {};
       vi.stubGlobal(
@@ -123,15 +123,78 @@ describe("CategoriesKeyboard independent initial loading", () => {
       });
       expect(status()).toBeTruthy();
       await act(async () => release());
-      await waitFor(() => expect(status()).toBeNull());
-      expect(screen.queryAllByRole("button")).toHaveLength(0);
-      if (outcome === "error") {
-        expect(notifications.add).toHaveBeenCalledWith(
-          expect.objectContaining({ id: "useCategoriesError" }),
-        );
+      if (outcome === "empty") {
+        expect(await screen.findByText(/Категорий .* пока нет/)).toBeTruthy();
+        expect(screen.queryAllByRole("button")).toHaveLength(0);
+      } else {
+        expect(await screen.findByRole("alert")).toBeTruthy();
+        expect(screen.getByRole("button", { name: "Повторить" })).toBeTruthy();
+        expect(notifications.add).not.toHaveBeenCalled();
       }
+      await waitFor(() => expect(status()).toBeNull());
     },
   );
+
+  it("retries a failed initial load into ready cards", async () => {
+    let requestCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        ++requestCount === 1
+          ? Promise.resolve(
+              Response.json(
+                {
+                  code: "CATEGORY_DENIED",
+                  message: "Denied",
+                  statusCode: 403,
+                },
+                { status: 403 },
+              ),
+            )
+          : Promise.resolve(Response.json(CATEGORIES)),
+      ),
+    );
+    render(<CategoriesKeyboard value={null} onChange={vi.fn()} />, { wrapper });
+    await screen.findByRole("alert");
+    fireEvent.click(screen.getByRole("button", { name: "Повторить" }));
+    expect(
+      await screen.findByRole("button", { name: "Частая" }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(requestCount).toBe(2);
+  });
+
+  it("keeps cached cards and offers retry when a background refresh fails", async () => {
+    let requestCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        // Первый запрос наполняет кэш; терминальная 403 без retry
+        // завершает фоновое обновление ошибкой при сохранённых карточках.
+        ++requestCount === 1
+          ? Promise.resolve(Response.json(CATEGORIES))
+          : Promise.resolve(
+              Response.json(
+                { code: "CATEGORY_DENIED", statusCode: 403 },
+                { status: 403 },
+              ),
+            ),
+      ),
+    );
+    render(<CategoriesKeyboard value={null} onChange={vi.fn()} />, { wrapper });
+    await screen.findByRole("button", { name: "Частая" });
+    let refreshed: Promise<unknown> = Promise.resolve();
+    act(() => {
+      refreshed = queryClient.invalidateQueries({
+        queryKey: categoryKeys.lists(42),
+      });
+    });
+    await waitFor(() => expect(requestCount).toBe(2));
+    expect(screen.getByRole("button", { name: "Частая" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Повторить" })).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).toMatch(/обнови/i);
+    await act(async () => refreshed);
+  });
 
   it("keeps cached cards visible during a held background refetch", async () => {
     queryClient.setQueryData(

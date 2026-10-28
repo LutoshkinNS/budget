@@ -1,4 +1,4 @@
-export { Dashboard } from "./Dashboard.tsx";
+export { Dashboard } from "./dashboard.tsx";
 export type {
   DashboardSearch,
   DashboardSearchChangeHandler,

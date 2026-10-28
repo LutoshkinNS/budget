@@ -14,7 +14,10 @@ export function Loader({ overlay }: { overlay?: boolean }) {
 }
 
 export function GlobalLoader() {
-  const count = useIsMutating();
+  // Мутации с локальной обратной связью не дублируются общим overlay.
+  const count = useIsMutating({
+    predicate: (mutation) => mutation.meta?.localFeedback !== true,
+  });
   if (!count) return null;
   return <Loader overlay />;
 }

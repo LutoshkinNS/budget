@@ -1,8 +1,5 @@
-import { useEffect } from "react";
-
 import { useAccountsListMembers } from "@/common/api/generate/accounts/accounts.gen.ts";
 import { AccountsListMembersResponse } from "@/common/api/generate/accounts/accounts.zod.gen.ts";
-import { useNotifications } from "@/common/lib/notifications";
 import { useCurrentAccountId } from "@/modules/user";
 
 import { memberKeys } from "./member-keys.ts";
@@ -10,37 +7,24 @@ import { memberKeys } from "./member-keys.ts";
 export function useAccountMembers() {
   const accountId = useCurrentAccountId();
   // Placeholder безопасен при отключённом запросе.
-  const { data, isError, error } = useAccountsListMembers(accountId ?? 1, {
+  const query = useAccountsListMembers(accountId ?? 1, {
     query: {
       // exactOptionalPropertyTypes запрещает queryKey: undefined.
       ...(accountId !== undefined && { queryKey: memberKeys.all(accountId) }),
       enabled: accountId != null,
     },
   });
-  const { addNotification } = useNotifications();
-
-  useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useAccountMembersError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
-      const validation = AccountsListMembersResponse.safeParse(data);
-      if (!validation.success) {
-        addNotification({
-          id: "useAccountMembersValidation",
-          title: "Некорректные данные",
-          message: "повторите запрос позднее",
-        });
-      }
-    }
-  }, [isError, error, data, addNotification]);
+  const { data, isError } = query;
 
   const validation = AccountsListMembersResponse.safeParse(data);
-  return { data: validation.success ? validation.data : [] };
+  const hasValidData = data !== undefined && validation.success;
+  const hasInvalidData = data !== undefined && !validation.success;
+
+  return {
+    data: hasValidData ? validation.data : [],
+    hasAccount: accountId != null,
+    hasValidData,
+    isLoading: accountId != null && query.isLoading,
+    isError: isError || hasInvalidData,
+  };
 }

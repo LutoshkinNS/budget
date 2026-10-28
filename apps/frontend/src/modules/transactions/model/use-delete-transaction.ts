@@ -22,6 +22,8 @@ export function useDeleteTransaction() {
           message: error?.message,
         });
       },
+      // Обратная связь мутации локальна строке, общий overlay исключён.
+      meta: { localFeedback: true },
       // Поздний ответ инвалидирует кэш счёта из variables вызова.
       onSuccess: async (_data, variables) => {
         const accountId = variables.accountId;
@@ -51,6 +53,11 @@ export function useDeleteTransaction() {
   return {
     deleteTransaction,
     isLoading: mutation.isPending,
+    // Ожидание известно для конкретной строки: другие действия остаются доступны.
+    pendingTransactionId:
+      mutation.isPending && mutation.variables
+        ? mutation.variables.transactionId
+        : null,
     isError: mutation.isError,
     error: mutation.error,
   };

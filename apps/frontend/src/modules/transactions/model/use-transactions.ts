@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { z } from "zod";
 
 import type {
@@ -16,7 +15,6 @@ import {
   TransactionsListResponse,
   TransactionsSummaryResponse,
 } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
-import { useNotifications } from "@/common/lib/notifications";
 import { useCurrentAccountId } from "@/modules/user";
 
 import { useAccountScopedQuery } from "./account-scoped-query.ts";
@@ -110,9 +108,7 @@ export function useTransactionsListQuery(
   return useTransactionsList(accountId ?? 1, params, { query: scoped });
 }
 
-export function useTransactionsSummaryQuery(
-  params: TransactionsSummaryParams,
-) {
+export function useTransactionsSummaryQuery(params: TransactionsSummaryParams) {
   const accountId = useCurrentAccountId();
   const scoped = useAccountScopedQuery((id) =>
     transactionKeys.summary(id, params),
@@ -135,74 +131,45 @@ export function useTransactionsCategorySummaryQuery(
 export function useTransactions(
   range: TransactionDateRange = getDefaultTransactionDateRange(),
 ) {
-  const { data, isError, error, isLoading } = useTransactionsListQuery(range);
-  const { addNotification } = useNotifications();
-
-  useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useTransactionsError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
-      const validation = TransactionsListResponse.safeParse(data);
-      if (!validation.success) {
-        addNotification({
-          id: "useTransactionsValidation",
-          title: "Некорректные данные",
-          message: "повторите запрос позднее",
-        });
-      }
-    }
-  }, [isError, error, data, addNotification]);
+  const accountId = useCurrentAccountId();
+  const query = useTransactionsListQuery(range);
+  const { data, isError, isLoading } = query;
 
   const validation = TransactionsListResponse.safeParse(data);
   const transactions =
     validation.success && data ? validation.data.map(normalizeTransaction) : [];
   const groups = groupByDay(transactions);
+  const hasInvalidData = data !== undefined && !validation.success;
 
-  return { groups, transactions, isLoading };
+  return {
+    groups,
+    transactions,
+    refetch: query.refetch,
+    hasAccount: accountId != null,
+    hasValidData: data !== undefined && validation.success,
+    isLoading: accountId != null && isLoading,
+    isError: isError || hasInvalidData,
+  };
 }
 
 export function useTransactionSummary(
   range: TransactionDateRange = getDefaultTransactionDateRange(),
 ) {
+  const accountId = useCurrentAccountId();
   const params = toSummaryParams(range);
-  const { data, isError, error, isLoading } = useTransactionsSummaryQuery(
-    params,
-  );
-  const { addNotification } = useNotifications();
-
-  useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useTransactionSummaryError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
-      const validation = TransactionsSummaryResponse.safeParse(data);
-      if (!validation.success) {
-        addNotification({
-          id: "useTransactionSummaryValidation",
-          title: "Некорректные данные",
-          message: "повторите запрос позднее",
-        });
-      }
-    }
-  }, [isError, error, data, addNotification]);
+  const query = useTransactionsSummaryQuery(params);
+  const { data, isError, isLoading } = query;
 
   const validation = TransactionsSummaryResponse.safeParse(data);
 
+  const hasValidData = data !== undefined && validation.success;
+  const hasInvalidData = data !== undefined && !validation.success;
+
   return {
-    data: validation.success && data ? validation.data : undefined,
-    isLoading,
+    data: hasValidData ? validation.data : undefined,
+    hasAccount: accountId != null,
+    hasValidData,
+    isLoading: accountId != null && isLoading,
+    isError: isError || hasInvalidData,
   };
 }

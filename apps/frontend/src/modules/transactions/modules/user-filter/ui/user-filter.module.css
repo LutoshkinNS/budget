@@ -5,6 +5,24 @@
   gap: 6px;
 }
 
+.loading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.loadingChip {
+  width: 4rem;
+  height: 1.75rem;
+  border-radius: 999px;
+}
+
+.errorState {
+  margin: 0;
+  color: var(--app-error-color);
+  font-size: 14px;
+}
+
 .chip {
   background: var(--app-surface-raised-color);
   color: var(--app-text-color);

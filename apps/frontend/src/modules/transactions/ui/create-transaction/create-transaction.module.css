@@ -1,3 +1,27 @@
+.form {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.form:disabled {
+  opacity: 1;
+}
+
+.form:disabled .typeSwitch {
+  opacity: 0.6;
+}
+
+.error {
+  margin: 0;
+  margin-bottom: 16px;
+  color: var(--app-error-color);
+  font-size: 14px;
+  text-align: center;
+}
+
 .header {
   display: flex;
   flex-direction: row;

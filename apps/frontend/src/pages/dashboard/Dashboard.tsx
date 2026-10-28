@@ -8,6 +8,7 @@ import {
   PeriodSummary,
 } from "@/modules/transactions";
 import { UserFilter } from "@/modules/transactions";
+import { useCurrentAccountId } from "@/modules/user";
 
 import type { DashboardSearchChangeHandler } from "./route.ts";
 
@@ -21,13 +22,13 @@ type DashboardProps = {
 
 export function Dashboard({ month, onSearchChange, period }: DashboardProps) {
   const navigate = useNavigate();
+  const accountId = useCurrentAccountId();
   const handleEdit = (transactionId: number) => {
     void navigate({
       to: "/expenses/$expenseId/edit",
       params: { expenseId: String(transactionId) },
     });
   };
-  const [userId, setUserId] = useState<number | null>(null);
   const safeMonth = clampFutureMonth(month);
   const range = useMemo(
     () => getTransactionDateRange(period, safeMonth),
@@ -52,13 +53,32 @@ export function Dashboard({ month, onSearchChange, period }: DashboardProps) {
           onSearchChange({ period, month: clampFutureMonth(nextMonth) })
         }
       />
+      <DashboardActivity
+        key={accountId ?? "no-account"}
+        range={range}
+        onEdit={handleEdit}
+      />
+    </div>
+  );
+}
+
+type DashboardActivityProps = {
+  range: ReturnType<typeof getTransactionDateRange>;
+  onEdit: (transactionId: number) => void;
+};
+
+function DashboardActivity({ range, onEdit }: DashboardActivityProps) {
+  const [userId, setUserId] = useState<number | null>(null);
+
+  return (
+    <>
       <UserFilter value={userId} onChange={setUserId} />
       <TransactionsByDays
-        onEdit={handleEdit}
+        onEdit={onEdit}
         range={range}
         userId={userId}
         onResetUser={() => setUserId(null)}
       />
-    </div>
+    </>
   );
 }

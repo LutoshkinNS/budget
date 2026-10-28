@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { Loader } from "@/common/ui/loader/Loader.tsx";
+import { Skeleton } from "@/common/ui/skeleton/skeleton.tsx";
 
 import {
   getTransactionDateRange,
@@ -47,7 +47,8 @@ export function TransactionsByDays({
   onResetUser,
 }: TransactionsByDaysProps) {
   const transactionRange = range ?? getTransactionDateRange("day");
-  const { groups, isLoading } = useTransactions(transactionRange);
+  const { groups, refetch, hasAccount, hasValidData, isError, isLoading } =
+    useTransactions(transactionRange);
 
   const filtered = useMemo(() => {
     return groups
@@ -66,15 +67,52 @@ export function TransactionsByDays({
       .filter((g) => g.transactions.length > 0);
   }, [groups, categoryId, userId]);
 
+  if (!hasAccount) {
+    return <p className={s.emptyStateText}>Счёт не выбран</p>;
+  }
+
   if (isLoading) {
     return (
       <div className={s.loading} role="status" aria-label="Загрузка операций">
-        <Loader />
+        {[0, 1, 2].map((group) => (
+          <div className={s.loadingGroup} key={group}>
+            <Skeleton
+              {...(s.loadingDate ? { className: s.loadingDate } : {})}
+            />
+            {[0, 1].map((row) => (
+              <Skeleton
+                {...(s.loadingRow ? { className: s.loadingRow } : {})}
+                key={row}
+              />
+            ))}
+          </div>
+        ))}
       </div>
     );
   }
 
+  const errorState = isError ? (
+    <div className={s.errorState} role="alert">
+      <p className={s.errorStateText}>
+        {hasValidData
+          ? "Не удалось обновить операции"
+          : "Не удалось загрузить операции"}
+      </p>
+      <button
+        type="button"
+        className={s.retryLink}
+        onClick={() => {
+          void refetch();
+        }}
+      >
+        Повторить
+      </button>
+    </div>
+  ) : null;
+
   if (filtered.length === 0) {
+    if (isError && !hasValidData) return errorState;
+
     const variant = categoryId == null && userId == null ? "empty" : "no-match";
     const resetProps = pickResetHandler({
       categoryId,
@@ -82,20 +120,28 @@ export function TransactionsByDays({
       ...(onResetCategory ? { onResetCategory } : {}),
       ...(onResetUser ? { onResetUser } : {}),
     });
-    return <EmptyState variant={variant} {...resetProps} />;
+    return (
+      <>
+        {errorState}
+        <EmptyState variant={variant} {...resetProps} />
+      </>
+    );
   }
 
   return (
-    <div className={s.container}>
-      {filtered.map((group) => (
-        <TransactionDayGroup
-          key={group.isoDate}
-          label={group.label}
-          total={group.total}
-          transactions={group.transactions}
-          onEdit={onEdit}
-        />
-      ))}
-    </div>
+    <>
+      {errorState}
+      <div className={s.container}>
+        {filtered.map((group) => (
+          <TransactionDayGroup
+            key={group.isoDate}
+            label={group.label}
+            total={group.total}
+            transactions={group.transactions}
+            onEdit={onEdit}
+          />
+        ))}
+      </div>
+    </>
   );
 }

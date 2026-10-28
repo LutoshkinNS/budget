@@ -1,5 +1,7 @@
 import clsx from "clsx";
 
+import { Skeleton } from "@/common/ui/skeleton/skeleton.tsx";
+
 import {
   getCurrentMonthValue,
   type Period,
@@ -24,6 +26,13 @@ function formatMoney(value: number, signed = false): string {
   return `${sign}${value.toLocaleString("ru")} ₽`;
 }
 
+const SUMMARY_LABELS = [
+  "Доходы периода",
+  "Расходы периода",
+  "Баланс периода",
+  "Текущий баланс",
+] as const;
+
 export function PeriodSummary({
   range,
   period,
@@ -31,7 +40,12 @@ export function PeriodSummary({
   onPeriodChange,
   onMonthChange,
 }: PeriodSummaryProps) {
-  const { data: summary, isLoading } = useTransactionSummary(range);
+  const {
+    data: summary,
+    hasAccount,
+    isError,
+    isLoading,
+  } = useTransactionSummary(range);
 
   return (
     <div className={s.summary}>
@@ -59,33 +73,64 @@ export function PeriodSummary({
           onChange={(event) => onMonthChange(event.target.value)}
         />
       )}
-      <div className={s.totals}>
-        <div className={s.totalItem}>
-          <span className={s.totalLabel}>Доходы периода</span>
-          <span className={s.totalValue}>
-            {isLoading || !summary ? "—" : formatMoney(summary.incomeTotal)}
-          </span>
-        </div>
-        <div className={s.totalItem}>
-          <span className={s.totalLabel}>Расходы периода</span>
-          <span className={s.totalValue}>
-            {isLoading || !summary ? "—" : formatMoney(summary.expenseTotal)}
-          </span>
-        </div>
-        <div className={s.totalItem}>
-          <span className={s.totalLabel}>Баланс периода</span>
-          <span className={s.totalValue}>
-            {isLoading || !summary
-              ? "—"
-              : formatMoney(summary.periodBalance, true)}
-          </span>
-        </div>
-        <div className={s.totalItem}>
-          <span className={s.totalLabel}>Текущий баланс</span>
-          <span className={s.totalValue}>
-            {isLoading || !summary ? "—" : formatMoney(summary.totalBalance)}
-          </span>
-        </div>
+      {!hasAccount && (
+        <p className={s.errorState} role="alert">
+          Счёт не выбран
+        </p>
+      )}
+      {isError && summary && (
+        <p className={s.errorState} role="alert">
+          Не удалось обновить итоги
+        </p>
+      )}
+      {isError && !summary && hasAccount && (
+        <p className={s.errorState} role="alert">
+          Не удалось загрузить итоги
+        </p>
+      )}
+      <div
+        className={s.totals}
+        {...(isLoading
+          ? { role: "status" as const, "aria-label": "Загрузка итогов" }
+          : {})}
+      >
+        {isLoading ? (
+          SUMMARY_LABELS.map((label) => (
+            <div className={s.totalItem} key={label}>
+              <span className={s.totalLabel}>{label}</span>
+              <Skeleton
+                {...(s.totalSkeleton ? { className: s.totalSkeleton } : {})}
+              />
+            </div>
+          ))
+        ) : (
+          <>
+            <div className={s.totalItem}>
+              <span className={s.totalLabel}>Доходы периода</span>
+              <span className={s.totalValue}>
+                {!summary ? "—" : formatMoney(summary.incomeTotal)}
+              </span>
+            </div>
+            <div className={s.totalItem}>
+              <span className={s.totalLabel}>Расходы периода</span>
+              <span className={s.totalValue}>
+                {!summary ? "—" : formatMoney(summary.expenseTotal)}
+              </span>
+            </div>
+            <div className={s.totalItem}>
+              <span className={s.totalLabel}>Баланс периода</span>
+              <span className={s.totalValue}>
+                {!summary ? "—" : formatMoney(summary.periodBalance, true)}
+              </span>
+            </div>
+            <div className={s.totalItem}>
+              <span className={s.totalLabel}>Текущий баланс</span>
+              <span className={s.totalValue}>
+                {!summary ? "—" : formatMoney(summary.totalBalance)}
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
