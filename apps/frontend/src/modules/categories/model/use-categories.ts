@@ -1,4 +1,7 @@
-import { useCategoriesList } from "@/common/api/generate/categories/categories.gen.ts";
+import {
+  categoriesList,
+  useCategoriesList,
+} from "@/common/api/generate/categories/categories.gen.ts";
 import { CategoriesListResponse } from "@/common/api/generate/categories/categories.zod.gen.ts";
 import type { CategoriesListParams } from "@/common/api/generate/model";
 import { useCurrentAccountId } from "@/modules/user";
@@ -17,6 +20,16 @@ export function useCategories(params?: CategoriesListParams) {
           queryKey: categoryKeys.list(accountId, params),
         }),
         enabled: accountId != null,
+        queryFn: async ({ signal }) => {
+          const data = await categoriesList(accountId ?? 1, params, { signal });
+          const validation = CategoriesListResponse.safeParse(data);
+
+          if (!validation.success) {
+            throw new Error("Invalid categories list response");
+          }
+
+          return validation.data;
+        },
       },
     },
   );

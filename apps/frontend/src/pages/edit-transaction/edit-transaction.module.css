@@ -10,3 +10,44 @@
   line-height: 28px;
   margin: 0;
 }
+
+.skeleton,
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldSkeleton {
+  min-height: 44px;
+  border-radius: 12px;
+}
+
+.buttonSkeleton {
+  width: 140px;
+  min-height: 42px;
+  border-radius: 12px;
+}
+
+.error p {
+  margin: 0;
+  color: var(--app-text-color);
+}
+
+.message {
+  margin: 0;
+  color: var(--app-text-color);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.retry {
+  align-self: flex-start;
+  border: 1px solid var(--app-border-strong-color);
+  border-radius: 12px;
+  padding: 9px 14px;
+  color: var(--app-text-color);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}

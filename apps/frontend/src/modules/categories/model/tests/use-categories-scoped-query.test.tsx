@@ -35,13 +35,17 @@ function seedMe(currentAccountId: number) {
   });
 }
 
-function stubFetch(authMe: () => Response | Promise<Response>) {
+function stubFetch(
+  authMe: () => Response | Promise<Response>,
+  categories: () => Response | Promise<Response> = () =>
+    Response.json(categoryPayload),
+) {
   const fetchMock = vi.fn(
     async (input: RequestInfo | URL): Promise<Response> => {
       const url = String(input);
       if (url.includes("/api/v1/auth/me")) return authMe();
       if (url.includes("/api/v1/accounts/42/categories")) {
-        return Response.json(categoryPayload);
+        return categories();
       }
       throw new Error(`unexpected fetch: ${url}`);
     },
@@ -55,13 +59,19 @@ function stubFetch(authMe: () => Response | Promise<Response>) {
 const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
+const defaultOptions = queryClient.getDefaultOptions();
 
 beforeEach(() => {
   queryClient.clear();
+  queryClient.setDefaultOptions({
+    ...defaultOptions,
+    queries: { ...defaultOptions.queries, retry: false },
+  });
 });
 afterEach(() => {
   cleanup();
   queryClient.clear();
+  queryClient.setDefaultOptions(defaultOptions);
   vi.unstubAllGlobals();
 });
 
@@ -212,4 +222,60 @@ describe("useCategories me-guard and scoped key", () => {
     expect(result.current.isFetching).toBe(false);
     expect(result.current.refetch).toBeTypeOf("function");
   });
+
+  it("does not fetch categories for an authenticated user without accounts", () => {
+    queryClient.setQueryData(getAuthMeQueryKey(), { userId: 1, accounts: [] });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { result } = renderHook(() => useCategories({ type: "expense" }), {
+      wrapper,
+    });
+
+    expect(result.current.hasAccount).toBe(false);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isFetching).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["server", "network", "schema"] as const)(
+    "keeps valid scoped categories after a background %s failure",
+    async (failure) => {
+      seedMe(42);
+      let fail = false;
+      const { calls } = stubFetch(
+        () => Response.json({ userId: 1, accounts: [] }),
+        () => {
+          if (!fail) return Response.json(categoryPayload);
+          if (failure === "network")
+            return Promise.reject(new TypeError("Network failure"));
+          if (failure === "schema") return Response.json({ items: [] });
+          return Response.json(
+            { statusCode: 500, code: "UNAVAILABLE", message: "Unavailable" },
+            { status: 500 },
+          );
+        },
+      );
+      const { result } = renderHook(() => useCategories({ type: "expense" }), {
+        wrapper,
+      });
+      await waitFor(() => expect(result.current.data).toEqual(categoryPayload));
+      fail = true;
+
+      await act(async () => {
+        await result.current.refetch();
+      });
+
+      expect(
+        queryClient.getQueryState(categoryKeys.list(42, { type: "expense" }))
+          ?.status,
+      ).toBe("error");
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.hasValidData).toBe(true);
+      expect(result.current.data).toEqual(categoryPayload);
+      expect(
+        queryClient.getQueryData(categoryKeys.list(42, { type: "expense" })),
+      ).toEqual(categoryPayload);
+      expect(calls()).toHaveLength(2);
+    },
+  );
 });

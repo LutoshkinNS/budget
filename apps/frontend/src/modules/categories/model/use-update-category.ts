@@ -18,9 +18,9 @@ export function useUpdateCategory(options?: {
 }) {
   const { mutateAsync: rawMutateAsync, ...rest } = useCategoriesUpdate({
     mutation: {
-      // Поздний ответ инвалидирует кэш счёта из variables вызова.
+      meta: { localFeedback: true },
       onSuccess: async (_category, variables) => {
-        await invalidateCategories(variables.accountId, variables.categoryId);
+        void invalidateCategories(variables.accountId, variables.categoryId);
         await options?.onCategoryUpdated?.({
           accountId: variables.accountId,
           categoryId: variables.categoryId,

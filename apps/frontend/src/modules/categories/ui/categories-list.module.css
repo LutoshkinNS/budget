@@ -48,3 +48,24 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.skeletonRow {
+  padding-block: 8px;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.skeletonName {
+  max-width: 65%;
+  min-height: 1.25rem;
+}
+
+.readError {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.readError p {
+  margin: 0;
+}

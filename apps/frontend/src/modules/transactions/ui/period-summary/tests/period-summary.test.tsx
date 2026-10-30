@@ -7,6 +7,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -156,22 +157,32 @@ describe("PeriodSummary loading states", () => {
   });
 
   it.each(["server", "invalid DTO"] as const)(
-    "ends initial loading with a local %s error",
+    "recovers from a local initial %s error through Retry",
     async (failure) => {
-      stubHttp(() =>
-        failure === "server"
+      let recovered = false;
+      const requests = stubHttp(() => {
+        if (recovered) return Response.json(SUMMARY);
+        return failure === "server"
           ? Response.json(
               { code: "SERVER_ERROR", statusCode: 500 },
               { status: 500 },
             )
-          : Response.json({ totalBalance: 100 }),
-      );
+          : Response.json({ totalBalance: 100 });
+      });
       render(<PeriodSummary {...baseProps} />, { wrapper: Wrapper });
-      await screen.findByRole("alert");
+      const error = await screen.findByRole("alert");
       expect(screen.queryByRole("status")).toBeNull();
       expect(
         screen.getByRole("tab", { name: "день" }).hasAttribute("disabled"),
       ).toBe(false);
+      recovered = true;
+      fireEvent.click(within(error).getByRole("button", { name: "Повторить" }));
+      await screen.findByText("475 ₽");
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(requests).toHaveLength(2);
+      expect(client.getQueryData(transactionKeys.summary(42, RANGE))).toEqual(
+        SUMMARY,
+      );
     },
   );
 
@@ -188,35 +199,138 @@ describe("PeriodSummary loading states", () => {
     expect(requests).toHaveLength(1);
   });
 
-  it("preserves same-key totals when a background refresh fails", async () => {
-    const refresh = new ResponseGate();
+  it.each(["server", "invalid DTO"] as const)(
+    "preserves same-key totals and retries a background %s failure",
+    async (failure) => {
+      const refresh = new ResponseGate();
+      let requestCount = 0;
+      let recovered = false;
+      const requests = stubHttp(() => {
+        if (++requestCount === 1) return Response.json(SUMMARY);
+        return recovered
+          ? Response.json({ ...SUMMARY, totalBalance: 600 })
+          : refresh.wait();
+      });
+      const onPeriodChange = vi.fn();
+      const onMonthChange = vi.fn();
+      try {
+        render(
+          <PeriodSummary
+            {...baseProps}
+            onPeriodChange={onPeriodChange}
+            onMonthChange={onMonthChange}
+          />,
+          { wrapper: Wrapper },
+        );
+        await screen.findByText("475 ₽");
+        let refreshFinished: Promise<void> | undefined;
+        act(() => {
+          refreshFinished = client.invalidateQueries({
+            queryKey: transactionKeys.summary(42, RANGE),
+          });
+        });
+        await waitFor(() => expect(refresh.heldCount).toBe(1));
+        expect(screen.getByText("475 ₽")).not.toBeNull();
+        expect(screen.getByRole("status").textContent).toMatch(
+          /обновление итогов/i,
+        );
+        expect(
+          screen.queryByRole("status", { name: "Загрузка итогов" }),
+        ).toBeNull();
+        fireEvent.click(screen.getByRole("tab", { name: "день" }));
+        expect(onPeriodChange).toHaveBeenCalledWith("day");
+        fireEvent.change(screen.getByLabelText("Месяц"), {
+          target: { value: "2026-09" },
+        });
+        expect(onMonthChange).toHaveBeenCalledWith("2026-09");
+        await act(async () => {
+          refresh.release(() =>
+            failure === "server"
+              ? Response.json({ statusCode: 500 }, { status: 500 })
+              : Response.json({ totalBalance: 999 }),
+          );
+          await refreshFinished;
+        });
+        const error = await screen.findByRole("alert");
+        expect(screen.getByText("475 ₽")).not.toBeNull();
+        expect(screen.getByText("+175 ₽")).not.toBeNull();
+        expect(screen.queryByRole("status")).toBeNull();
+        expect(client.getQueryData(transactionKeys.summary(42, RANGE))).toEqual(
+          SUMMARY,
+        );
+        recovered = true;
+        fireEvent.click(
+          within(error).getByRole("button", { name: "Повторить" }),
+        );
+        await screen.findByText("600 ₽");
+        expect(screen.queryByRole("alert")).toBeNull();
+        expect(requests).toHaveLength(3);
+      } finally {
+        refresh.release();
+      }
+    },
+  );
+
+  it("shows local retry progress after a cached background failure", async () => {
+    const retry = new ResponseGate();
     let requestCount = 0;
-    stubHttp(() =>
-      ++requestCount === 1 ? Response.json(SUMMARY) : refresh.wait(),
-    );
+    const requests = stubHttp(() => {
+      requestCount += 1;
+      if (requestCount === 1) return Response.json(SUMMARY);
+      if (requestCount === 2) {
+        return Response.json({ statusCode: 500 }, { status: 500 });
+      }
+      return retry.wait();
+    });
+    const onPeriodChange = vi.fn();
+    const onMonthChange = vi.fn();
     try {
-      render(<PeriodSummary {...baseProps} />, { wrapper: Wrapper });
+      render(
+        <PeriodSummary
+          {...baseProps}
+          onPeriodChange={onPeriodChange}
+          onMonthChange={onMonthChange}
+        />,
+        { wrapper: Wrapper },
+      );
       await screen.findByText("475 ₽");
-      let refreshFinished: Promise<void> | undefined;
-      act(() => {
-        refreshFinished = client.invalidateQueries({
+      await act(async () => {
+        await client.invalidateQueries({
           queryKey: transactionKeys.summary(42, RANGE),
         });
       });
-      await waitFor(() => expect(refresh.heldCount).toBe(1));
-      expect(screen.getByText("475 ₽")).not.toBeNull();
-      expect(screen.queryByRole("status")).toBeNull();
-      await act(async () => {
-        refresh.release(() =>
-          Response.json({ statusCode: 500 }, { status: 500 }),
-        );
-        await refreshFinished;
+      const error = await screen.findByRole("alert");
+      const retryButton = within(error).getByRole("button", {
+        name: "Повторить",
       });
-      await screen.findByRole("alert");
+      fireEvent.click(retryButton);
+      await waitFor(() => expect(retry.heldCount).toBe(1));
+
       expect(screen.getByText("475 ₽")).not.toBeNull();
       expect(screen.getByText("+175 ₽")).not.toBeNull();
+      expect(
+        screen.queryByRole("status", { name: "Загрузка итогов" }),
+      ).toBeNull();
+      fireEvent.click(screen.getByRole("tab", { name: "день" }));
+      expect(onPeriodChange).toHaveBeenCalledWith("day");
+      fireEvent.change(screen.getByLabelText("Месяц"), {
+        target: { value: "2026-09" },
+      });
+      expect(onMonthChange).toHaveBeenCalledWith("2026-09");
+      expect
+        .soft(screen.queryByRole("status")?.textContent ?? "")
+        .toMatch(/(?:обновление|повторная загрузка) итогов/i);
+      expect.soft(retryButton.hasAttribute("disabled")).toBe(true);
+      expect(requests).toHaveLength(3);
+
+      await act(async () => {
+        retry.release(() => Response.json({ ...SUMMARY, totalBalance: 600 }));
+      });
+      await screen.findByText("600 ₽");
+      expect(screen.queryByRole("status")).toBeNull();
+      expect(screen.queryByRole("alert")).toBeNull();
     } finally {
-      refresh.release();
+      retry.release();
     }
   });
 
@@ -241,8 +355,16 @@ describe("PeriodSummary loading states", () => {
       expect(screen.getByLabelText("Месяц").getAttribute("value")).toBe(
         "2026-09",
       );
+      view.rerender(<PeriodSummary {...baseProps} />);
+      expect(screen.getByText("475 ₽")).not.toBeNull();
+      expect(screen.queryByRole("status")).toBeNull();
       await act(async () =>
         next.release(() => Response.json({ ...SUMMARY, totalBalance: 999 })),
+      );
+      expect(screen.getByText("475 ₽")).not.toBeNull();
+      expect(screen.queryByText("999 ₽")).toBeNull();
+      view.rerender(
+        <PeriodSummary {...baseProps} range={NEXT_RANGE} month="2026-09" />,
       );
       await screen.findByText("999 ₽");
       expect(screen.queryByText("475 ₽")).toBeNull();

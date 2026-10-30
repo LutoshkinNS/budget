@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { queryClient } from "@/common/api/appQuery";
@@ -22,7 +22,10 @@ const RANGE = {
   from: "2026-10-01T00:00:00.000Z",
   to: "2026-10-02T00:00:00.000Z",
 };
-const ME_42 = { accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }], userId: 1 };
+const ME_42 = {
+  accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
+  userId: 1,
+};
 const LIST_URL =
   "/api/v1/accounts/42/transactions?from=2026-10-01T00%3A00%3A00.000Z&to=2026-10-02T00%3A00%3A00.000Z";
 const SUMMARY_URL =
@@ -63,13 +66,19 @@ function seedMe(currentAccountId: number) {
   });
 }
 
-function stubFetch(handlers: { authMe: () => Response | Promise<Response> }) {
+function stubFetch(handlers: {
+  authMe: () => Response | Promise<Response>;
+  list?: () => Response | Promise<Response>;
+  categorySummary?: () => Response | Promise<Response>;
+}) {
   const fetchMock = vi.fn(
     async (input: RequestInfo | URL): Promise<Response> => {
       const url = String(input);
       if (url.includes("/api/v1/auth/me")) return handlers.authMe();
       if (url.includes("/api/v1/accounts/42/transactions/category-summary")) {
-        return Response.json(categorySummaryPayload);
+        return (
+          handlers.categorySummary?.() ?? Response.json(categorySummaryPayload)
+        );
       }
       if (url.includes("/api/v1/accounts/42/transactions/summary")) {
         return Response.json(summaryPayload);
@@ -81,7 +90,7 @@ function stubFetch(handlers: { authMe: () => Response | Promise<Response> }) {
         });
       }
       if (url.includes("/api/v1/accounts/42/transactions")) {
-        return Response.json(transactionsPayload);
+        return handlers.list?.() ?? Response.json(transactionsPayload);
       }
       throw new Error(`unexpected fetch: ${url}`);
     },
@@ -185,6 +194,33 @@ describe("useTransactions / useTransactionSummary me-guard", () => {
     expect(calls(LIST_URL)).toHaveLength(1);
     second.unmount();
   });
+
+  it("keeps valid cached operations when a background response is invalid", async () => {
+    seedMe(42);
+    let validResponse = true;
+    const { calls } = stubFetch({
+      authMe: () => Response.json(ME_42),
+      list: () =>
+        Response.json(validResponse ? transactionsPayload : { items: [] }),
+    });
+    const { result } = renderHook(() => useTransactions(RANGE), { wrapper });
+    await waitFor(() => expect(result.current.transactions).toHaveLength(1));
+
+    validResponse = false;
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.isLoading).toBe(false);
+    expect.soft(result.current.hasValidData).toBe(true);
+    expect.soft(result.current.transactions).toMatchObject(transactionsPayload);
+    expect.soft(result.current.groups).toHaveLength(1);
+    expect
+      .soft(queryClient.getQueryData(transactionKeys.list(42, RANGE)))
+      .toEqual(transactionsPayload);
+    expect(calls(LIST_URL)).toHaveLength(2);
+  });
 });
 
 describe("useTransactionsCategorySummaryQuery me-guard and scoped key", () => {
@@ -222,6 +258,38 @@ describe("useTransactionsCategorySummaryQuery me-guard and scoped key", () => {
         CATEGORY_SUMMARY_PARAMS,
       ]),
     ).toBeUndefined();
+  });
+
+  it("rejects an invalid background summary before replacing valid cache", async () => {
+    seedMe(42);
+    let validResponse = true;
+    stubFetch({
+      authMe: () => Response.json(ME_42),
+      categorySummary: () =>
+        Response.json(
+          validResponse ? categorySummaryPayload : { categories: [] },
+        ),
+    });
+    const { result } = renderHook(
+      () => useTransactionsCategorySummaryQuery(CATEGORY_SUMMARY_PARAMS),
+      { wrapper },
+    );
+    await waitFor(() =>
+      expect(result.current.data).toEqual(categorySummaryPayload),
+    );
+
+    validResponse = false;
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toEqual(categorySummaryPayload);
+    expect(
+      queryClient.getQueryData(
+        transactionKeys.categorySummary(42, CATEGORY_SUMMARY_PARAMS),
+      ),
+    ).toEqual(categorySummaryPayload);
   });
 });
 

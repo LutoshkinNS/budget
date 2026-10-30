@@ -7,6 +7,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -133,22 +134,29 @@ describe("UserFilter loading states", () => {
   );
 
   it.each(["server", "invalid DTO"] as const)(
-    "shows a local %s error instead of silently hiding the filter",
+    "recovers from a local initial %s error through Retry",
     async (failure) => {
-      stubHttp(() =>
-        failure === "server"
+      let recovered = false;
+      const requests = stubHttp(() => {
+        if (recovered) return Response.json(MEMBERS);
+        return failure === "server"
           ? Response.json(
               { code: "SERVER_ERROR", statusCode: 500 },
               { status: 500 },
             )
-          : Response.json({ members: [] }),
-      );
+          : Response.json({ members: [] });
+      });
       render(<UserFilter value={null} onChange={() => {}} />, {
         wrapper: Wrapper,
       });
-      await screen.findByRole("alert");
+      const error = await screen.findByRole("alert");
       expect(screen.queryByRole("status")).toBeNull();
       expect(screen.queryByRole("tablist")).toBeNull();
+      recovered = true;
+      fireEvent.click(within(error).getByRole("button", { name: "Повторить" }));
+      await screen.findByRole("tab", { name: "Анна" });
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(requests).toHaveLength(2);
     },
   );
 
@@ -180,38 +188,56 @@ describe("UserFilter loading states", () => {
     expect(requests).toHaveLength(1);
   });
 
-  it("keeps participant controls visible after a same-key background refresh error", async () => {
-    const refresh = new ResponseGate();
-    let requestCount = 0;
-    stubHttp(() =>
-      ++requestCount === 1 ? Response.json(MEMBERS) : refresh.wait(),
-    );
-    try {
-      render(<UserFilter value={null} onChange={() => {}} />, {
-        wrapper: Wrapper,
+  it.each(["server", "invalid DTO"] as const)(
+    "preserves participant controls and retries a background %s failure",
+    async (failure) => {
+      const refresh = new ResponseGate();
+      let requestCount = 0;
+      let recovered = false;
+      const requests = stubHttp(() => {
+        if (++requestCount === 1) return Response.json(MEMBERS);
+        return recovered ? Response.json(MEMBERS) : refresh.wait();
       });
-      await screen.findByRole("tab", { name: "Анна" });
-      let refreshFinished: Promise<void> | undefined;
-      act(() => {
-        refreshFinished = client.invalidateQueries();
-      });
-      await waitFor(() => expect(refresh.heldCount).toBe(1));
-      expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
-      expect(screen.queryByRole("status")).toBeNull();
-      await act(async () => {
-        refresh.release(() =>
-          Response.json({ statusCode: 500 }, { status: 500 }),
+      const onChange = vi.fn();
+      try {
+        render(<UserFilter value={null} onChange={onChange} />, {
+          wrapper: Wrapper,
+        });
+        await screen.findByRole("tab", { name: "Анна" });
+        let refreshFinished: Promise<void> | undefined;
+        act(() => {
+          refreshFinished = client.invalidateQueries();
+        });
+        await waitFor(() => expect(refresh.heldCount).toBe(1));
+        expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
+        expect(screen.queryByRole("status")).toBeNull();
+        await act(async () => {
+          refresh.release(() =>
+            failure === "server"
+              ? Response.json({ statusCode: 500 }, { status: 500 })
+              : Response.json({ members: [] }),
+          );
+          await refreshFinished;
+        });
+        const error = await screen.findByRole("alert");
+        expect(
+          screen.getByRole("tab", { name: "Анна" }).hasAttribute("disabled"),
+        ).toBe(false);
+        fireEvent.click(screen.getByRole("tab", { name: "Пётр" }));
+        expect(onChange).toHaveBeenCalledWith(2);
+        expect(requests).toHaveLength(2);
+        recovered = true;
+        fireEvent.click(
+          within(error).getByRole("button", { name: "Повторить" }),
         );
-        await refreshFinished;
-      });
-      await screen.findByRole("alert");
-      expect(
-        screen.getByRole("tab", { name: "Анна" }).hasAttribute("disabled"),
-      ).toBe(false);
-    } finally {
-      refresh.release();
-    }
-  });
+        await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+        expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
+        expect(requests).toHaveLength(3);
+      } finally {
+        refresh.release();
+      }
+    },
+  );
 
   it("does not carry previous-account participants into a new pending account", async () => {
     const secondAccount = new ResponseGate();
@@ -229,6 +255,9 @@ describe("UserFilter loading states", () => {
       await waitFor(() => expect(secondAccount.heldCount).toBe(1));
       expect(screen.queryByRole("tab", { name: "Анна" })).toBeNull();
       expect(screen.getByRole("status")).not.toBeNull();
+      act(() => switchAccount(42));
+      expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
+      expect(screen.queryByRole("status")).toBeNull();
       await act(async () =>
         secondAccount.release(() =>
           Response.json([
@@ -237,6 +266,9 @@ describe("UserFilter loading states", () => {
           ]),
         ),
       );
+      expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
+      expect(screen.queryByRole("tab", { name: "Мария" })).toBeNull();
+      act(() => switchAccount(43));
       await screen.findByRole("tab", { name: "Мария" });
       expect(screen.queryByRole("tab", { name: "Анна" })).toBeNull();
       act(() => switchAccount(42));

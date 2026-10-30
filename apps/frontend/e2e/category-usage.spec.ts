@@ -191,7 +191,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         .click();
       await expect(
         page.getByRole("heading", {
-          name: `Редактировать ${type === "income" ? "доход" : "расход"}`,
+          name: "Редактировать операцию",
         }),
       ).toBeVisible();
       const categorySelect = page.getByRole("combobox", { name: "Категория" });
@@ -217,7 +217,13 @@ for (const colorScheme of ["light", "dark"] as const) {
       await page
         .getByRole("button", { name: "Сохранить", exact: true })
         .click();
-      expect((await updated).ok()).toBeTruthy();
+      const updatedResponse = await updated;
+      expect(updatedResponse.ok()).toBeTruthy();
+      const updatedTransaction = TransactionsGetResponse.parse(
+        await updatedResponse.json(),
+      );
+      await expect(page).toHaveURL(/\/$/);
+      await page.goto(`/expenses/${updatedTransaction.id}/edit`);
       await expect(categorySelect).toHaveValue(String(gamma.id));
       await expect(categorySelect.locator("option")).toHaveText([
         beta.name,

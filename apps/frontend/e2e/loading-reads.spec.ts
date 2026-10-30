@@ -180,6 +180,9 @@ async function installApi(page: Page, backendUrl: string) {
     fail(resource: Resource, accountId = 1) {
       failures.add(key(resource, accountId));
     },
+    recover(resource: Resource, accountId = 1) {
+      failures.delete(key(resource, accountId));
+    },
     count(resource: Resource, accountId = 1) {
       return requests.filter(
         (entry) => entry.resource === resource && entry.accountId === accountId,
@@ -270,6 +273,59 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
   }
 
+  for (const resource of ["summary", "members"] as const) {
+    test(`dashboard retries a failed ${resource} block locally: ${colorScheme}`, async ({
+      page,
+      backend,
+    }, testInfo) => {
+      const api = await installApi(page, backend.url);
+      api.fail(resource);
+      await page.emulateMedia({ colorScheme });
+      try {
+        await page.goto("/dashboard");
+        const error = page.getByRole("alert").filter({
+          hasText:
+            resource === "summary"
+              ? "Не удалось загрузить итоги"
+              : "Не удалось загрузить участников",
+        });
+        await expect(error).toBeVisible();
+        await expect(
+          page.getByText("Операция Анны", { exact: true }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "день", exact: true }),
+        ).toBeEnabled();
+        if (resource === "summary") {
+          await expect(
+            page.getByRole("tab", { name: "Анна", exact: true }),
+          ).toBeVisible();
+        } else {
+          await expect(page.getByText("500 ₽", { exact: true })).toBeVisible();
+        }
+        await expectNoOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `${resource}-error-retry-${colorScheme}.png`,
+          ),
+        });
+        const requestsBeforeRetry = api.count(resource);
+        api.recover(resource);
+        await error
+          .getByRole("button", { name: "Повторить", exact: true })
+          .click();
+        await expect(error).toHaveCount(0);
+        await expect(page.getByText("500 ₽", { exact: true })).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Анна", exact: true }),
+        ).toBeVisible();
+        expect(api.count(resource)).toBe(requestsBeforeRetry + 1);
+      } finally {
+        api.releaseAll();
+      }
+    });
+  }
+
   test(`main history remains readable while category lookup waits: ${colorScheme}`, async ({
     page,
     backend,
@@ -305,7 +361,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     }
   });
 
-  test(`account navigation resets the filter and preserves cached history on background failure: ${colorScheme}`, async ({
+  test(`account navigation resets the filter and preserves cached history and totals on background failure: ${colorScheme}`, async ({
     page,
     backend,
   }, testInfo) => {
@@ -318,6 +374,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       ).toBeVisible();
       const historyRequests = api.count("history");
       const summaryRequests = api.count("summary");
+      const membersRequests = api.count("members");
       await page.getByRole("tab", { name: "Пётр", exact: true }).click();
       await expect(
         page.getByText("Операция Анны", { exact: true }),
@@ -328,6 +385,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expect(page.getByText("500 ₽", { exact: true })).toBeVisible();
       expect(api.count("history")).toBe(historyRequests);
       expect(api.count("summary")).toBe(summaryRequests);
+      expect(api.count("members")).toBe(membersRequests);
 
       await page.getByRole("link", { name: "Настройки", exact: true }).click();
       await page.locator('select[name="account_id"]').selectOption("2");
@@ -338,6 +396,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expect(
         page.getByText("Операция Анны", { exact: true }),
       ).toHaveCount(0);
+      await expect(page.getByText("910 ₽", { exact: true })).toBeVisible();
       await expect(
         page.getByRole("tab", { name: "все", exact: true }),
       ).toHaveAttribute("aria-selected", "true");
@@ -345,9 +404,20 @@ for (const colorScheme of ["light", "dark"] as const) {
       await page.getByRole("link", { name: "Настройки", exact: true }).click();
       await page.locator('select[name="account_id"]').selectOption("1");
       const refresh = api.hold("history");
+      const summaryRefresh = api.hold("summary");
       api.fail("history");
+      api.fail("summary");
       await page.getByRole("link", { name: "Дашборд", exact: true }).click();
       await expect.poll(() => refresh.heldCount).toBeGreaterThan(0);
+      await expect.poll(() => summaryRefresh.heldCount).toBeGreaterThan(0);
+      await expect(
+        page.getByRole("status").filter({ hasText: "Обновление итогов" }),
+      ).toBeVisible();
+      await expect(page.getByText("500 ₽", { exact: true })).toBeVisible();
+      await expect(page.getByText("910 ₽", { exact: true })).toHaveCount(0);
+      await expect(
+        page.getByRole("tab", { name: "день", exact: true }),
+      ).toBeEnabled();
       await expect(
         page.getByText("Операция Анны", { exact: true }),
       ).toBeVisible();
@@ -364,7 +434,16 @@ for (const colorScheme of ["light", "dark"] as const) {
         page.getByRole("status", { name: "Загрузка операций" }),
       ).toHaveCount(0);
       refresh.release();
+      summaryRefresh.release();
       await expect(page.getByRole("alert").first()).toBeVisible();
+      const summaryError = page.getByRole("alert").filter({
+        hasText: "Не удалось обновить итоги",
+      });
+      await expect(summaryError).toBeVisible();
+      await expect(page.getByText("500 ₽", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Обновление итогов" }),
+      ).toHaveCount(0);
       await expect(
         page.getByText("Операция Анны", { exact: true }),
       ).toBeVisible();
@@ -377,6 +456,12 @@ for (const colorScheme of ["light", "dark"] as const) {
           `cached-history-background-error-${colorScheme}.png`,
         ),
       });
+      api.recover("summary");
+      await summaryError
+        .getByRole("button", { name: "Повторить", exact: true })
+        .click();
+      await expect(summaryError).toHaveCount(0);
+      await expect(page.getByText("500 ₽", { exact: true })).toBeVisible();
     } finally {
       api.releaseAll();
     }

@@ -1,3 +1,4 @@
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   cleanup,
   fireEvent,
@@ -7,10 +8,14 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CreateCategory } from "./CreateCategory";
+import { queryClient } from "@/common/api/appQuery";
+import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
+import { Notifications } from "@/common/lib/notifications";
+
+import { CreateCategory } from "../create-category";
 
 const mocks = vi.hoisted(() => ({ createCategory: vi.fn() }));
-vi.mock("../model/use-create-category.ts", () => ({
+vi.mock("../../model/use-create-category.ts", () => ({
   useCreateCategory: () => ({
     createCategory: mocks.createCategory,
     isPending: false,
@@ -18,15 +23,33 @@ vi.mock("../model/use-create-category.ts", () => ({
     errorMessage: undefined,
   }),
 }));
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  queryClient.clear();
+});
 beforeEach(() => {
   mocks.createCategory.mockReset();
   mocks.createCategory.mockResolvedValue({ id: 1 });
+  queryClient.clear();
+  queryClient.setQueryData(getAuthMeQueryKey(), {
+    userId: 1,
+    accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
+  });
 });
+
+function renderCreate() {
+  return render(
+    <Notifications>
+      <QueryClientProvider client={queryClient}>
+        <CreateCategory type="expense" />
+      </QueryClientProvider>
+    </Notifications>,
+  );
+}
 
 describe("CreateCategory icons", () => {
   it("does not choose an icon based on the category name", async () => {
-    render(<CreateCategory type="expense" />);
+    renderCreate();
     fireEvent.change(screen.getByLabelText("Наименование категории"), {
       target: { value: "продукты" },
     });
@@ -46,7 +69,7 @@ describe("CreateCategory icons", () => {
   });
 
   it("submits the explicit selection and starts the next category without an icon", async () => {
-    render(<CreateCategory type="expense" />);
+    renderCreate();
     fireEvent.change(screen.getByLabelText("Наименование категории"), {
       target: { value: "Покупки" },
     });

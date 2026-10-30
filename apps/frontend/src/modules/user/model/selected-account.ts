@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 
 import { queryClient } from "@/common/api/appQuery";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
+import { AuthMeResponse } from "@/common/api/generate/authentication/authentication.zod.gen.ts";
 import type { UserInfoDTO } from "@/common/api/generate/model";
 import { accountKeys } from "@/common/api/query-keys";
 
@@ -74,6 +75,13 @@ export function useCurrentAccountId(): number | undefined {
 /** Снимок accountId при вызове сохраняет область инвалидации после переключения. */
 export function getCurrentAccountIdSnapshot(): number | undefined {
   return resolveAccountId(readMeAccounts() ?? [], getSelectedAccountId());
+}
+
+/** Снимок нужен для отбрасывания поздних callback после смены пользователя. */
+export function getCurrentUserIdSnapshot(): number | undefined {
+  const me = queryClient.getQueryData<UserInfoDTO>(getAuthMeQueryKey());
+  const validation = AuthMeResponse.safeParse(me);
+  return validation.success ? validation.data.userId : undefined;
 }
 
 export function requireCurrentAccountId(): number {

@@ -17,6 +17,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
     hasValidData,
     isError,
     isLoading,
+    refetch,
   } = useAccountMembers();
 
   if (!hasAccount) return null;
@@ -37,6 +38,13 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
           {hasValidData
             ? "Не удалось обновить список участников"
             : "Не удалось загрузить участников"}
+          <button
+            type="button"
+            className={s.retryButton}
+            onClick={() => void refetch()}
+          >
+            Повторить
+          </button>
         </p>
       )}
       {members.length > 1 && (

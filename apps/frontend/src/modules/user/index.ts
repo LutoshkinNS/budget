@@ -1,6 +1,7 @@
 export { useMe } from "./model/useMe.ts";
 export {
   getCurrentAccountIdSnapshot,
+  getCurrentUserIdSnapshot,
   requireCurrentAccountId,
   switchAccount,
   useCurrentAccountId,

@@ -77,13 +77,39 @@ export function CategoryDetailSheet({
           {formatPeriodChange(category.changePercent)}
         </p>
         <h3>Операции</h3>
-        {operationsQuery.isError ? (
-          <SimpleError>Не удалось загрузить операции.</SimpleError>
+        {!operationsQuery.hasAccount ? (
+          <p className={s.empty} role="status">
+            Счёт не выбран.
+          </p>
         ) : (
-          <Operations
-            transactions={operationsQuery.transactions}
-            isLoading={operationsQuery.isLoading}
-          />
+          <>
+            {operationsQuery.isFetching && operationsQuery.hasValidData && (
+              <p className={s.updateStatus} role="status" aria-live="polite">
+                Обновляем операции…
+              </p>
+            )}
+            {operationsQuery.isError && (
+              <div className={s.errorState} role="alert">
+                <SimpleError>
+                  {operationsQuery.hasValidData
+                    ? "Не удалось обновить операции."
+                    : "Не удалось загрузить операции."}
+                </SimpleError>
+                <button
+                  className={s.retryButton}
+                  type="button"
+                  onClick={() => void operationsQuery.refetch()}
+                >
+                  Повторить
+                </button>
+              </div>
+            )}
+            <Operations
+              transactions={operationsQuery.transactions}
+              isLoading={operationsQuery.isLoading}
+              hasValidData={operationsQuery.hasValidData}
+            />
+          </>
         )}
       </section>
     </div>
