@@ -1,4 +1,4 @@
-import { getCategoryIcon } from "../model/category-icons";
+import { getCategoryIcon } from "../model/category-icons.ts";
 
 import styles from "./category-icon.module.css";
 

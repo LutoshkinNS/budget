@@ -1,11 +1,7 @@
 import { useCallback, useState } from "react";
 
 import type { CategoryType } from "@/modules/categories";
-import {
-  CategoriesList,
-  CreateCategory,
-  DeleteCategory,
-} from "@/modules/categories";
+import { CategoriesManager } from "@/modules/categories";
 import { invalidateTransactionsCategorySummary } from "@/modules/transactions";
 
 export function Categories() {
@@ -38,13 +34,10 @@ export function Categories() {
           доходы
         </button>
       </fieldset>
-      <CategoriesList
-        key={`list-${type}`}
+      <CategoriesManager
         type={type}
         onCategoryUpdated={handleCategoryUpdated}
       />
-      <CreateCategory key={`create-${type}`} type={type} />
-      <DeleteCategory key={`delete-${type}`} type={type} />
     </div>
   );
 }

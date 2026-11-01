@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { AccountAvatar } from "@/common/ui/account-avatar/AccountAvatar";
 import { Input } from "@/common/ui/input/Input";
 import { NumericKeyboard } from "@/common/ui/numeric-keyboard/ui/numeric-keyboard.tsx";
-import { CategoriesKeyboard } from "@/modules/categories";
+import { CategoryPicker } from "@/modules/category-selection";
 import { useCurrentAccountId, useMe } from "@/modules/user";
 
 import { parseTransactionAmountInput } from "../../model/amount.ts";
@@ -105,7 +105,7 @@ export function CreateTransaction() {
             {error}
           </p>
         )}
-        <CategoriesKeyboard
+        <CategoryPicker
           className={s.categories}
           type={type}
           value={null}

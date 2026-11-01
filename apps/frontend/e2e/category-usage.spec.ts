@@ -218,6 +218,18 @@ for (const colorScheme of ["light", "dark"] as const) {
         .getByRole("button", { name: "Сохранить", exact: true })
         .click();
       expect((await updated).ok()).toBeTruthy();
+      await expect(page).toHaveURL("/");
+      if (type === "income") {
+        await page.getByRole("button", { name: "доход", exact: true }).click();
+      }
+      await page
+        .getByRole("button", { name: new RegExp(gamma.name + ".*" + suffix) })
+        .click();
+      await expect(
+        page.getByRole("heading", {
+          name: `Редактировать ${type === "income" ? "доход" : "расход"}`,
+        }),
+      ).toBeVisible();
       await expect(categorySelect).toHaveValue(String(gamma.id));
       await expect(categorySelect.locator("option")).toHaveText([
         beta.name,
