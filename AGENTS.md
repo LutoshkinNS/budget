@@ -39,6 +39,7 @@
 | Проверять идею или план вопросами                                       | `grilling`; `grill-me` — интервью, `grill-with-docs` — интервью с глоссарием и ADR |
 | Менять предметную модель, термины, глоссарий или ADR                    | `domain-modeling`                                                                  |
 | Проектировать интерфейсы модулей и места подмены поведения для тестов   | `codebase-design`                                                                  |
+| Создавать структуру frontend, размещать код по слоям FEOD, проверять импорты | [feod](.agents/skills/feod/SKILL.md); область — `apps/frontend`, правила проекта — [frontend-architecture.md](apps/frontend/docs/frontend-architecture.md) |
 | Искать возможности архитектурного рефакторинга                          | `improve-codebase-architecture`                                                    |
 | Исследовать вопрос по первичным источникам                              | `research`                                                                         |
 | Проверять решение временным исполняемым прототипом                      | `prototype`                                                                        |
