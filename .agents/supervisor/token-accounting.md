@@ -1,26 +1,64 @@
-# Учёт токенов по задаче
+# Учёт токенов и покрытия назначений
 
-Используй сборщик после публикации задачи, чтобы вручную связать расход supervisor и исполнителей с задачей. Он читает локальные JSONL сессии и сохраняет manifest и отчёт внутри каталога проектной сессии. Команда не меняет статусы задачи и не запускает хуки автоматически.
+Используй этот документ после публикации задачи. Реестр назначений и token manifest — отдельные входы: первый фиксирует известные запуски supervisor, второй — измерительные окна. Ни один из них не подтверждает runtime-состояние чата или полный расход.
 
-## Рабочий цикл
+## Реестр запусков
 
-Из корня репозитория укажи путь задачи, опубликованной в `projects/tasks/`, и thread ID из события `session_meta`:
+Supervisor создаёт и обновляет `projects/tasks/<work>/sessions/<run>/launches.json` обычной записью после запуска каждого назначенного потока. Intake до согласованной границы не добавляй задним числом; неназначенные потоки, включая guardian, не записывай фиктивной ролью.
 
-```powershell
-pnpm agents:tokens start projects/tasks/<work>/sessions/<run> --task projects/tasks/<feature>/work-items/<task>.md --thread <supervisor-thread-id>
-pnpm agents:tokens attach projects/tasks/<work>/sessions/<run> --task projects/tasks/<feature>/work-items/<task>.md --thread <developer-thread-id> --role developer --attempt 0 --from-start
-pnpm agents:tokens stop projects/tasks/<work>/sessions/<run> --thread <developer-thread-id>
-pnpm agents:tokens report projects/tasks/<work>/sessions/<run> --format markdown
-pnpm agents:tokens stop projects/tasks/<work>/sessions/<run> --thread <supervisor-thread-id>
-pnpm agents:tokens report projects/tasks/<work>/sessions/<run> --format json --output projects/tasks/<work>/sessions/<run>/tokens.json
+```json
+{
+  "schema_version": 1,
+  "kind": "agent-launch-registry",
+  "run": "example-run",
+  "launches": [
+    {
+      "thread_id": "known-thread-id",
+      "task": "projects/tasks/example/work-items/1-change.md",
+      "role": "developer",
+      "attempt": 0,
+      "state": "open"
+    }
+  ]
+}
 ```
 
-Для нового интервала того же потока сначала выполни `stop`, затем `attach` с нужной задачей, ролью и попыткой. `--from-start` применяй только при первом присоединении потока, когда нужен весь доступный журнал. По умолчанию сбор начинается с текущего checkpoint. По умолчанию sessions-root — `~/.codex/sessions`; для изолированного теста передай `--sessions-root <dir>`.
+Все поля обязательны; дополнительные поля запрещены. `launches` может быть пустым. `run` равен имени каталога сессии. `task` — существующий файл `work-items` той же работы, путь от корня с `/`, без traversal. Роль — `supervisor`, `spec-writer`, `developer`, `tester` или `reviewer`; попытка — целое 0–3; состояние — `open` или `closed`. Tuple `(thread_id, task, role, attempt)` уникален: новое назначение потока создаёт tuple, повтор того же tuple обновляет запись.
 
-## Как читать отчёт
+После запуска запиши ID со `state: open`, затем выполняй `start`/`attach`; после завершения учётного окна выполняй `stop` и ставь `closed`. `open` допускает незакрытые окна; `closed` требует, чтобы все окна tuple были закрыты. Эти ручные отметки не следят за чатом.
 
-JSON содержит строки по задаче, роли, модели и попытке; Markdown показывает те же наблюдаемые суммы и причины неполноты. Суммируются только валидные `token_usage_record.payload.usage` выбранных окон. Input и output дают total; cached input и reasoning output являются их подмножествами и повторно не прибавляются. Неизвестные подкатегории остаются неизвестными.
+## Учётные окна
 
-Открытые интервалы, активный turn, незавершённый хвост журнала, отсутствующий model context, изменения/недоступность источника, конфликт ответа, fork и другие diagnostics означают provisional, partial или unknown. Это фактическая сумма доступных записей, а не оценка billing/quota и не гарантия полного расхода всей работы. `token_count` не используется как запасной источник. Прочитай diagnostics перед передачей отчёта на принятие.
+Из корня репозитория укажи задачу и thread ID из `session_meta`:
 
-Источник сессии выбирается по `session_meta.id`; неоднозначный ID требует ручного разбора. Тексты сообщений, prompts и аргументы инструментов в manifest и отчёт не копируются.
+```powershell
+pnpm agents:tokens start projects/tasks/<work>/sessions/<run> --task projects/tasks/<work>/work-items/<task>.md --thread <supervisor-thread-id>
+pnpm agents:tokens attach projects/tasks/<work>/sessions/<run> --task projects/tasks/<work>/work-items/<task>.md --thread <developer-thread-id> --role developer --attempt 0 --from-start
+pnpm agents:tokens stop projects/tasks/<work>/sessions/<run> --thread <developer-thread-id>
+pnpm agents:tokens report projects/tasks/<work>/sessions/<run> --format markdown
+```
+
+Для нового окна того же потока сначала `stop`, затем `attach` с актуальными task/role/attempt. `--from-start` применяй только при первом attach, если нужен доступный журнал целиком. Иначе сбор начинается с текущего checkpoint. По умолчанию JSONL берётся из `~/.codex/sessions`; для изолированного запуска можно задать `--sessions-root <dir>`. Старые команды не требуют launches.json.
+
+## Coverage
+
+Запусти локальную сверку из корня:
+
+```powershell
+pnpm agents:tokens coverage projects/tasks/<work>/sessions/<run>
+pnpm agents:tokens coverage projects/tasks/<work>/sessions/<run> --format markdown
+```
+
+Coverage читает только launches.json, token-manifest.json и файлы задач для проверки пути. JSONL и `~/.codex/sessions` не нужны. Команда печатает только в stdout, не создаёт файлов и не принимает `--output`, `--sessions-root` или другие опции кроме `--format`. linked paths и некорректные существующие входы дают exit 1; валидные `partial`/`unknown` возвращают exit 0.
+
+`complete` означает, что реестр согласуется с окнами и все записи `closed` закрыты. `partial` показывает расхождения либо отсутствующий manifest при существующем registry. `unknown` с `registry_missing` означает старую сессию без реестра; полнота назначений не утверждается. Отсутствующий manifest при наличии реестра даёт `manifest_missing` и missing для назначений. Если registry отсутствует, coverage возвращает `unknown`; существующий manifest всё равно валидируется, и ошибка не скрывается.
+
+Диагностики: `missing_interval` (thread отсутствует), `ownership_mismatch` (у thread есть окна другого tuple), `unregistered_interval` (manifest-only окно), `unclosed_interval` (закрытый tuple содержит открытое окно), `manifest_missing` и `registry_missing`. Одно окно может показать обе стороны несоответствия. Нормальное открытое окно выводится в `open` и само не делает coverage частичным; tuple `open` со всеми закрытыми окнами допустим. JSON и Markdown показывают статус, открытые окна и диагностики без текстов сообщений.
+
+Coverage не читает JSONL, не меняет manifest, результаты или статусы и не принимает приложение. Даже `complete` coverage не означает полный расход токенов.
+
+## Интерпретация report
+
+Отчёт суммирует только валидные `token_usage_record.payload.usage` выбранных окон. Input и output дают total; cached input и reasoning output являются подмножествами. Неизвестные категории остаются неизвестными. Открытый интервал, активный turn, неполный хвост журнала, отсутствующий model context, изменение/недоступность источника, конфликт ответа, fork и другие diagnostics означают provisional, partial или unknown. `token_count` не используется как замена. Отчёт — наблюдаемые данные, не billing/quota и не гарантия полного расхода.
+
+Источник JSONL выбирается по `session_meta.id`; неоднозначный ID требует ручного разбора. Тексты сообщений, prompts и аргументы инструментов в manifest/report не копируются. Отдельная диагностика неназначенного дочернего потока сохраняется и не превращается в запись registry.
