@@ -54,18 +54,21 @@ const { todos, addTodo, toggleTodo, removeTodo } = useTodos()
 </template>
 ```
 
-page is thin but not just router to the module.
+### Page composed from one module
 
-BAD:
-```
+```vue
 <script setup lang="ts">
-import { UserPage } from '@/modules/User'
+import { UserProfile } from '@/modules/User'
 </script>
 
 <template>
-  <UserPage />
+  <UserProfile />
 </template>
 ```
+
+A page may render one public module component when it is the complete composition for the route.
+Add route parameter adaptation, navigation or other composition when that route needs it;
+do not add page logic solely to make the wrapper look less simple.
 
 
 ## Todos module

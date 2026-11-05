@@ -18,6 +18,8 @@ Pillars: **modularity** and **fractality** (submodules in `modules/<Name>/module
 FEOD ≠ FSD: `common` is a staging area for entities that are not yet a module;
 entities routinely move between layers as the project grows.
 
+Before creating, moving or splitting modules, read [module-boundaries.md](references/module-boundaries.md).
+
 ## Step 0 — project profile
 
 1. Look for `feod.profile.md` in the project root.
@@ -41,8 +43,8 @@ global — never imported (available without import; .d.ts via tsconfig)
 | Layer | Purpose | Imports | Imported by |
 |-------|---------|---------|-------------|
 | **global** | shims, polyfills, `.d.ts` | — | nobody |
-| **common** | small reusable entities, usually 1 file | common | modules, pages, app |
-| **modules** | business logic, isolated modules | common, modules (public API only) | modules, pages, app |
+| **common** | small universal entities without a domain owner | common | modules, pages, app |
+| **modules** | cohesive application capabilities, integrations and complex utilities with a public API | common, modules (public API only) | modules, pages, app |
 | **pages** | URL → component, thin | common, modules | app |
 | **app** | bootstrap, router, layouts, integrations | everything below | nobody |
 
@@ -53,7 +55,7 @@ global — never imported (available without import; .d.ts via tsconfig)
 - Cross-level imports use the alias (`@/`); in-level / in-module imports are relative.
 - `common` → modules only via **IoC** (interface + injection from app).
 - Pages are thin; no business logic in pages or app.
-- A module is not created "for one utility": use common or a submodule.
+- Choose a module or submodule only when its interface and isolation provide a useful boundary; use `common` for small universal entities and ordinary folders for implementation details.
 
 Full matrix, path rules, nested levels, modifications and anti-patterns — [rules.md](references/rules.md).
 

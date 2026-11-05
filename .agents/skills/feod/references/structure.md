@@ -4,29 +4,27 @@
 
 Entities move between layers (common → module and back) — expected.
 
+Before creating or moving modules, use [module-boundaries.md](module-boundaries.md).
+This map helps locate URLs, universal code and application infrastructure after their owners are clear.
+
 ```
 Need availability without import?            → global (.d.ts, polyfill, shim only)
-Tied to a business domain?                   → modules
-  Needs a URL?                               → modules/<Name>/pages/
-  Only for one top-level page?               → pages/_<page>/ (prefer module pages)
-  Too large / needs isolation?               → modules/<Name>/modules/<Sub>/
-  Depends on another module?                 → IoC (interface + app/init)
-Universal, 1 file, no business logic?        → common
-  Several related files / design system?     → modules (not common)
-  Needs another module?                      → modules or IoC
-Bootstrap / config / router / layout?        → app (layouts may be a module)
-URL without domain (404, about)?             → pages (thin)
-Everything maps to module pages?             → top-level pages/ may be omitted
+Bootstrap, config, router or layout?         → app
+URL, route parameters or navigation?         → pages (compose public module interfaces)
+Cohesive application capability/integration? → modules
+Small universal entity without domain owner?  → common
+Implementation detail of an existing module? → ordinary internal folder
+Independent part useful to isolate?           → modules/<Name>/modules/<Sub>/
 ```
 
 | Entity | Layer |
 |--------|-------|
 | Entry, router, layouts, integrations | app |
 | 404, about | pages |
-| URL + domain logic | modules/…/pages/ |
-| Feature, API, domain store | modules |
+| URL + route composition | pages (module pages are optional when allowed by the profile) |
+| Application capability, integration, complex utility | modules |
 | Design system / UI library | modules |
-| One button, formatDate, one composable | common |
+| Small universal control, formatDate | common |
 | vue-router.d.ts, polyfill | global |
 
 ## Base tree (SPA)
@@ -38,7 +36,7 @@ src/
   modules/
     FeatureName/
       components/ | ui/   composables/   api/   store/   types/
-      pages/              module pages (preferred)
+      pages/              optional module pages (profile decides)
       modules/            submodules (fractal)
       index.ts            public API
   common/         ui/ (primitives), composables/, utilities/, types/, constants/
@@ -50,7 +48,8 @@ prescribe module internals — only `index.ts` and optionally `modules/`, `pages
 
 Other frameworks: same layers; rename `composables/` → `hooks/`, `.vue` → `.tsx`, etc.
 Meta-frameworks that fix their own routing directory (Next, Nuxt) keep it as the
-**app/pages entry point** and delegate to `modules/` — see the profile.
+**app/pages entry point** and delegate to `modules/` — see the profile. Top-level pages compose
+public module interfaces; a page rendering one module can be a complete route composition.
 
 ## Variant trees
 

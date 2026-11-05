@@ -3,6 +3,10 @@
 Single source for import legality and variants. The project profile
 (`feod.profile.md`) selects which deltas below apply.
 
+For the scale and responsibility behind module boundaries, follow
+[module-boundaries.md](module-boundaries.md). Import rules constrain the resulting structure;
+they do not decide how large a module should be.
+
 ## Cross-level import matrix (base)
 
 | Imports ↓ / from → | global | common | modules | pages | app |
@@ -30,6 +34,33 @@ npm packages may be imported anywhere.
 
 Submodule from outside: public API of the parent only.
 
+## Submodules and dependency cycles
+
+A submodule stays in the `modules` layer. It may use another top-level module through that
+module's public API. Its parent may use the public API of its immediate child; modules outside
+that parent use the parent API and do not reach into that child directly.
+
+A child may import a concrete implementation from its own parent as a narrow exception.
+Keep this dependency minimal. Prefer making the child autonomous or passing the parent's
+behavior through IoC.
+
+Avoid importing the parent's `index.ts` from a child when that index re-exports the child.
+The resulting runtime cycle can expose values before they are initialized; a cycle does not
+necessarily fail in every case, but this shape is fragile.
+
+```text
+categories/index.ts → management/index.ts → management consumer → categories/index.ts
+```
+
+If the child must use parent behavior, import the concrete parent implementation that does
+not depend back on the child or its barrel. For example, from
+`categories/modules/management/model/`, `../../../model/use-categories.ts` reaches the
+parent's implementation. This is only the own-parent exception; it does not permit deep
+imports into another module.
+
+Check the full transitive dependency chain after choosing the concrete file: that path alone
+does not prove the cycle is gone. Do not conceal a direct cycle by adding more barrels.
+
 ## Nested levels
 
 The path defines the logical layer, not folder depth. Special rules only for:
@@ -44,8 +75,8 @@ The path defines the logical layer, not folder depth. Special rules only for:
 Everything else (`common/ui/Button.vue`, ...) belongs to the enclosing layer.
 Rule priority: project profile > level rules > base rules.
 
-- **Module pages** — a module may import its own pages to re-export through the public API.
-  Preferred over top-level `pages/` for domain URLs.
+- **Module pages** — a module may import its own pages to re-export through the public API when
+  allowed by the project profile. Top-level pages may instead compose module interfaces.
 - **Private page module** (`pages/_name/`) — usable only by the owning page; has no pages
   of its own; does not import other entities at pages level. Use sparingly.
 - **Transit module** — container without its own `modules/`; `_/index.ts` is the private
@@ -76,7 +107,8 @@ Alternative layer names keep the same rules: `boot`≈app, `views`/`routes`≈pa
 - ❌ Importing module internals (`@/modules/User/api/userApi`) — only `@/modules/User`
 - ❌ `common/index.ts` or a barrel in common (unless the profile allows it)
 - ❌ Business logic in pages or app
-- ❌ A module "for one utility" — use common or a submodule
+- ❌ A module with no useful public interface or isolation — use an ordinary internal folder;
+  use `common` for small universal entities
 - ❌ Pseudo-modules `utils`, `types`, `constants` — group by meaning
 - ❌ More than ~3 levels of submodule nesting without justification
 - ❌ Direct module → module imports instead of IoC when coupling is strong
@@ -90,7 +122,7 @@ Alternative layer names keep the same rules: `boot`≈app, `views`/`routes`≈pa
 | common = shared abstraction layer | common = temporary staging area |
 | widgets/features/entities | one modules layer |
 | barrel in shared/common | `index.ts` only in modules |
-| logic in pages | modules + thin pages |
+| logic in pages | module scenarios plus route-level page composition |
 | utils/types/constants modules | common or domain modules |
 
 ## IoC pattern
