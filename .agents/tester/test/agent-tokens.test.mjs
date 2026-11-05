@@ -4,10 +4,12 @@ import { createHash } from "node:crypto";
 import {
   appendFile,
   link,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
   readdir,
+  readlink,
   rm,
   symlink,
   writeFile,
@@ -1412,4 +1414,381 @@ test("cycle2 R-10: lagging token_count before checkpoint never replaces the mode
   assert.equal(report.completeness, "complete");
   assert.ok(!codes(report).includes("coverage_gap"));
   assert.ok(!codes(report).includes("counter_reset"));
+});
+
+const registryPath = `${projectSession}/launches.json`;
+const coverageManifestPath = `${projectSession}/token-manifest.json`;
+const anotherProjectTask = "projects/tasks/feature/work-items/second.md";
+
+function launch(overrides = {}) {
+  return {
+    thread_id: "assigned-thread",
+    task: projectTask,
+    role: "developer",
+    attempt: 0,
+    state: "closed",
+    ...overrides,
+  };
+}
+
+function coverageRegistry(launches = [launch()]) {
+  return {
+    schema_version: 1,
+    kind: "agent-launch-registry",
+    run: "fixture-run",
+    launches,
+  };
+}
+
+function coverageCheckpoint(offset) {
+  return { offset, sha256: "0".repeat(64) };
+}
+
+function coverageInterval(overrides = {}) {
+  return {
+    id: "window-1",
+    thread_id: "assigned-thread",
+    task: projectTask,
+    role: "developer",
+    attempt: 0,
+    start: coverageCheckpoint(0),
+    end: coverageCheckpoint(10),
+    ...overrides,
+  };
+}
+
+function coverageManifest(intervals = [coverageInterval()]) {
+  return {
+    schema_version: 1,
+    kind: "task-token-manifest",
+    run: "fixture-run",
+    sources: [...new Set(intervals.map((interval) => interval.thread_id))].map(
+      (thread_id) => ({
+        thread_id,
+        path: `${thread_id}.jsonl`,
+        initial: coverageCheckpoint(0),
+        end: coverageCheckpoint(Math.max(...intervals.map((interval) => interval.end?.offset ?? interval.start.offset))),
+      }),
+    ),
+    intervals,
+  };
+}
+
+async function coverageTree(directory) {
+  const result = {};
+  async function visit(current, prefix = "") {
+    for (const entry of await readdir(current, { withFileTypes: true })) {
+      const relative = `${prefix}${entry.name}`;
+      const target = path.join(current, entry.name);
+      const info = await lstat(target);
+      if (info.isSymbolicLink()) result[relative] = { link: await readlink(target) };
+      else if (info.isDirectory()) {
+        result[relative] = { directory: true };
+        await visit(target, `${relative}/`);
+      } else {
+        result[relative] = {
+          sha256: createHash("sha256").update(await readFile(target)).digest("hex"),
+          links: info.nlink,
+        };
+      }
+    }
+  }
+  await visit(directory);
+  return result;
+}
+
+async function coverageFixture(t, { registry = coverageRegistry(), manifest = coverageManifest() } = {}) {
+  const f = await projectFixture(t);
+  await f.put(anotherProjectTask, "# Second project task — status: done\n");
+  if (registry !== null) await f.put(registryPath, JSON.stringify(registry));
+  if (manifest !== null) await f.put(coverageManifestPath, JSON.stringify(manifest));
+  assert.equal(path.dirname(path.resolve(f.sessionsRoot)), path.resolve(f.root));
+  await rm(f.sessionsRoot, { recursive: true });
+  async function coverage(args = [], { status = 0, run = projectSession } = {}) {
+    const before = await coverageTree(f.root);
+    const result = spawnSync(process.execPath, [cli, "coverage", run, ...args], {
+      cwd: f.root,
+      encoding: "utf8",
+      env: { ...process.env, CODEX_HOME: path.join(f.root, "no-codex-home") },
+      timeout: 20000,
+    });
+    assert.deepEqual(await coverageTree(f.root), before, "Coverage must leave directories, links and input bytes unchanged.");
+    assert.equal(result.status, status, `${result.error ?? ""}\n${result.stderr}\n${result.stdout}`);
+    assert.ok(!`${result.stdout}${result.stderr}`.includes(secret));
+    if (status === 0) assert.equal(result.stderr, "");
+    return result;
+  }
+  async function json(args = [], options) {
+    const report = JSON.parse((await coverage(args, options)).stdout);
+    assert.equal(report.schema_version, 1);
+    assert.equal(report.kind, "task-token-coverage");
+    assert.equal(report.run, "fixture-run");
+    assert.ok(Array.isArray(report.open));
+    assert.ok(Array.isArray(report.diagnostics));
+    return report;
+  }
+  return { ...f, coverage, json };
+}
+
+test("coverage AC-2/3/5: exact tuple and repeated windows are complete without any JSONL", async (t) => {
+  const tuples = [
+    launch(),
+    launch({ task: anotherProjectTask }),
+    launch({ role: "reviewer" }),
+    launch({ attempt: 1 }),
+    launch({ role: "supervisor", attempt: 3 }),
+    launch({ role: "spec-writer", attempt: 2 }),
+    launch({ role: "tester" }),
+  ];
+  const intervals = [...tuples, tuples[0]].map((tuple, index) => {
+    const { state, ...owner } = tuple;
+    return coverageInterval({ ...owner, id: `window-${index}`, start: coverageCheckpoint(index * 10), end: coverageCheckpoint((index + 1) * 10) });
+  });
+  const f = await coverageFixture(t, { registry: coverageRegistry(tuples), manifest: coverageManifest(intervals) });
+  const report = await f.json();
+  assert.equal(report.status, "complete");
+  assert.deepEqual(report.open, []);
+  assert.deepEqual(report.diagnostics, []);
+});
+
+test("coverage AC-3: lifecycle reflects files through open, attach, stop and closed", async (t) => {
+  const f = await coverageFixture(t, { registry: coverageRegistry([launch({ state: "open" })]), manifest: null });
+  let report = await f.json();
+  assert.equal(report.status, "partial");
+  assert.deepEqual(codes(report).sort(), ["manifest_missing", "missing_interval"]);
+  await f.put(coverageManifestPath, JSON.stringify(coverageManifest([coverageInterval({ end: null })])));
+  report = await f.json();
+  assert.equal(report.status, "complete");
+  assert.deepEqual(report.diagnostics, []);
+  assert.equal(report.open.length, 1);
+  for (const field of ["thread_id", "task", "role", "attempt"]) assert.equal(report.open[0][field], launch()[field]);
+  assert.equal(report.open[0].interval_id, "window-1");
+  const markdown = (await f.coverage(["--format", "markdown"])).stdout;
+  for (const value of ["complete", "assigned-thread", projectTask, "developer", "window-1"]) assert.ok(markdown.includes(value), value);
+  await f.put(coverageManifestPath, JSON.stringify(coverageManifest()));
+  report = await f.json();
+  assert.equal(report.status, "complete");
+  assert.deepEqual(report.open, []);
+  await f.put(registryPath, JSON.stringify(coverageRegistry()));
+  report = await f.json(["--format", "json"]);
+  assert.equal(report.status, "complete");
+  assert.deepEqual(report.diagnostics, []);
+});
+
+test("coverage AC-3: closed checks every exact window even before a later closed entry", async (t) => {
+  const intervals = [
+    coverageInterval({ id: "unclosed-earlier-entry", start: coverageCheckpoint(10), end: null }),
+    coverageInterval({ id: "closed-later-entry" }),
+  ];
+  const f = await coverageFixture(t, { manifest: coverageManifest(intervals) });
+  const report = await f.json();
+  assert.equal(report.status, "partial");
+  assert.deepEqual(codes(report), ["unclosed_interval"]);
+  assert.equal(report.diagnostics[0].interval_id, "unclosed-earlier-entry");
+  const markdown = (await f.coverage(["--format", "markdown"])).stdout;
+  for (const value of ["partial", "unclosed_interval", "unclosed-earlier-entry"]) assert.ok(markdown.includes(value), value);
+});
+
+test("coverage AC-2/3: missing, ownership mismatch and unregistered diagnoses accumulate", async (t) => {
+  const mismatches = [
+    { task: anotherProjectTask },
+    { role: "tester" },
+    { attempt: 2 },
+  ];
+  for (const [index, mismatch] of mismatches.entries()) {
+    await t.test(Object.keys(mismatch)[0], async (t) => {
+      const f = await coverageFixture(t, {
+        registry: coverageRegistry([launch(), launch({ thread_id: "never-attached" })]),
+        manifest: coverageManifest([coverageInterval({ ...mismatch, id: `wrong-${index}` }), coverageInterval({ thread_id: "guardian", id: "guardian-window" })]),
+      });
+      const report = await f.json();
+      assert.equal(report.status, "partial");
+      assert.deepEqual(codes(report).sort(), ["missing_interval", "ownership_mismatch", "unregistered_interval", "unregistered_interval"]);
+      assert.equal(report.diagnostics.find((item) => item.code === "missing_interval").thread_id, "never-attached");
+      const mismatchDiagnostic = report.diagnostics.find((item) => item.code === "ownership_mismatch");
+      for (const field of ["thread_id", "task", "role", "attempt"]) assert.equal(mismatchDiagnostic[field], launch()[field]);
+      const unregistered = report.diagnostics.filter((item) => item.code === "unregistered_interval");
+      assert.deepEqual(unregistered.map((item) => item.interval_id).sort(), ["guardian-window", `wrong-${index}`]);
+      const markdown = (await f.coverage(["--format", "markdown"])).stdout;
+      for (const item of report.diagnostics) {
+        assert.ok(markdown.includes(item.code));
+        assert.ok(markdown.includes(item.thread_id));
+      }
+    });
+  }
+});
+
+test("coverage AC-4: legacy registry absence has priority without migrating files", async (t) => {
+  for (const manifest of [null, coverageManifest()]) {
+    await t.test(manifest === null ? "no inputs" : "manifest only", async (t) => {
+      const f = await coverageFixture(t, { registry: null, manifest });
+      const report = await f.json();
+      assert.equal(report.status, "unknown");
+      assert.deepEqual(codes(report), ["registry_missing"]);
+      const markdown = (await f.coverage(["--format", "markdown"])).stdout;
+      assert.ok(markdown.includes("unknown"));
+      assert.ok(markdown.includes("registry_missing"));
+    });
+  }
+  const f = await coverageFixture(t, { registry: coverageRegistry([]), manifest: null });
+  const report = await f.json();
+  assert.equal(report.status, "partial");
+  assert.deepEqual(codes(report), ["manifest_missing"]);
+});
+
+test("coverage AC-2/4: malformed registry is an input error, never partial", async (t) => {
+  const cases = [
+    ["JSON", "{"],
+    ...[null, false, 0, ""].map((value) => [`JSON ${JSON.stringify(value)}`, JSON.stringify(value)]),
+    ["version", { ...coverageRegistry(), schema_version: 2 }],
+    ["kind", { ...coverageRegistry(), kind: "other" }],
+    ["run", { ...coverageRegistry(), run: "another-run" }],
+    ["unknown root field", { ...coverageRegistry(), extra: true }],
+    ["missing root field", { schema_version: 1, kind: "agent-launch-registry", launches: [] }],
+    ["launches type", { ...coverageRegistry(), launches: {} }],
+    ["null launch", coverageRegistry([null])],
+    ["missing launch field", coverageRegistry([{ ...launch(), state: undefined }])],
+    ["unknown launch field", coverageRegistry([launch({ extra: secret })])],
+    ["empty thread", coverageRegistry([launch({ thread_id: "" })])],
+    ["thread type", coverageRegistry([launch({ thread_id: 7 })])],
+    ["role", coverageRegistry([launch({ role: "guardian" })])],
+    ["state", coverageRegistry([launch({ state: "running" })])],
+    ["task type", coverageRegistry([launch({ task: null })])],
+    ...[-1, 4, 1.5, "0"].map((attempt) => [`attempt ${attempt}`, coverageRegistry([launch({ attempt })])]),
+    ["duplicate tuple with different state", coverageRegistry([launch(), launch({ state: "open" })])],
+    ...[foreignProjectTask, taskPath, "projects/tasks/feature/work-items/missing.md", "../escape.md", "/absolute.md", "C:/absolute.md", "projects/tasks/feature/work-items/../work-items/task.md", projectTask.replaceAll("/", "\\")].map((task) => [`task ${task}`, coverageRegistry([launch({ task })])]),
+  ];
+  for (const [name, value] of cases) {
+    await t.test(name, async (t) => {
+      const f = await coverageFixture(t);
+      await f.put(registryPath, typeof value === "string" ? value : JSON.stringify(value));
+      await f.coverage([], { status: 1 });
+    });
+  }
+});
+
+test("coverage AC-4: invalid existing manifest cannot hide behind a missing registry", async (t) => {
+  const mutations = [
+    ["JSON", () => "{"],
+    ...[null, false, 0, ""].map((value) => [`JSON ${JSON.stringify(value)}`, () => JSON.stringify(value)]),
+    ["version", (manifest) => ({ ...manifest, schema_version: 2 })],
+    ["run", (manifest) => ({ ...manifest, run: "other-run" })],
+    ["foreign task", (manifest) => ({ ...manifest, intervals: [coverageInterval({ task: foreignProjectTask })] })],
+    ["task array", (manifest) => ({ ...manifest, intervals: [coverageInterval({ task: [projectTask] })] })],
+    ["overlap", (manifest) => ({ ...manifest, intervals: [coverageInterval(), coverageInterval({ id: "overlap" })] })],
+  ];
+  for (const registry of [null, coverageRegistry()]) {
+    for (const [name, mutate] of mutations) {
+      await t.test(`${registry === null ? "legacy" : "registered"} ${name}`, async (t) => {
+        const f = await coverageFixture(t, { registry });
+        const value = mutate(coverageManifest());
+        await f.put(coverageManifestPath, typeof value === "string" ? value : JSON.stringify(value));
+        await f.coverage([], { status: 1 });
+      });
+    }
+  }
+});
+
+test("coverage AC-5: output, traversal and malformed session paths cannot create files", async (t) => {
+  const f = await coverageFixture(t);
+  for (const args of [["--output", `${projectSession}/coverage.json`], ["--format", "html"], ["--format", "json", "--format", "markdown"]]) await f.coverage(args, { status: 1 });
+  for (const run of [path.join(f.root, projectSession), `${projectSession}/../fixture-run`, `${projectSession}/extra`, "projects/tasks/feature/sessions/fixture_run"]) await f.coverage([], { run, status: 1 });
+  const missing = "projects/tasks/feature/sessions/absent-run";
+  const report = JSON.parse((await f.coverage([], { run: missing })).stdout);
+  assert.equal(report.status, "unknown");
+  hasCode(report, "registry_missing");
+});
+
+test("coverage AC-5: hardlinked registry, manifest and task are rejected unchanged", async (t) => {
+  for (const relative of [registryPath, coverageManifestPath, projectTask]) {
+    await t.test(relative, async (t) => {
+      const f = await coverageFixture(t);
+      await link(path.join(f.root, relative), path.join(f.root, "hardlink-peer"));
+      await f.coverage([], { status: 1 });
+    });
+  }
+});
+
+test("coverage AC-5: session and task directory junctions cannot redirect reads", async (t) => {
+  for (const relative of [projectSession, "projects/tasks/feature/work-items"]) {
+    await t.test(relative, async (t) => {
+      const f = await coverageFixture(t);
+      const target = path.join(f.root, "linked-target");
+      await mkdir(target);
+      if (relative === projectSession) {
+        await writeFile(path.join(target, "launches.json"), JSON.stringify(coverageRegistry()));
+        await writeFile(path.join(target, "token-manifest.json"), JSON.stringify(coverageManifest()));
+      } else await writeFile(path.join(target, "task.md"), "# Linked task\n");
+      const linked = path.join(f.root, relative);
+      assert.ok(path.resolve(linked).startsWith(`${path.resolve(f.root)}${path.sep}`));
+      await rm(linked, { recursive: true });
+      await symlink(target, linked, "junction");
+      await f.coverage([], { status: 1 });
+    });
+  }
+});
+
+test("coverage AC-5: symlinked manifest is rejected unchanged", async (t) => {
+  const f = await coverageFixture(t);
+  const peer = await f.put("symlink-peer.json", JSON.stringify(coverageManifest()));
+  const target = path.join(f.root, coverageManifestPath);
+  await rm(target);
+  try {
+    await symlink(peer, target, "file");
+  } catch (error) {
+    if (error.code !== "EPERM") throw error;
+    t.skip("File symlinks require Windows privileges; hardlink and directory junction cases remain mandatory.");
+    return;
+  }
+  await f.coverage([], { status: 1 });
+});
+
+test("coverage AC-4/5: unexpected input read errors are not treated as missing files", async (t) => {
+  for (const relative of [registryPath, coverageManifestPath, projectTask]) {
+    await t.test(relative, async (t) => {
+      const f = await coverageFixture(t);
+      await rm(path.join(f.root, relative));
+      await mkdir(path.join(f.root, relative));
+      await f.coverage([], { status: 1 });
+    });
+  }
+});
+
+test("coverage AC-6: complete assignment coverage preserves partial report and guardian diagnostic", async (t) => {
+  const f = await projectFixture(t);
+  await f.source("parent");
+  f.start();
+  await f.append("parent", [context("turn-a"), record("parent", "known", usage(50, 5))]);
+  await f.source("guardian", [], { parent_thread_id: "parent" });
+  await f.put(registryPath, JSON.stringify(coverageRegistry([launch({ thread_id: "parent", role: "supervisor", state: "open" })])));
+  const before = JSON.parse(f.call("report").stdout);
+  total(before, 55);
+  assert.equal(before.provisional, true);
+  incomplete(before);
+  hasCode(before, "unattached_threads");
+  const tree = await coverageTree(f.root);
+  const result = spawnSync(process.execPath, [cli, "coverage", projectSession], { cwd: f.root, encoding: "utf8", timeout: 20000 });
+  assert.equal(result.status, 0, result.stderr);
+  const coverage = JSON.parse(result.stdout);
+  assert.equal(coverage.status, "complete");
+  assert.equal(coverage.open.length, 1);
+  assert.deepEqual(coverage.diagnostics, []);
+  const after = JSON.parse(f.call("report").stdout);
+  const { captured_at: beforeTime, ...beforeReport } = before;
+  const { captured_at: afterTime, ...afterReport } = after;
+  assert.ok(beforeTime && afterTime);
+  function stableSources(sources) {
+    return sources.map((source) => {
+      const { captured_at, ...end } = source.end;
+      assert.ok(captured_at);
+      return { ...source, end };
+    });
+  }
+  assert.deepEqual(
+    { ...afterReport, sources: stableSources(afterReport.sources) },
+    { ...beforeReport, sources: stableSources(beforeReport.sources) },
+  );
+  assert.equal(after.rows.length, 1);
+  assert.ok(after.rows.every((row) => row.role === "supervisor"));
+  assert.deepEqual(await coverageTree(f.root), tree);
 });

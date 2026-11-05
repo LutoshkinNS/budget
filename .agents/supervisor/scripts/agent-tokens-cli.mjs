@@ -2,8 +2,12 @@ import { lstat, readFile, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { renderMarkdown, runTokens } from "./agent-tokens.mjs";
+import {
+  renderCoverageMarkdown,
+  runCoverage,
+} from "./agent-token-coverage.mjs";
 
-const help = `Usage:\n  pnpm agents:tokens start <session> --task <task.md> --thread <thread-id> [--sessions-root <dir>]\n  pnpm agents:tokens attach <session> --task <task.md> --thread <thread-id> --role <role> --attempt <0-3> [--from-start] [--sessions-root <dir>]\n  pnpm agents:tokens stop <session> --thread <thread-id> [--sessions-root <dir>]\n  pnpm agents:tokens report <session> [--format json|markdown] [--output <path>] [--sessions-root <dir>]\n\nOptions:\n  --help  Show this help\n`;
+const help = `Usage:\n  pnpm agents:tokens start <session> --task <task.md> --thread <thread-id> [--sessions-root <dir>]\n  pnpm agents:tokens attach <session> --task <task.md> --thread <thread-id> --role <role> --attempt <0-3> [--from-start] [--sessions-root <dir>]\n  pnpm agents:tokens stop <session> --thread <thread-id> [--sessions-root <dir>]\n  pnpm agents:tokens report <session> [--format json|markdown] [--output <path>] [--sessions-root <dir>]\n  pnpm agents:tokens coverage <session> [--format json|markdown]\n\nOptions:\n  --help  Show this help\n`;
 
 function parse(args) {
   const options = { format: "json", fromStart: false };
@@ -45,13 +49,21 @@ function parse(args) {
   const command = positional.shift();
   const session = positional.shift();
   if (
-    !new Set(["start", "attach", "stop", "report"]).has(command) ||
+    !new Set(["start", "attach", "stop", "report", "coverage"]).has(command) ||
     !session ||
     positional.length
   )
     throw new Error("Expected a command and one session path.");
   if (options.format !== "json" && options.format !== "markdown")
     throw new Error("Option --format must be json or markdown.");
+  if (
+    command === "coverage" &&
+    (options.fromStart ||
+      [...seenOptions].some((option) => option !== "--format"))
+  )
+    throw new Error(
+      "Coverage supports only --format; it does not accept other options.",
+    );
   if (options.format !== "json" && options.output?.endsWith(".json"))
     throw new Error("Markdown format requires a .md output path.");
   if (options.format === "json" && options.output?.endsWith(".md"))
@@ -106,8 +118,17 @@ try {
   if (parsed.help) process.stdout.write(help);
   else {
     const { command, session, options } = parsed;
-    const result = await runTokens(command, { ...options, session });
-    if (command === "report") {
+    const result =
+      command === "coverage"
+        ? await runCoverage(session)
+        : await runTokens(command, { ...options, session });
+    if (command === "coverage") {
+      const output =
+        options.format === "markdown"
+          ? renderCoverageMarkdown(result)
+          : `${JSON.stringify(result, null, 2)}\n`;
+      process.stdout.write(output);
+    } else if (command === "report") {
       const output =
         options.format === "markdown"
           ? renderMarkdown(result)
