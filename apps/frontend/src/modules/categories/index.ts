@@ -1,13 +1,5 @@
 export { useCategories } from "./model/use-categories.ts";
 export { invalidateCategories } from "./model/category-cache.ts";
-export type { CategoryUpdatedScope } from "./model/use-update-category.ts";
-export { CategoriesList } from "./ui/categories-list.tsx";
-export { CategoriesSelect } from "./ui/categories-select.tsx";
-export { CategoriesKeyboard } from "./ui/categories-keyboard.tsx";
-export { CreateCategory } from "./ui/create-category.tsx";
-export { DeleteCategory } from "./ui/delete-category.tsx";
-export type { CategoryType, CreateCategoryFormData } from "./model/types.ts";
-export { CATEGORY_ICONS, getCategoryIcon } from "./model/category-icons";
-export type { CategoryIconKey } from "./model/category-icons";
-export { CategoryIcon } from "./ui/category-icon";
-export { CategoryIconPicker } from "./ui/category-icon-picker";
+export type { CategoryType } from "./model/types.ts";
+export { CategoryIcon } from "./ui/category-icon.tsx";
+export { CategoriesManager } from "./modules/management/index.ts";

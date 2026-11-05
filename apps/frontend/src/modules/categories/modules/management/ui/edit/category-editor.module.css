@@ -1,0 +1,19 @@
+.fieldset {
+  min-width: 0;
+}
+
+.fieldset input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.fieldset legend {
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

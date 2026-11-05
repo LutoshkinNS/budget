@@ -233,10 +233,11 @@ async function saveManifest(file, manifest) {
   await rename(temp, file);
 }
 
-async function loadManifest(runPath, run) {
-  const file = path.join(runPath, "token-manifest.json");
-  const manifest = JSON.parse(await readFile(file, "utf8"));
+export function validateManifest(manifest, run, work = null) {
   if (
+    !manifest ||
+    typeof manifest !== "object" ||
+    Array.isArray(manifest) ||
     manifest.schema_version !== 1 ||
     manifest.kind !== "task-token-manifest" ||
     manifest.run !== run ||
@@ -298,6 +299,16 @@ async function loadManifest(runPath, run) {
         throw new Error("Overlapping token manifest intervals.");
     }
   }
+  assertManifestWork(manifest, work);
+  return manifest;
+}
+
+async function loadManifest(runPath, run) {
+  const file = path.join(runPath, "token-manifest.json");
+  const manifest = validateManifest(
+    JSON.parse(await readFile(file, "utf8")),
+    run,
+  );
   return { file, manifest };
 }
 

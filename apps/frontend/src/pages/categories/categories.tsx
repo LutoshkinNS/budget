@@ -1,16 +1,10 @@
 import { useCallback, useState } from "react";
 
 import type { CategoryType } from "@/modules/categories";
-import {
-  CategoriesList,
-  CreateCategory,
-  DeleteCategory,
-} from "@/modules/categories";
+import { CategoriesManager } from "@/modules/categories";
 import { invalidateTransactionsCategorySummary } from "@/modules/transactions";
-import { useCurrentAccountId } from "@/modules/user";
 
 export function Categories() {
-  const accountId = useCurrentAccountId();
   const [type, setType] = useState<CategoryType>("expense");
 
   const handleCategoryUpdated = useCallback(
@@ -39,18 +33,9 @@ export function Categories() {
           доходы
         </button>
       </fieldset>
-      <CategoriesList
-        key={`list-${accountId ?? "no-account"}-${type}`}
+      <CategoriesManager
         type={type}
         onCategoryUpdated={handleCategoryUpdated}
-      />
-      <CreateCategory
-        key={`create-${accountId ?? "no-account"}-${type}`}
-        type={type}
-      />
-      <DeleteCategory
-        key={`delete-${accountId ?? "no-account"}-${type}`}
-        type={type}
       />
     </div>
   );

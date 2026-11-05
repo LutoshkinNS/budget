@@ -22,6 +22,7 @@
 - Смотритель координирует работу и передаёт результаты: `spec-writer` составляет ТЗ, `developer` реализует, `tester` проверяет поведение, отдельный `reviewer` проверяет архитектуру и соответствие ТЗ. Границы и передача результатов описаны в [.agents/supervisor/workflow.md](.agents/supervisor/workflow.md); модели — в [.agents/supervisor/models.md](.agents/supervisor/models.md).
 - На каждую работу заводи одну ветку от `master`, называя её как работу в kebab-case; все её подзадачи и роли используют эту ветку. Следуй [порядку веток](.agents/supervisor/workflow.md#ветка-работы).
 - Результаты ролей сохраняй как Markdown с YAML по [.agents/supervisor/artifacts.md](.agents/supervisor/artifacts.md); смотритель проверяет их через `pnpm agents:check` и собирает сводку через `pnpm agents:summary`.
+- Для назначения потоков, запуска учёта и проверки покрытия токенов следуй [.agents/supervisor/token-accounting.md](.agents/supervisor/token-accounting.md); там описаны локальный реестр и ограничения coverage.
 - Материалы ролей находятся в собственных каталогах `.agents/`, память и общий список — в `projects/`, документы конкретной работы — в `projects/tasks/<work>/`. В `.codex/` хранятся настройки подключения Codex и указатели на проектные материалы.
 - Пути `.codex/solution.md`, `.codex/tasks/`, `.codex/backlog.md` и `.codex/sessions/` в установленных скиллах адаптируй к `projects/solution.md`, `projects/tasks/<work>/work-items/`, `projects/backlog.md` и `projects/tasks/<work>/sessions/`. Проектный процесс распределяет тесты агенту `tester`, координацию и принятие результата — смотрителю. Лимиты повторных проверок и полномочия бери из текущего запроса и `.agents/supervisor/workflow.md`.
 
@@ -39,6 +40,7 @@
 | Проверять идею или план вопросами                                       | `grilling`; `grill-me` — интервью, `grill-with-docs` — интервью с глоссарием и ADR |
 | Менять предметную модель, термины, глоссарий или ADR                    | `domain-modeling`                                                                  |
 | Проектировать интерфейсы модулей и места подмены поведения для тестов   | `codebase-design`                                                                  |
+| Создавать структуру frontend, размещать код по слоям FEOD, проверять импорты | [feod](.agents/skills/feod/SKILL.md); область — `apps/frontend`, правила проекта — [frontend-architecture.md](apps/frontend/docs/frontend-architecture.md) |
 | Искать возможности архитектурного рефакторинга                          | `improve-codebase-architecture`                                                    |
 | Исследовать вопрос по первичным источникам                              | `research`                                                                         |
 | Проверять решение временным исполняемым прототипом                      | `prototype`                                                                        |
