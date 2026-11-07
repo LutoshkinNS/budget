@@ -1,20 +1,21 @@
 import { Outlet } from "@tanstack/react-router";
 
-import { GlobalLoader } from "@/common/ui/loader/Loader.tsx";
 import { Navigation } from "@/modules/navigation";
+import { useMe } from "@/modules/user";
 
-import { AuthLoadingBoundary } from "./AuthLoadingBoundary.tsx";
+import { AuthLoadingBoundary } from "./auth-loading-boundary.tsx";
 
 import s from "./private.module.css";
 
 export function PrivateLayout() {
+  const { privateLifetime } = useMe();
+
   return (
-    <AuthLoadingBoundary>
-      <main className={s.main}>
-        <GlobalLoader />
-        <Navigation />
+    <main className={s.main}>
+      <Navigation />
+      <AuthLoadingBoundary key={privateLifetime}>
         <Outlet />
-      </main>
-    </AuthLoadingBoundary>
+      </AuthLoadingBoundary>
+    </main>
   );
 }

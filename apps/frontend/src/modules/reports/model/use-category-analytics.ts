@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { z } from "zod";
 
 import type {
@@ -10,11 +9,11 @@ import {
   TransactionsCategorySummaryResponse,
   TransactionsListResponse,
 } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
-import { useNotifications } from "@/common/lib/notifications";
 import {
   useTransactionsCategorySummaryQuery,
   useTransactionsListQuery,
 } from "@/modules/transactions";
+import { useCurrentAccountId } from "@/modules/user";
 
 import type { ReportsPeriodRanges } from "./period.ts";
 
@@ -71,40 +70,23 @@ export function useReportsCategorySummary(
   ranges: ReportsPeriodRanges,
   type: ReportsTransactionType,
 ) {
+  const accountId = useCurrentAccountId();
   const params = toCategorySummaryParams(ranges, type);
-  const { data, isError, error, isLoading } =
-    useTransactionsCategorySummaryQuery(params);
-  const { addNotification } = useNotifications();
-
-  useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useReportsCategorySummaryError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
-      const validation = TransactionsCategorySummaryResponse.safeParse(data);
-
-      if (!validation.success) {
-        addNotification({
-          id: "useReportsCategorySummaryValidation",
-          title: "Некорректные данные",
-          message: "повторите запрос позднее",
-        });
-      }
-    }
-  }, [isError, error, data, addNotification]);
-
+  const query = useTransactionsCategorySummaryQuery(params);
+  const { data } = query;
   const validation = TransactionsCategorySummaryResponse.safeParse(data);
+  const hasAccount = accountId !== undefined;
+  const hasValidData = hasAccount && data !== undefined && validation.success;
+  const hasInvalidData = hasAccount && data !== undefined && !validation.success;
 
   return {
-    summary: validation.success ? validation.data : undefined,
-    isLoading,
-    isError,
+    summary: hasValidData && validation.success ? validation.data : undefined,
+    hasAccount,
+    hasValidData,
+    isLoading: hasAccount && query.isLoading,
+    isFetching: hasAccount && query.isFetching,
+    isError: hasAccount && (query.isError || hasInvalidData),
+    refetch: query.refetch,
   };
 }
 
@@ -114,44 +96,26 @@ export function useReportsCategoryTransactions({
   to,
   type,
 }: ReportsCategoryTransactionsParams) {
+  const accountId = useCurrentAccountId();
   const params = toCategoryTransactionsParams({ categoryId, from, to, type });
-  const { data, isError, error, isLoading } = useTransactionsListQuery(
-    params,
-    categoryId !== null,
-  );
-  const { addNotification } = useNotifications();
-
-  useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useReportsCategoryTransactionsError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
-      const validation = TransactionsListResponse.safeParse(data);
-
-      if (!validation.success) {
-        addNotification({
-          id: "useReportsCategoryTransactionsValidation",
-          title: "Некорректные данные",
-          message: "повторите запрос позднее",
-        });
-      }
-    }
-  }, [isError, error, data, addNotification]);
-
+  const query = useTransactionsListQuery(params, categoryId !== null);
+  const { data } = query;
   const validation = TransactionsListResponse.safeParse(data);
+  const hasAccount = accountId !== undefined;
+  const isEnabled = hasAccount && categoryId !== null;
+  const hasValidData = isEnabled && data !== undefined && validation.success;
+  const hasInvalidData = isEnabled && data !== undefined && !validation.success;
 
   return {
     transactions:
-      validation.success && data
+      hasValidData && validation.success
         ? validation.data.map(normalizeTransaction)
         : [],
-    isLoading,
-    isError,
+    hasAccount,
+    hasValidData,
+    isLoading: isEnabled && query.isLoading,
+    isFetching: isEnabled && query.isFetching,
+    isError: isEnabled && (query.isError || hasInvalidData),
+    refetch: query.refetch,
   };
 }

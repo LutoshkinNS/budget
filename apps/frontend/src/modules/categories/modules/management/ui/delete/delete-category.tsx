@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { FormBlock } from "@/common/ui/form-block/FormBlock.tsx";
+import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
+import { useCurrentAccountId } from "@/modules/user";
 
 import type {
   CategoryType,
@@ -17,16 +19,38 @@ type DeleteCategoryProps = {
 };
 
 export function DeleteCategoryForm({ type }: DeleteCategoryProps) {
-  const { deleteCategory } = useDeleteCategory();
+  const accountId = useCurrentAccountId();
+  const { deleteCategory, isError, isPending } = useDeleteCategory();
 
   const [formState, setFormState] = useState<DeleteCategoryFormData>({
     categoryId: "",
   });
+  const deleting = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const pending = isPending || isSubmitting;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (
+      accountId == null ||
+      !formState.categoryId ||
+      pending ||
+      deleting.current
+    ) {
+      return;
+    }
 
-    deleteCategory(formState.categoryId);
+    deleting.current = true;
+    setIsSubmitting(true);
+    try {
+      await deleteCategory(formState.categoryId);
+      setFormState({ categoryId: "" });
+    } catch {
+      // Ошибка остаётся в состоянии мутации и показывается рядом с действием.
+    } finally {
+      deleting.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -38,6 +62,7 @@ export function DeleteCategoryForm({ type }: DeleteCategoryProps) {
       <CategoriesSelect
         type={type}
         value={formState.categoryId}
+        disabled={pending}
         onChange={(e) =>
           setFormState((formState) => ({
             ...formState,
@@ -45,7 +70,19 @@ export function DeleteCategoryForm({ type }: DeleteCategoryProps) {
           }))
         }
       />
-      <button type="submit">Удалить</button>
+      {isError && accountId != null && (
+        <div role="alert">
+          <SimpleError>
+            Не удалось удалить категорию. Попробуйте ещё раз.
+          </SimpleError>
+        </div>
+      )}
+      <button
+        type="submit"
+        disabled={accountId == null || pending || !formState.categoryId}
+      >
+        {pending ? "Удаление…" : "Удалить"}
+      </button>
     </FormBlock>
   );
 }

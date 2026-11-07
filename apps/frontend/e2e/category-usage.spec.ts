@@ -191,7 +191,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         .click();
       await expect(
         page.getByRole("heading", {
-          name: `Редактировать ${type === "income" ? "доход" : "расход"}`,
+          name: "Редактировать операцию",
         }),
       ).toBeVisible();
       const categorySelect = page.getByRole("combobox", { name: "Категория" });

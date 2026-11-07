@@ -147,7 +147,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await page.getByRole("link", { name: "Расходы", exact: true }).click();
       await operation.click();
       await expect(
-        page.getByRole("heading", { name: "Редактировать доход" }),
+        page.getByRole("heading", { name: "Редактировать операцию" }),
       ).toBeVisible();
       await expect(
         page.getByLabel("Категория").locator("option"),
@@ -211,7 +211,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expect(editedOperation).toContainText("+1 500,5 ₽");
       await editedOperation.click();
       await expect(
-        page.getByRole("heading", { name: "Редактировать доход" }),
+        page.getByRole("heading", { name: "Редактировать операцию" }),
       ).toBeVisible();
       await page.getByRole("link", { name: "Отчёты", exact: true }).click();
       await page.getByRole("tab", { name: "Доходы", exact: true }).click();
@@ -242,7 +242,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await page.getByRole("link", { name: "Расходы", exact: true }).click();
       await expenseRow.click();
       await expect(
-        page.getByRole("heading", { name: "Редактировать расход" }),
+        page.getByRole("heading", { name: "Редактировать операцию" }),
       ).toBeVisible();
       await expect(
         page.getByLabel("Категория").locator("option"),
@@ -279,6 +279,6 @@ test("existing income can be opened directly for editing", async ({
   });
   await page.goto("/expenses/" + income.id + "/edit");
   await expect(
-    page.getByRole("heading", { name: "Редактировать доход" }),
+    page.getByRole("heading", { name: "Редактировать операцию" }),
   ).toBeVisible();
 });

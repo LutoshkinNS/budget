@@ -1,0 +1,55 @@
+.group {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.accountName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.result {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+  min-width: 0;
+}
+
+.result a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.result p {
+  margin: 0;
+}
+
+.result button {
+  justify-self: start;
+}
+
+.row [role="alert"] {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+
+.row [role="alert"] p {
+  margin: 0;
+}
+
+.row [role="status"] {
+  grid-column: 1 / -1;
+  margin: 0;
+}

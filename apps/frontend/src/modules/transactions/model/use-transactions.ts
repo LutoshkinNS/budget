@@ -7,11 +7,15 @@ import type {
   TransactionsSummaryParams,
 } from "@/common/api/generate/model";
 import {
+  transactionsCategorySummary,
+  transactionsList,
+  transactionsSummary,
   useTransactionsCategorySummary,
   useTransactionsList,
   useTransactionsSummary,
 } from "@/common/api/generate/transactions/transactions.gen.ts";
 import {
+  TransactionsCategorySummaryResponse,
   TransactionsListResponse,
   TransactionsSummaryResponse,
 } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
@@ -105,7 +109,24 @@ export function useTransactionsListQuery(
     (id) => transactionKeys.list(id, params),
     extraEnabled,
   );
-  return useTransactionsList(accountId ?? 1, params, { query: scoped });
+  return useTransactionsList(accountId ?? 1, params, {
+    query: {
+      ...scoped,
+      queryFn: async ({ signal }) => {
+        const data = await transactionsList(accountId ?? 1, params, { signal });
+        const validation = TransactionsListResponse.safeParse(data);
+
+        if (!validation.success) {
+          throw new Error("Invalid transactions response");
+        }
+
+        return validation.data.map((transaction) => {
+          const { description, ...fields } = transaction;
+          return description === undefined ? fields : { ...fields, description };
+        });
+      },
+    },
+  });
 }
 
 export function useTransactionsSummaryQuery(params: TransactionsSummaryParams) {
@@ -113,7 +134,23 @@ export function useTransactionsSummaryQuery(params: TransactionsSummaryParams) {
   const scoped = useAccountScopedQuery((id) =>
     transactionKeys.summary(id, params),
   );
-  return useTransactionsSummary(accountId ?? 1, params, { query: scoped });
+  return useTransactionsSummary(accountId ?? 1, params, {
+    query: {
+      ...scoped,
+      queryFn: async ({ signal }) => {
+        const data = await transactionsSummary(accountId ?? 1, params, {
+          signal,
+        });
+        const validation = TransactionsSummaryResponse.safeParse(data);
+
+        if (!validation.success) {
+          throw new Error("Invalid transaction summary response");
+        }
+
+        return validation.data;
+      },
+    },
+  });
 }
 
 export function useTransactionsCategorySummaryQuery(
@@ -124,7 +161,21 @@ export function useTransactionsCategorySummaryQuery(
     transactionKeys.categorySummary(id, params),
   );
   return useTransactionsCategorySummary(accountId ?? 1, params, {
-    query: scoped,
+    query: {
+      ...scoped,
+      queryFn: async ({ signal }) => {
+        const data = await transactionsCategorySummary(accountId ?? 1, params, {
+          signal,
+        });
+        const validation = TransactionsCategorySummaryResponse.safeParse(data);
+
+        if (!validation.success) {
+          throw new Error("Invalid transaction category summary response");
+        }
+
+        return validation.data;
+      },
+    },
   });
 }
 
@@ -167,8 +218,10 @@ export function useTransactionSummary(
 
   return {
     data: hasValidData ? validation.data : undefined,
+    refetch: query.refetch,
     hasAccount: accountId != null,
     hasValidData,
+    isFetching: query.isFetching,
     isLoading: accountId != null && isLoading,
     isError: isError || hasInvalidData,
   };

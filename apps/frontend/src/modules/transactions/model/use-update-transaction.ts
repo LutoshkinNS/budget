@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import z from "zod";
 
 import type { TransactionUpdateDTO } from "@/common/api/generate/model";
@@ -5,7 +6,11 @@ import { useTransactionsUpdate } from "@/common/api/generate/transactions/transa
 import { TransactionsUpdateBody } from "@/common/api/generate/transactions/transactions.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
 import { invalidateCategories } from "@/modules/categories";
-import { requireCurrentAccountId } from "@/modules/user";
+import {
+  getCurrentAccountIdSnapshot,
+  getCurrentUserIdSnapshot,
+  useCurrentAccountId,
+} from "@/modules/user";
 
 import {
   invalidateTransaction,
@@ -14,38 +19,56 @@ import {
   invalidateTransactionSummary,
 } from "./transaction-cache.ts";
 
-export function useUpdateTransaction(transactionId: number) {
+export function useUpdateTransaction(
+  transactionId: number,
+  sourceAccountId?: number,
+  sourceUserId?: number,
+) {
   const { addNotification } = useNotifications();
+  const currentAccountId = useCurrentAccountId();
+  const isActiveRef = useRef(true);
+
+  useLayoutEffect(() => {
+    isActiveRef.current = true;
+
+    return () => {
+      isActiveRef.current = false;
+    };
+  }, []);
 
   const mutation = useTransactionsUpdate({
     mutation: {
-      onError: (error) => {
-        addNotification({
-          id: `updateTransactionError-${transactionId}`,
-          title: error?.code || "Не удалось сохранить операцию",
-          message: error?.message,
-        });
-      },
-      // Поздний ответ инвалидирует кэш счёта из variables вызова.
-      onSuccess: async (_data, variables) => {
+      meta: { localFeedback: true },
+      onSuccess: (_data, variables) => {
         const accountId = variables.accountId;
-        await Promise.all([
-          invalidateTransactionsList(accountId),
-          invalidateTransactionSummary(accountId),
-          invalidateTransactionsCategorySummary(accountId),
-          invalidateTransaction(accountId, transactionId),
-          invalidateCategories(accountId),
-        ]);
-        addNotification({
-          id: `updateTransactionSuccess-${transactionId}-${Date.now()}`,
-          type: "success",
-          title: "Операция сохранена",
-        });
+        void invalidateTransactionsList(accountId);
+        void invalidateTransactionSummary(accountId);
+        void invalidateTransactionsCategorySummary(accountId);
+        void invalidateTransaction(accountId, variables.transactionId);
+        void invalidateCategories(accountId);
+
+        const isCurrentActor =
+          sourceUserId === undefined ||
+          getCurrentUserIdSnapshot() === sourceUserId;
+        const isCurrentAccount = getCurrentAccountIdSnapshot() === accountId;
+
+        if (isActiveRef.current && isCurrentActor && isCurrentAccount) {
+          addNotification({
+            id: `updateTransactionSuccess-${variables.transactionId}-${Date.now()}`,
+            type: "success",
+            title: "Операция сохранена",
+          });
+        }
       },
     },
   });
 
   const updateTransaction = (data: TransactionUpdateDTO) => {
+    const accountId = sourceAccountId ?? currentAccountId;
+    if (accountId === undefined) {
+      return Promise.reject(new Error("Текущий счёт не определён"));
+    }
+
     const normalizedData = {
       ...data,
       description: data.description?.trim() || null,
@@ -53,12 +76,7 @@ export function useUpdateTransaction(transactionId: number) {
     const validation = TransactionsUpdateBody.safeParse(normalizedData);
 
     if (!validation.success) {
-      addNotification({
-        id: "updateTransactionValidation",
-        title: "Некорректные данные",
-        message: z.prettifyError(validation.error),
-      });
-      return Promise.reject(validation.error);
+      return Promise.reject(new Error(z.prettifyError(validation.error)));
     }
 
     const updateData: TransactionUpdateDTO = {
@@ -70,16 +88,21 @@ export function useUpdateTransaction(transactionId: number) {
     };
 
     return mutation.mutateAsync({
-      accountId: requireCurrentAccountId(),
+      accountId,
       transactionId,
       data: updateData,
     });
   };
 
+  const isUnavailable =
+    mutation.isError &&
+    (mutation.error?.statusCode === 403 || mutation.error?.statusCode === 404);
+
   return {
     updateTransaction,
     isLoading: mutation.isPending,
     isError: mutation.isError,
+    isUnavailable,
     error: mutation.error,
   };
 }

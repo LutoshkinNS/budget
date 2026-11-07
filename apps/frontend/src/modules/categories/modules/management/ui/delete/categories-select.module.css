@@ -4,3 +4,27 @@
   max-width: 100%;
   width: 100%;
 }
+
+.container {
+  min-width: 0;
+}
+
+.loading {
+  min-width: 0;
+  padding-block: 4px;
+}
+
+.skeleton {
+  min-height: 2.5rem;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.error p {
+  margin: 0;
+}

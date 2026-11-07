@@ -1,10 +1,11 @@
 import type { PropsWithChildren } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { queryClient } from "@/common/api/appQuery";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
+import { getSessionContext } from "@/modules/user";
 
 import { memberKeys } from "../member-keys.ts";
 import { useAccountMembers } from "../use-account-members.ts";
@@ -16,6 +17,10 @@ vi.mock("@/common/lib/notifications", () => ({
 const membersPayload = [{ userId: 2, firstName: "Анна", photoUrl: null }];
 
 function seedMe(currentAccountId: number) {
+  const session = getSessionContext(queryClient);
+  const token = session.captureRead();
+  if (token === null) throw new Error("Fixture session is pending");
+  session.apply(token, { type: "me-valid", actorId: 1 });
   queryClient.setQueryData(getAuthMeQueryKey(), {
     accounts: [
       { id: currentAccountId, name: "Счёт", initialBalance: 0, isOwner: true },
@@ -24,12 +29,16 @@ function seedMe(currentAccountId: number) {
   });
 }
 
-function stubFetch(authMe: () => Response | Promise<Response>) {
+function stubFetch(
+  authMe: () => Response | Promise<Response>,
+  members: () => Response | Promise<Response> = () =>
+    Response.json(membersPayload),
+) {
   const fetchMock = vi.fn(
     async (input: RequestInfo | URL): Promise<Response> => {
       const url = String(input);
       if (url.includes("/api/v1/auth/me")) return authMe();
-      if (url.includes("/members")) return Response.json(membersPayload);
+      if (url.includes("/members")) return members();
       throw new Error(`unexpected fetch: ${url}`);
     },
   );
@@ -67,7 +76,10 @@ describe("useAccountMembers me-guard and scoped key", () => {
   it("fetches under the scoped members key after me is known", async () => {
     seedMe(42);
     const { calls } = stubFetch(() =>
-      Response.json({ accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }], userId: 1 }),
+      Response.json({
+        accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
+        userId: 1,
+      }),
     );
 
     const { result } = renderHook(useAccountMembers, { wrapper });
@@ -80,5 +92,30 @@ describe("useAccountMembers me-guard and scoped key", () => {
     expect(
       calls().filter((url) => url.includes("/api/v1/accounts/42/members")),
     ).toHaveLength(1);
+  });
+
+  it("keeps valid scoped cache after an invalid background response", async () => {
+    seedMe(42);
+    let validResponse = true;
+    const { calls } = stubFetch(
+      () => Response.json({ accounts: [], userId: 1 }),
+      () => Response.json(validResponse ? membersPayload : { members: [] }),
+    );
+    const { result } = renderHook(useAccountMembers, { wrapper });
+    await waitFor(() => expect(result.current.data).toEqual(membersPayload));
+
+    validResponse = false;
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.hasValidData).toBe(true);
+    expect(result.current.data).toEqual(membersPayload);
+    expect(queryClient.getQueryData(memberKeys.all(42))).toEqual(
+      membersPayload,
+    );
+    expect(queryClient.getQueryState(memberKeys.all(43))).toBeUndefined();
+    expect(calls().filter((url) => url.includes("/members"))).toHaveLength(2);
   });
 });

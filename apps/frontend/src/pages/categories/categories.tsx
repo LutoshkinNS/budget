@@ -7,10 +7,9 @@ import { invalidateTransactionsCategorySummary } from "@/modules/transactions";
 export function Categories() {
   const [type, setType] = useState<CategoryType>("expense");
 
-  // Отчёты показывают имя категории, поэтому после переименования их кэш обновляется.
   const handleCategoryUpdated = useCallback(
-    async ({ accountId }: { accountId: number }) => {
-      await invalidateTransactionsCategorySummary(accountId);
+    ({ accountId }: { accountId: number }) => {
+      void invalidateTransactionsCategorySummary(accountId);
     },
     [],
   );

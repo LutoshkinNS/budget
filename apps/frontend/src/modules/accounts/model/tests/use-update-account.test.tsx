@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { queryClient } from "@/common/api/appQuery";
 import { getAccountsListQueryKey } from "@/common/api/generate/accounts/accounts.gen.ts";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
+import type { AccountDTO } from "@/common/api/generate/model";
 
 import { useUpdateAccount } from "../use-update-account.ts";
 
@@ -14,7 +15,7 @@ vi.mock("@/common/lib/notifications", () => ({
 }));
 
 const mocks = vi.hoisted(() => ({
-  update: vi.fn<() => Promise<{ success: true }>>(),
+  update: vi.fn<() => Promise<AccountDTO>>(),
   invalidateTransactionSummary: vi.fn(),
 }));
 // Тест использует публичную границу, не связываясь с ключами transactions.
@@ -63,6 +64,13 @@ const wrapper = ({ children }: PropsWithChildren) => (
 
 beforeEach(() => {
   queryClient.clear();
+  mocks.update.mockResolvedValue({
+    id: 43,
+    name: "Новый",
+    initialBalance: 0,
+    ownerId: 1,
+    createdAt: "2026-10-15T09:18:27.000Z",
+  });
   mocks.invalidateTransactionSummary.mockReset();
 });
 afterEach(() => {

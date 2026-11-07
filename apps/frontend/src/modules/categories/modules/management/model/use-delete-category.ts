@@ -10,16 +10,16 @@ import { invalidateCategories } from "../../../model/category-cache.ts";
 import { deleteCategoryFormDataSchema } from "./schemas.ts";
 
 export function useDeleteCategory() {
-  const { mutate, isError, error, status } = useCategoriesDelete({
+  const mutation = useCategoriesDelete({
     mutation: {
-      // Поздний ответ инвалидирует кэш счёта из variables вызова.
-      onSuccess: async (_data, variables) => {
-        await invalidateCategories(variables.accountId);
+      meta: { localFeedback: true },
+      onSuccess: (_data, variables) => {
+        void invalidateCategories(variables.accountId);
       },
     },
   });
 
-  const deleteCategory = (categoryId: string) => {
+  const deleteCategory = async (categoryId: string) => {
     const resultParsedFormData = deleteCategoryFormDataSchema.safeParse({
       categoryId,
     });
@@ -30,7 +30,9 @@ export function useDeleteCategory() {
       return;
     }
 
+    const accountId = requireCurrentAccountId();
     const resultDtoParsed = CategoriesDeleteParams.safeParse({
+      accountId,
       categoryId: resultParsedFormData.data?.categoryId,
     });
 
@@ -40,11 +42,11 @@ export function useDeleteCategory() {
       return;
     }
 
-    mutate({
-      accountId: requireCurrentAccountId(),
+    return await mutation.mutateAsync({
+      accountId: resultDtoParsed.data.accountId,
       categoryId: resultDtoParsed.data.categoryId,
     });
   };
 
-  return { deleteCategory, isError, error, status };
+  return { deleteCategory, ...mutation };
 }

@@ -84,6 +84,24 @@
   font-size: 14px;
 }
 
+.refreshState {
+  margin: 0;
+  color: var(--app-text-color);
+  font-size: 12px;
+}
+
+.retryButton {
+  display: block;
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  color: var(--app-accent-color);
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 @media (min-width: 640px) {
   .totals {
     grid-template-columns: repeat(4, minmax(0, 1fr));

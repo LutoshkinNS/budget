@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CategoryDTO, TransactionDTO } from "@/common/api/generate/model";
 
-import { EditTransactionForm } from "./edit-transaction-form";
+import { EditTransactionForm } from "../edit-transaction-form";
 
 const mocks = vi.hoisted(() => {
   const categories: Pick<CategoryDTO, "id" | "name" | "iconKey">[] = [];
@@ -19,10 +19,16 @@ const mocks = vi.hoisted(() => {
 vi.mock("@/modules/categories", () => ({
   useCategories: (params: unknown) => {
     mocks.useCategories(params);
-    return { data: mocks.categories };
+    return {
+      data: mocks.categories,
+      hasValidData: true,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    };
   },
 }));
-vi.mock("../../model/use-update-transaction.ts", () => ({
+vi.mock("../../../model/use-update-transaction.ts", () => ({
   useUpdateTransaction: () => ({
     updateTransaction: mocks.updateTransaction,
     isLoading: false,

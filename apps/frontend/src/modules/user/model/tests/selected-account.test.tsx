@@ -8,6 +8,7 @@ import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authenti
 let queryClient: typeof import("@/common/api/appQuery").queryClient;
 let QueryClientProvider: typeof import("@tanstack/react-query").QueryClientProvider;
 let selectedAccount: typeof import("../selected-account.ts");
+let getSessionContext: typeof import("../session-context.ts").getSessionContext;
 
 vi.mock("@/common/lib/notifications", () => ({
   useNotifications: () => ({ addNotification: vi.fn() }),
@@ -28,14 +29,16 @@ const wrapper = ({ children }: PropsWithChildren) =>
 
 beforeEach(async () => {
   vi.resetModules();
-  const [api, query, account] = await Promise.all([
+  const [api, query, account, session] = await Promise.all([
     import("@/common/api/appQuery"),
     import("@tanstack/react-query"),
     import("../selected-account.ts"),
+    import("../session-context.ts"),
   ]);
   queryClient = api.queryClient;
   QueryClientProvider = query.QueryClientProvider;
   selectedAccount = account;
+  getSessionContext = session.getSessionContext;
   queryClient.clear();
   window.localStorage.clear();
 });
@@ -90,6 +93,7 @@ describe("selected account resolution", () => {
       wrapper,
     });
     await waitFor(() => expect(result.current).toBeUndefined());
+    expect(selectedAccount.getCurrentUserIdSnapshot()).toBe(1);
     expect(() => selectedAccount.requireCurrentAccountId()).toThrow(
       "Текущий счёт не определён",
     );
@@ -100,16 +104,64 @@ describe("selected account resolution", () => {
     act(() => selectedAccount.switchAccount(43));
     expect(window.localStorage.getItem("budget.selected-account")).toBe("43");
 
+    const session = getSessionContext(queryClient);
+    const logout = session.beginCommand("logout");
+    session.apply(logout, { type: "logout-success" });
     queryClient.clear();
-    seedMe([
-      { id: 50, name: "Новый пользователь", initialBalance: 0, isOwner: true },
-    ]);
+    const login = session.beginCommand("login");
+    session.apply(login, { type: "login-success" });
+    session.apply(session.getSnapshot().token, {
+      type: "me-valid",
+      actorId: 2,
+    });
+    queryClient.setQueryData(getAuthMeQueryKey(), {
+      userId: 2,
+      accounts: [
+        {
+          id: 50,
+          name: "Новый пользователь",
+          initialBalance: 0,
+          isOwner: true,
+        },
+      ],
+    });
 
     const { result } = renderHook(() => selectedAccount.useCurrentAccountId(), {
       wrapper,
     });
     await waitFor(() => expect(result.current).toBe(50));
     expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(50);
+  });
+});
+
+describe("imperative snapshots", () => {
+  it("rejects both snapshots for schema-invalid me", () => {
+    queryClient.setQueryData(getAuthMeQueryKey(), {
+      userId: 1,
+      accounts: false,
+    });
+    expect(selectedAccount.getCurrentUserIdSnapshot()).toBeUndefined();
+    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
+    expect(() => selectedAccount.requireCurrentAccountId()).toThrow();
+  });
+
+  it("retains both snapshots during and after a failed logout, then rejects retired cache", () => {
+    seedMe();
+    const session = getSessionContext(queryClient);
+    const logout = session.beginCommand("logout");
+    expect(selectedAccount.getCurrentUserIdSnapshot()).toBe(1);
+    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(42);
+    session.apply(logout, { type: "logout-failure" });
+    expect(selectedAccount.getCurrentUserIdSnapshot()).toBe(1);
+    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(42);
+
+    session.apply(session.getSnapshot().token, { type: "me-unauthorized" });
+    expect(selectedAccount.getCurrentUserIdSnapshot()).toBeUndefined();
+    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
+
+    session.beginCommand("login");
+    expect(selectedAccount.getCurrentUserIdSnapshot()).toBeUndefined();
+    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
   });
 });
 

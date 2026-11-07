@@ -1,5 +1,5 @@
-import { Loader } from "@/common/ui/loader/Loader.tsx";
 import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
+import { Skeleton } from "@/common/ui/skeleton/skeleton.tsx";
 
 import {
   buildReportsPeriodRanges,
@@ -44,6 +44,7 @@ export function ReportsScreen({
     summary?.categories.find(
       (category) => category.categoryId === selectedCategoryId,
     ) ?? null;
+  const hasSummary = summaryQuery.hasValidData && summary !== undefined;
 
   return (
     <div className={s.container}>
@@ -56,11 +57,51 @@ export function ReportsScreen({
         periodSelection={periodSelection}
         onPeriodSelectionChange={onPeriodSelectionChange}
       />
-      {summaryQuery.isLoading && <Loader />}
-      {summaryQuery.isError && (
-        <SimpleError>Не удалось загрузить отчёт.</SimpleError>
+      {!summaryQuery.hasAccount ? (
+        <p className={s.emptyState} role="status">
+          Счёт не выбран.
+        </p>
+      ) : null}
+      {summaryQuery.isLoading && (
+        <div className={s.summarySkeleton} role="status" aria-label="Загрузка отчёта">
+          <Skeleton
+            {...(s.totalSkeleton ? { className: s.totalSkeleton } : {})}
+          />
+          <section aria-label="Загрузка категорий">
+            <Skeleton
+              {...(s.categorySkeleton ? { className: s.categorySkeleton } : {})}
+            />
+            <Skeleton
+              {...(s.categorySkeleton ? { className: s.categorySkeleton } : {})}
+            />
+            <Skeleton
+              {...(s.categorySkeleton ? { className: s.categorySkeleton } : {})}
+            />
+          </section>
+        </div>
       )}
-      {summary && (
+      {summaryQuery.isFetching && hasSummary && (
+        <p className={s.updateStatus} role="status" aria-live="polite">
+          Обновляем отчёт…
+        </p>
+      )}
+      {summaryQuery.isError && summaryQuery.hasAccount && (
+        <div className={s.errorState} role="alert">
+          <SimpleError>
+            {hasSummary
+              ? "Не удалось обновить отчёт."
+              : "Не удалось загрузить отчёт."}
+          </SimpleError>
+          <button
+            className={s.retryButton}
+            type="button"
+            onClick={() => void summaryQuery.refetch()}
+          >
+            Повторить
+          </button>
+        </div>
+      )}
+      {hasSummary && (
         <>
           <TransactionSummary summary={summary} reportType={reportType} />
           <CategoryList

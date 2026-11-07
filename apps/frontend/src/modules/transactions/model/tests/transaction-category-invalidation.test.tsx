@@ -1,3 +1,5 @@
+import type { PropsWithChildren } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -90,6 +92,10 @@ vi.mock("@/common/lib/notifications", () => ({
   useNotifications: () => ({ addNotification: vi.fn() }),
 }));
 
+const wrapper = ({ children }: PropsWithChildren) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -110,7 +116,7 @@ describe("transaction category invalidation", () => {
     "invalidates the category cache after a successful %s",
     async (operation) => {
       if (operation === "create") {
-        const { result } = renderHook(useCreateTransaction);
+        const { result } = renderHook(useCreateTransaction, { wrapper });
         await result.current.createTransaction({
           type: "expense",
           amount: 10,
@@ -118,7 +124,9 @@ describe("transaction category invalidation", () => {
           date: "2026-10-15T09:00:00.000Z",
         });
       } else if (operation === "update") {
-        const { result } = renderHook(() => useUpdateTransaction(5));
+        const { result } = renderHook(() => useUpdateTransaction(5), {
+          wrapper,
+        });
         await result.current.updateTransaction({
           type: "expense",
           amount: 10,
@@ -127,7 +135,7 @@ describe("transaction category invalidation", () => {
           description: null,
         });
       } else {
-        const { result } = renderHook(useDeleteTransaction);
+        const { result } = renderHook(useDeleteTransaction, { wrapper });
         await result.current.deleteTransaction(5);
       }
 
@@ -138,7 +146,7 @@ describe("transaction category invalidation", () => {
   );
 
   it("does not invalidate categories when an operation mutation fails", async () => {
-    const { result } = renderHook(useCreateTransaction);
+    const { result } = renderHook(useCreateTransaction, { wrapper });
     mocks.create.mockRejectedValue(new Error("save failed"));
 
     await expect(

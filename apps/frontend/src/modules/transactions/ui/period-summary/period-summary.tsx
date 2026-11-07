@@ -44,7 +44,9 @@ export function PeriodSummary({
     data: summary,
     hasAccount,
     isError,
+    isFetching,
     isLoading,
+    refetch,
   } = useTransactionSummary(range);
 
   return (
@@ -81,11 +83,32 @@ export function PeriodSummary({
       {isError && summary && (
         <p className={s.errorState} role="alert">
           Не удалось обновить итоги
+          <button
+            type="button"
+            className={s.retryButton}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            Повторить
+          </button>
         </p>
       )}
       {isError && !summary && hasAccount && (
         <p className={s.errorState} role="alert">
           Не удалось загрузить итоги
+          <button
+            type="button"
+            className={s.retryButton}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            Повторить
+          </button>
+        </p>
+      )}
+      {isFetching && summary && (
+        <p className={s.refreshState} role="status">
+          {isError ? "Повторная загрузка итогов…" : "Обновление итогов…"}
         </p>
       )}
       <div

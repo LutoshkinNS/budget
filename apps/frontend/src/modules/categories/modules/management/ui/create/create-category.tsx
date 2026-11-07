@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { z } from "zod";
 
 import { SimpleError } from "@/common/ui/simple-error/SimpleError.tsx";
+import { useCurrentAccountId } from "@/modules/user";
 
 import { createCategoryFormDataSchema } from "../../model/schemas.ts";
 import type {
@@ -26,6 +27,7 @@ type CreateCategoryProps = {
 };
 
 export function CreateCategoryForm({ type }: CreateCategoryProps) {
+  const accountId = useCurrentAccountId();
   const { createCategory, isPending, isError, errorMessage } =
     useCreateCategory();
 
@@ -37,6 +39,7 @@ export function CreateCategoryForm({ type }: CreateCategoryProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
   const pending = isPending || isSubmitting;
+  const disabled = pending || accountId == null;
 
   const validationResult = createCategoryFormDataSchema.safeParse(formState);
   const errors = validationResult.success
@@ -45,7 +48,7 @@ export function CreateCategoryForm({ type }: CreateCategoryProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (pending || submitting.current) return;
+    if (disabled || submitting.current) return;
 
     const validationResult = createCategoryFormDataSchema.safeParse(formState);
 
@@ -71,8 +74,9 @@ export function CreateCategoryForm({ type }: CreateCategoryProps) {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <fieldset disabled={pending} className={s.fieldset}>
+      <fieldset disabled={disabled} className={s.fieldset}>
         <legend>Создание новой категории</legend>
+        {accountId == null && <p role="status">Счёт не выбран</p>}
         <p>
           <label htmlFor={IDS.NAME}>Наименование категории</label>
           <input
@@ -99,13 +103,15 @@ export function CreateCategoryForm({ type }: CreateCategoryProps) {
           }
           disabled={pending}
         />
-        {(isError || submitError) && (
-          <SimpleError>
-            Ошибка:{" "}
-            {submitError || errorMessage || "Не удалось создать категорию"}
-          </SimpleError>
+        {(isError || submitError) && accountId != null && (
+          <div role="alert">
+            <SimpleError>
+              Ошибка:{" "}
+              {submitError || errorMessage || "Не удалось создать категорию"}
+            </SimpleError>
+          </div>
         )}
-        <button type="submit" disabled={pending || !validationResult.success}>
+        <button type="submit" disabled={disabled || !validationResult.success}>
           {pending ? "Создание..." : "Создать"}
         </button>
       </fieldset>
