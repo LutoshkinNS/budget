@@ -1,0 +1,25 @@
+.loading,
+.error {
+  display: grid;
+  gap: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.loadingLine {
+  width: 42%;
+  height: 24px;
+}
+
+.loadingCard {
+  width: 100%;
+  height: 112px;
+}
+
+.refreshStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}

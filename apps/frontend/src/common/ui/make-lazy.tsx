@@ -1,6 +1,6 @@
 import { ComponentType, lazy, Suspense } from "react";
 
-import { Loader } from "./loader/Loader";
+import { Loader } from "./loader/loader";
 
 export function makeLazy<M, P extends object>(
   factory: () => Promise<M>,

@@ -6,7 +6,8 @@ import { AuthMeResponse } from "@/common/api/generate/authentication/authenticat
 import type { UserInfoDTO } from "@/common/api/generate/model";
 import { accountKeys } from "@/common/api/query-keys";
 
-import { useMe } from "./useMe.ts";
+import { getSessionContext } from "./session-context.ts";
+import { useMe } from "./use-me.ts";
 
 const STORAGE_KEY = "budget.selected-account";
 
@@ -49,7 +50,21 @@ function notifyListeners() {
 }
 
 function readMeAccounts(): UserInfoDTO["accounts"] | undefined {
-  return queryClient.getQueryData<UserInfoDTO>(getAuthMeQueryKey())?.accounts;
+  const snapshot = getSessionContext(queryClient).getSnapshot();
+  if (
+    (snapshot.phase !== "authenticated" && snapshot.phase !== "logout-pending") ||
+    snapshot.actorId === null
+  ) {
+    return undefined;
+  }
+  const me = readAdmittedMe();
+  return me?.userId === snapshot.actorId ? me.accounts : undefined;
+}
+
+function readAdmittedMe(): UserInfoDTO | undefined {
+  const me: unknown = queryClient.getQueryData(getAuthMeQueryKey());
+  const validation = AuthMeResponse.safeParse(me);
+  return validation.success ? validation.data : undefined;
 }
 
 function resolveAccountId(
@@ -79,9 +94,16 @@ export function getCurrentAccountIdSnapshot(): number | undefined {
 
 /** Снимок нужен для отбрасывания поздних callback после смены пользователя. */
 export function getCurrentUserIdSnapshot(): number | undefined {
-  const me = queryClient.getQueryData<UserInfoDTO>(getAuthMeQueryKey());
-  const validation = AuthMeResponse.safeParse(me);
-  return validation.success ? validation.data.userId : undefined;
+  const snapshot = getSessionContext(queryClient).getSnapshot();
+  if (
+    (snapshot.phase !== "authenticated" && snapshot.phase !== "logout-pending") ||
+    snapshot.actorId === null
+  ) {
+    return undefined;
+  }
+  return readAdmittedMe()?.userId === snapshot.actorId
+    ? snapshot.actorId
+    : undefined;
 }
 
 export function requireCurrentAccountId(): number {

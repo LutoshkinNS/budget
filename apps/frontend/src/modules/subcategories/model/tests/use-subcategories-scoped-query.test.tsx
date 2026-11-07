@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { queryClient } from "@/common/api/appQuery";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
+import { getSessionContext } from "@/modules/user";
 
 import { subcategoryKeys } from "../subcategory-keys.ts";
 import { useSubcategories } from "../use-subcategories.ts";
@@ -16,6 +17,10 @@ vi.mock("@/common/lib/notifications", () => ({
 const subcategoryPayload = [{ id: 7, categoryId: 3, name: "Овощи" }];
 
 function seedMe(currentAccountId: number) {
+  const session = getSessionContext(queryClient);
+  const token = session.captureRead();
+  if (token === null) throw new Error("Fixture session is pending");
+  session.apply(token, { type: "me-valid", actorId: 1 });
   queryClient.setQueryData(getAuthMeQueryKey(), {
     accounts: [
       { id: currentAccountId, name: "Счёт", initialBalance: 0, isOwner: true },
@@ -71,7 +76,10 @@ describe("useSubcategories me-guard and scoped key", () => {
   it("fetches under the scoped list key after me is known", async () => {
     seedMe(42);
     const { calls } = stubFetch(() =>
-      Response.json({ accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }], userId: 1 }),
+      Response.json({
+        accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
+        userId: 1,
+      }),
     );
 
     const { result } = renderHook(() => useSubcategories(3), { wrapper });

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { queryClient } from "@/common/api/appQuery";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
+import { getSessionContext } from "@/modules/user";
 
 import { memberKeys } from "../member-keys.ts";
 import { useAccountMembers } from "../use-account-members.ts";
@@ -16,6 +17,10 @@ vi.mock("@/common/lib/notifications", () => ({
 const membersPayload = [{ userId: 2, firstName: "Анна", photoUrl: null }];
 
 function seedMe(currentAccountId: number) {
+  const session = getSessionContext(queryClient);
+  const token = session.captureRead();
+  if (token === null) throw new Error("Fixture session is pending");
+  session.apply(token, { type: "me-valid", actorId: 1 });
   queryClient.setQueryData(getAuthMeQueryKey(), {
     accounts: [
       { id: currentAccountId, name: "Счёт", initialBalance: 0, isOwner: true },
