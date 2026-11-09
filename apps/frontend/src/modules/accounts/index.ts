@@ -1,4 +1,4 @@
-export { useAccounts, useInvalidateAccounts } from "./model/useAccounts.ts";
+export { useAccounts, useInvalidateAccounts } from "./model/use-accounts.ts";
 export { InvitationRedemption } from "./modules/invitation-redemption";
 export { useUpdateAccount } from "./model/use-update-account.ts";
 export { AccountsSelect } from "./ui/AccountsSelect.tsx";

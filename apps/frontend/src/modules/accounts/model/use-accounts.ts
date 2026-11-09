@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { queryClient } from "@/common/api/appQuery.ts";
+import { queryClient } from "@/common/api/app-query.ts";
 import {
   getAccountsListQueryKey,
   useAccountsList,
@@ -13,16 +13,7 @@ export function useAccounts() {
   const { addNotification } = useNotifications();
 
   useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useAccountsListError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
+    if (!isError && data) {
       const validation = AccountsListResponse.safeParse(data);
       if (!validation.success) {
         addNotification({
@@ -32,7 +23,7 @@ export function useAccounts() {
         });
       }
     }
-  }, [isError, error, data, addNotification]);
+  }, [isError, data, addNotification]);
 
   return { data: data ? data : [], error, isError, ...other };
 }

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { queryClient } from "@/common/api/appQuery.ts";
+import { queryClient } from "@/common/api/app-query.ts";
 import { useCategorySubcategoriesList } from "@/common/api/generate/subcategories/subcategories.gen.ts";
 import { CategorySubcategoriesListResponse } from "@/common/api/generate/subcategories/subcategories.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
@@ -11,7 +11,7 @@ import { subcategoryKeys } from "./subcategory-keys.ts";
 export function useSubcategories(categoryId: number) {
   const accountId = useCurrentAccountId();
       // Placeholder безопасен при отключённом запросе.
-  const { data, isError, error } = useCategorySubcategoriesList(
+  const { data, isError } = useCategorySubcategoriesList(
     accountId ?? 1,
     categoryId,
     {
@@ -25,18 +25,8 @@ export function useSubcategories(categoryId: number) {
     },
   );
   const { addNotification } = useNotifications();
-
   useEffect(() => {
-    if (isError) {
-      addNotification({
-        id: "useSubcategoriesError",
-        title: error?.code || "Error",
-        message: error?.message,
-      });
-      return;
-    }
-
-    if (data) {
+    if (!isError && data) {
       const validation = CategorySubcategoriesListResponse.safeParse(data);
       if (!validation.success) {
         addNotification({
@@ -46,7 +36,7 @@ export function useSubcategories(categoryId: number) {
         });
       }
     }
-  }, [isError, error, data, addNotification]);
+  }, [isError, data, addNotification]);
 
   const validation = CategorySubcategoriesListResponse.safeParse(data);
   return { data: data && validation.success ? validation.data : [] };

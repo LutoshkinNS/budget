@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 
-let queryClient: typeof import("@/common/api/appQuery").queryClient;
+let queryClient: typeof import("@/common/api/app-query").queryClient;
 let QueryClientProvider: typeof import("@tanstack/react-query").QueryClientProvider;
 let selectedAccount: typeof import("../selected-account.ts");
 let getSessionContext: typeof import("../session-context.ts").getSessionContext;
@@ -30,7 +30,7 @@ const wrapper = ({ children }: PropsWithChildren) =>
 beforeEach(async () => {
   vi.resetModules();
   const [api, query, account, session] = await Promise.all([
-    import("@/common/api/appQuery"),
+    import("@/common/api/app-query"),
     import("@tanstack/react-query"),
     import("../selected-account.ts"),
     import("../session-context.ts"),

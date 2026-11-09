@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-import { queryClient } from "@/common/api/appQuery";
+import { queryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import { AuthMeResponse } from "@/common/api/generate/authentication/authentication.zod.gen.ts";
 import type { UserInfoDTO } from "@/common/api/generate/model";

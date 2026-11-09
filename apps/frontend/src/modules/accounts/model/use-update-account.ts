@@ -1,4 +1,4 @@
-import { queryClient } from "@/common/api/appQuery.ts";
+import { queryClient } from "@/common/api/app-query.ts";
 import {
   getAccountsListQueryKey,
   useAccountsUpdate,

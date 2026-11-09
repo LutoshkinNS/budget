@@ -2,11 +2,12 @@ import { Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
-import { queryClient } from "@/common/api/appQuery";
+import { queryClient } from "@/common/api/app-query";
 import { lazyDevComponent } from "@/common/lib/lazyDevComponent";
 import { Notifications } from "@/common/lib/notifications";
 
 import { routeTree } from "./routes/routeTree.gen";
+import { QueryErrorNotificationBridge } from "./query-error-notification-bridge.tsx";
 
 const router = createRouter({ routeTree });
 
@@ -25,6 +26,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Notifications>
+        <QueryErrorNotificationBridge />
         <Suspense fallback={<div>Loading...</div>}>
           <RouterProvider router={router} />
         </Suspense>

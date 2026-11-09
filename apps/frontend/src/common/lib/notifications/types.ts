@@ -5,6 +5,7 @@ export type NotificationProps = {
   title: string;
   message?: string;
   type?: NotificationUiProps["variant"];
+  deduplicateByContent?: boolean;
 };
 
 export type NotificationsContextProps = {

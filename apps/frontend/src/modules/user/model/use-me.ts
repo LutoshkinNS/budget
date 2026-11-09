@@ -28,6 +28,7 @@ export function useMe() {
   );
   const query = useQuery<UserInfoDTO, Error>({
     queryKey: getAuthMeQueryKey(),
+    meta: { queryErrorNotification: false },
     enabled:
       sessionSnapshot.phase !== "login-pending",
     queryFn: async ({ signal }) => {

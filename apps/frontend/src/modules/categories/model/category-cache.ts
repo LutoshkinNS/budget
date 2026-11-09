@@ -1,4 +1,4 @@
-import { queryClient } from "@/common/api/appQuery";
+import { queryClient } from "@/common/api/app-query";
 
 import { categoryKeys } from "./category-keys.ts";
 

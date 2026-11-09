@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { Notification } from "../../ui/notification/Notification";
 
@@ -10,13 +10,21 @@ import s from "./notifications.module.css";
 export const Notifications = ({ children }: { children: React.ReactNode }) => {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
-  function addNotifications(notification: NotificationProps) {
+  const deleteNotifications = useCallback((id: NotificationProps["id"]) => {
+    setNotifications((prevState) =>
+      prevState.filter((notification) => notification.id !== id),
+    );
+  }, []);
+
+  const addNotifications = useCallback((notification: NotificationProps) => {
     setNotifications((prevState) => {
       if (
         prevState.some(
           (n) =>
             n.id === notification.id ||
-            (n.title === notification.title &&
+            (n.deduplicateByContent !== false &&
+              notification.deduplicateByContent !== false &&
+              n.title === notification.title &&
               n.message === notification.message),
         )
       ) {
@@ -33,13 +41,7 @@ export const Notifications = ({ children }: { children: React.ReactNode }) => {
     setTimeout(() => {
       deleteNotifications(notification.id);
     }, 5000);
-  }
-
-  function deleteNotifications(id: NotificationProps["id"]) {
-    setNotifications((prevState) =>
-      prevState.filter((notification) => notification.id !== id),
-    );
-  }
+  }, [deleteNotifications]);
 
   return (
     <NotificationsContext.Provider

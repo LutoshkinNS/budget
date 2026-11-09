@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { queryClient } from "@/common/api/appQuery";
+import { queryClient } from "@/common/api/app-query";
 
 import { invalidateCategories } from "../category-cache";
 import { categoryKeys } from "../category-keys";
