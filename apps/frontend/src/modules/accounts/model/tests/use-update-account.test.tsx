@@ -3,15 +3,17 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAccountsListQueryKey } from "@/common/api/generate/accounts/accounts.gen.ts";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import type { AccountDTO } from "@/common/api/generate/model";
 
 import { useUpdateAccount } from "../use-update-account.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const mocks = vi.hoisted(() => ({
@@ -63,6 +65,7 @@ const wrapper = ({ children }: PropsWithChildren) => (
 );
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
   mocks.update.mockResolvedValue({
     id: 43,
@@ -101,7 +104,10 @@ describe("useUpdateAccount invalidation scope", () => {
       await done.promise;
     });
 
-    expect(mocks.invalidateTransactionSummary).toHaveBeenCalledWith(43);
+    expect(mocks.invalidateTransactionSummary).toHaveBeenCalledWith(
+      queryClient,
+      43,
+    );
 
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: getAccountsListQueryKey(),

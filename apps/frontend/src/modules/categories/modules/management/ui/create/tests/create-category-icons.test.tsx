@@ -8,11 +8,13 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
-import { Notifications } from "@/common/lib/notifications";
+import { NotificationsTestRoot as Notifications } from "@/common/lib/notifications/tests/notifications-test-root";
 
 import { CreateCategoryForm } from "../create-category.tsx";
+
+let queryClient: ReturnType<typeof createAppQueryClient>;
 
 const mocks = vi.hoisted(() => ({ createCategory: vi.fn() }));
 vi.mock("../../../model/use-create-category.ts", () => ({
@@ -28,6 +30,7 @@ afterEach(() => {
   queryClient.clear();
 });
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   mocks.createCategory.mockReset();
   mocks.createCategory.mockResolvedValue({ id: 1 });
   queryClient.clear();

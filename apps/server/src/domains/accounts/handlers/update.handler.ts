@@ -3,17 +3,20 @@ import type { FromSchema } from 'json-schema-to-ts';
 
 import AccountId from '#s/AccountId.js';
 import AccountUpdate from '#s/AccountUpdate.js';
+import ForbiddenError from '#s/ForbiddenError.js';
 import type { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
 export type UpdateBody = FromSchema<typeof AccountUpdate>;
 export type UpdateParams = { accountId: FromSchema<typeof AccountId> };
 
-const ERRORS = {
-  FORBIDDEN: {
-    code: 'FORBIDDEN',
-    message: 'Только владелец аккаунта может изменять настройки аккаунта'
-  }
-} as const;
+const forbiddenMessage = 'Только владелец аккаунта может изменять настройки аккаунта';
+
+const forbidden = createErrorResponse(
+  ForbiddenError,
+  ForbiddenError.properties.statusCode.default,
+  forbiddenMessage
+);
 
 export async function updateAccountHandler(
   this: FastifyApp,
@@ -30,7 +33,7 @@ export async function updateAccountHandler(
   });
 
   if (!account) {
-    return reply.code(403).send(ERRORS.FORBIDDEN);
+    return reply.code(forbidden.statusCode).send(forbidden);
   }
 
   const updated = await this.prisma.account.update({

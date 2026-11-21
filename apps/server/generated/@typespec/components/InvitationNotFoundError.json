@@ -13,7 +13,8 @@
       ]
     },
     "message": {
-      "type": "string"
+      "type": "string",
+      "default": "Приглашение не найдено или уже использовано."
     },
     "statusCode": {
       "type": "number",
@@ -22,5 +23,10 @@
       ]
     }
   },
+  "allOf": [
+    {
+      "$ref": "ErrorDTO.json"
+    }
+  ],
   "additionalProperties": false
 }

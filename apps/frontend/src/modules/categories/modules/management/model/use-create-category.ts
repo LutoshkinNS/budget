@@ -1,8 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
+import { ApiError } from "@/common/api/api-error.ts";
 import { useCategoriesCreate } from "@/common/api/generate/categories/categories.gen.ts";
 import { CategoriesCreateBody } from "@/common/api/generate/categories/categories.zod.gen.ts";
 import type { CategoryCreateDTO } from "@/common/api/generate/model";
+import { BusinessErrorCodeDTO } from "@/common/api/generate/model/businessErrorCodeDTO.ts";
 import { errorHandler } from "@/common/lib/error-handler/error-handler.ts";
 import { requireCurrentAccountId } from "@/modules/user";
 
@@ -12,36 +15,21 @@ export type CategoryCreateData = Omit<CategoryCreateDTO, "type"> & {
   type?: CategoryCreateDTO["type"] | undefined;
 };
 
-function getCreateCategoryErrorMessage(error: unknown) {
-  if (typeof error === "object" && error !== null && "code" in error) {
-    const code = error.code;
-
-    if (code === "CATEGORY_ALREADY_EXISTS") {
-      return "Категория с таким названием уже существует";
-    }
+export function getCreateCategoryErrorMessage(error: unknown) {
+  if (!(error instanceof ApiError)) return undefined;
+  if (error.code === BusinessErrorCodeDTO.CATEGORY_ALREADY_EXISTS) {
+    return "Категория с таким названием уже существует";
   }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === "object" && error !== null && "message" in error) {
-    const message = error.message;
-
-    if (typeof message === "string") {
-      return message;
-    }
-  }
-
-  return undefined;
+  return error.message;
 }
 
 export function useCreateCategory() {
+  const queryClient = useQueryClient();
   const mutation = useCategoriesCreate({
     mutation: {
       meta: { localFeedback: true },
       onSuccess: (_data, variables) => {
-        void invalidateCategories(variables.accountId);
+        void invalidateCategories(queryClient, variables.accountId);
       },
     },
   });
@@ -58,23 +46,13 @@ export function useCreateCategory() {
       return;
     }
 
-    try {
-      return await mutation.mutateAsync({
-        accountId: requireCurrentAccountId(),
-        data: {
-          ...validateResult.data,
-          iconKey: validateResult.data.iconKey ?? null,
-        },
-      });
-    } catch (error) {
-      const errorMessage = getCreateCategoryErrorMessage(error);
-
-      if (errorMessage) {
-        throw new Error(errorMessage);
-      }
-
-      throw error;
-    }
+    return mutation.mutateAsync({
+      accountId: requireCurrentAccountId(queryClient),
+      data: {
+        ...validateResult.data,
+        iconKey: validateResult.data.iconKey ?? null,
+      },
+    });
   };
 
   return {

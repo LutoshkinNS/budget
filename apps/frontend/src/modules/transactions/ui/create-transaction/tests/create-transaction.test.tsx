@@ -10,13 +10,18 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 
 import { CreateTransaction } from "../create-transaction.tsx";
 
+let runtime: ReturnType<typeof createApiRuntime>;
+let queryClient: ReturnType<typeof createApiRuntime>["queryClient"];
+
 vi.mock(import("@/common/lib/notifications"), () => ({
   useNotifications: () => ({
+    notifications: [],
     addNotification: vi.fn(),
     deleteNotification: vi.fn(),
   }),
@@ -31,7 +36,9 @@ const CATEGORIES = [
 ];
 
 const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  <ApiRuntimeContext.Provider value={runtime}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </ApiRuntimeContext.Provider>
 );
 
 // Сумма "0" не проходит валидацию POST, поэтому перед выбором категории
@@ -74,6 +81,11 @@ function stubHttp() {
 }
 
 beforeEach(() => {
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: () => {},
+  });
+  queryClient = runtime.queryClient;
   queryClient.clear();
   window.localStorage.clear();
   postShouldFail = false;
@@ -81,6 +93,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => pendingPosts.splice(0).forEach((release) => release()));
   cleanup();
+  runtime.dispose();
   queryClient.clear();
   vi.unstubAllGlobals();
 });
@@ -97,7 +110,9 @@ describe("CreateTransaction local save feedback", () => {
     fireEvent.click(card);
     fireEvent.click(card);
     await waitFor(() => expect(posts).toHaveLength(1));
-    await act(async () => pendingPosts.splice(0).forEach((release) => release()));
+    await act(async () =>
+      pendingPosts.splice(0).forEach((release) => release()),
+    );
     expect(posts).toHaveLength(1);
   });
 
@@ -115,7 +130,9 @@ describe("CreateTransaction local save feedback", () => {
       screen.getByPlaceholderText("добавить комментарий").matches(":disabled"),
     ).toBe(true);
 
-    await act(async () => pendingPosts.splice(0).forEach((release) => release()));
+    await act(async () =>
+      pendingPosts.splice(0).forEach((release) => release()),
+    );
     await waitFor(() => expect(card.matches(":disabled")).toBe(false));
   });
 
@@ -135,7 +152,9 @@ describe("CreateTransaction local save feedback", () => {
     postShouldFail = true;
     fireEvent.click(card);
     await waitFor(() => expect(pendingPosts).toHaveLength(1));
-    await act(async () => pendingPosts.splice(0).forEach((release) => release()));
+    await act(async () =>
+      pendingPosts.splice(0).forEach((release) => release()),
+    );
     await screen.findByRole("alert");
     expect(comment.value).toBe("кофе");
 
@@ -143,7 +162,9 @@ describe("CreateTransaction local save feedback", () => {
     postShouldFail = false;
     fireEvent.click(card);
     await waitFor(() => expect(posts).toHaveLength(2));
-    await act(async () => pendingPosts.splice(0).forEach((release) => release()));
+    await act(async () =>
+      pendingPosts.splice(0).forEach((release) => release()),
+    );
     await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
     expect(
       (screen.getByPlaceholderText("добавить комментарий") as HTMLInputElement)

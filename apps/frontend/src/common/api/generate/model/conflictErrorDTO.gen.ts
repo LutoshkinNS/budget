@@ -4,11 +4,9 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { ConflictErrorDTOCode } from "./conflictErrorDTOCode";
-import type { ConflictErrorDTOStatusCode } from "./conflictErrorDTOStatusCode";
+import type { ErrorDTODTO } from "./errorDTODTO";
 
-export interface ConflictErrorDTO {
-  code: ConflictErrorDTOCode;
+export type ConflictErrorDTO = ErrorDTODTO & {
   message: string;
-  statusCode: ConflictErrorDTOStatusCode;
-}
+  statusCode: number;
+};

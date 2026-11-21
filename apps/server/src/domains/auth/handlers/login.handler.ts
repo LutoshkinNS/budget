@@ -2,12 +2,14 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 
 import type LoginRequest from '#s/LoginRequest.js';
+import UnauthorizedError from '#s/UnauthorizedError.js';
 import type { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
 import {
   ACCESS_TOKEN_MAX_AGE_SECONDS,
   AUTH_DATA_MAX_AGE_SECONDS,
-  AUTH_ERRORS,
+  AUTH_ERROR_MESSAGES,
   REFRESH_TOKEN_MAX_AGE_SECONDS
 } from '../constants.js';
 import { upsertUserFromTelegram } from '../repositories/user.repository.js';
@@ -36,14 +38,30 @@ export async function loginHandler(
 
   if (!isValid) {
     req.log.warn({ event: 'auth_login_failed', reason: 'invalid_telegram_auth' });
-    return reply.code(401).send(AUTH_ERRORS.INVALID_TELEGRAM_AUTH);
+    return reply
+      .code(UnauthorizedError.properties.statusCode.default)
+      .send(
+        createErrorResponse(
+          UnauthorizedError,
+          UnauthorizedError.properties.statusCode.default,
+          AUTH_ERROR_MESSAGES.INVALID_TELEGRAM_AUTH
+        )
+      );
   }
 
   const authDate = req.body.auth_date;
   const currentTimestamp = Math.floor(Date.now() / 1000);
   if (currentTimestamp - authDate > AUTH_DATA_MAX_AGE_SECONDS) {
     req.log.warn({ event: 'auth_login_failed', reason: 'auth_data_expired' });
-    return reply.code(401).send(AUTH_ERRORS.AUTH_DATA_EXPIRED);
+    return reply
+      .code(UnauthorizedError.properties.statusCode.default)
+      .send(
+        createErrorResponse(
+          UnauthorizedError,
+          UnauthorizedError.properties.statusCode.default,
+          AUTH_ERROR_MESSAGES.AUTH_DATA_EXPIRED
+        )
+      );
   }
 
   const telegramId = BigInt(req.body.id);

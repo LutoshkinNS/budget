@@ -3,6 +3,7 @@ import NotFoundError from '#s/NotFoundError.js';
 import Subcategory from '#s/Subcategory.js';
 import SubcategoryCreate from '#s/SubcategoryCreate.js';
 import { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
 const categoryParamsSchema = {
   type: 'object',
@@ -25,11 +26,8 @@ const subcategoryParamsSchema = {
   additionalProperties: false
 } as const;
 
-const notFound = {
-  code: 'NOT_FOUND' as const,
-  message: 'Category not found or access denied',
-  statusCode: 404 as const
-};
+const notFound = (message: string) =>
+  createErrorResponse(NotFoundError, NotFoundError.properties.statusCode.default, message);
 
 export default async function subcategoriesModule(app: FastifyApp) {
   app.addHook('preHandler', app.authenticate);
@@ -89,11 +87,8 @@ export default async function subcategoriesModule(app: FastifyApp) {
       });
 
       if (!subcategory) {
-        return reply.code(404).send({
-          code: 'NOT_FOUND',
-          message: 'Subcategory not found or access denied',
-          statusCode: 404
-        });
+        const error = notFound('Subcategory not found or access denied');
+        return reply.code(error.statusCode).send(error);
       }
 
       return subcategory;
@@ -123,7 +118,8 @@ export default async function subcategoriesModule(app: FastifyApp) {
       });
 
       if (!category) {
-        return reply.code(404).send(notFound);
+        const error = notFound('Category not found or access denied');
+        return reply.code(error.statusCode).send(error);
       }
 
       return await this.prisma.subcategory.create({

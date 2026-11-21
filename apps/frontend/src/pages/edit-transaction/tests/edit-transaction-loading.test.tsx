@@ -10,7 +10,8 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import type { TransactionDTO } from "@/common/api/generate/model";
 import { invalidateCategories } from "@/modules/categories";
@@ -19,9 +20,13 @@ import { getCurrentAccountIdSnapshot, switchAccount } from "@/modules/user";
 
 import { EditTransaction } from "../edit-transaction.tsx";
 
+let runtime: ReturnType<typeof createApiRuntime>;
+let queryClient: ReturnType<typeof createApiRuntime>["queryClient"];
+
 const notifications = vi.hoisted(() => ({ add: vi.fn() }));
 vi.mock(import("@/common/lib/notifications"), () => ({
   useNotifications: () => ({
+    notifications: [],
     addNotification: notifications.add,
     deleteNotification: vi.fn(),
   }),
@@ -116,10 +121,20 @@ function submit() {
 }
 
 const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  <ApiRuntimeContext.Provider value={runtime}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </ApiRuntimeContext.Provider>
 );
-const defaults = queryClient.getDefaultOptions();
+let defaults: ReturnType<
+  ReturnType<typeof createApiRuntime>["queryClient"]["getDefaultOptions"]
+>;
 beforeEach(() => {
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: () => {},
+  });
+  queryClient = runtime.queryClient;
+  defaults = queryClient.getDefaultOptions();
   queryClient.clear();
   queryClient.setDefaultOptions({
     ...defaults,
@@ -129,6 +144,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  runtime.dispose();
   queryClient.clear();
   queryClient.setDefaultOptions(defaults);
   vi.unstubAllGlobals();
@@ -145,7 +161,7 @@ describe("edit transaction loading and workflow lifetime", () => {
         isOwner: true,
       })),
     });
-    switchAccount(42);
+    switchAccount(queryClient, 42);
     const patch = barrier();
     const onSaved = vi.fn();
     http((kind, url) =>
@@ -185,7 +201,7 @@ describe("edit transaction loading and workflow lifetime", () => {
       await act(async () => {
         seedAccount(43, 1);
         transitions.push({
-          accountId: getCurrentAccountIdSnapshot(),
+          accountId: getCurrentAccountIdSnapshot(queryClient),
           renderedAmount: input("Сумма").value,
         });
         patch.release(Response.json(TRANSACTION));
@@ -200,7 +216,7 @@ describe("edit transaction loading and workflow lifetime", () => {
       unsubscribe();
       act(() => {
         patch.release(Response.json(TRANSACTION));
-        switchAccount(42);
+        switchAccount(queryClient, 42);
       });
     }
   });
@@ -357,8 +373,8 @@ describe("edit transaction loading and workflow lifetime", () => {
     categories = [...CATEGORIES].reverse();
     await act(async () => {
       await Promise.all([
-        invalidateTransaction(42, 7),
-        invalidateCategories(42),
+        invalidateTransaction(queryClient, 42, 7),
+        invalidateCategories(queryClient, 42),
       ]);
     });
     expect(input("Сумма").value).toBe("88.5");
@@ -406,7 +422,7 @@ describe("edit transaction loading and workflow lifetime", () => {
       });
       broken = true;
       await act(async () => {
-        await invalidateTransaction(42, 7);
+        await invalidateTransaction(queryClient, 42, 7);
       });
       await waitFor(() =>
         expect(
@@ -441,7 +457,7 @@ describe("edit transaction loading and workflow lifetime", () => {
     await waitFor(() => expect(screen.queryByRole("combobox")).not.toBeNull());
     try {
       act(() => {
-        void invalidateTransaction(42, 7);
+        void invalidateTransaction(queryClient, 42, 7);
       });
       await waitFor(() => expect(reads).toBe(2));
       expect(input("Сумма").value).toBe("25");
@@ -470,7 +486,7 @@ describe("edit transaction loading and workflow lifetime", () => {
     fireEvent.change(input("Комментарий"), { target: { value: "Не терять" } });
     missing = true;
     await act(async () => {
-      await invalidateTransaction(42, 7);
+      await invalidateTransaction(queryClient, 42, 7);
     });
     await waitFor(() =>
       expect(calls.filter(({ kind }) => kind === "detail")).toHaveLength(2),
@@ -526,7 +542,7 @@ describe("edit transaction loading and workflow lifetime", () => {
     await waitFor(() => expect(screen.queryByRole("combobox")).not.toBeNull());
     try {
       act(() => {
-        void invalidateCategories(42);
+        void invalidateCategories(queryClient, 42);
       });
       await waitFor(() => expect(reads).toBe(2));
       const category = screen.getByRole("combobox");

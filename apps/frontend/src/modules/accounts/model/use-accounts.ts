@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { queryClient } from "@/common/api/app-query.ts";
 import {
   getAccountsListQueryKey,
   useAccountsList,
@@ -29,6 +29,7 @@ export function useAccounts() {
 }
 
 export function useInvalidateAccounts() {
+  const queryClient = useQueryClient();
   return () =>
     queryClient.invalidateQueries({
       queryKey: getAccountsListQueryKey(),

@@ -4,11 +4,9 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { ValidationErrorDTOCode } from "./validationErrorDTOCode";
-import type { ValidationErrorDTOStatusCode } from "./validationErrorDTOStatusCode";
+import type { ErrorDTODTO } from "./errorDTODTO";
 
-export interface ValidationErrorDTO {
-  code: ValidationErrorDTOCode;
+export type ValidationErrorDTO = ErrorDTODTO & {
   message: string;
-  statusCode: ValidationErrorDTOStatusCode;
-}
+  statusCode: number;
+};

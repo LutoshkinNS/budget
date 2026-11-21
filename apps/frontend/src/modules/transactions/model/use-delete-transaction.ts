@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useTransactionsDelete } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
 import { invalidateCategories } from "@/modules/categories";
@@ -11,6 +13,7 @@ import {
 } from "./transaction-cache.ts";
 
 export function useDeleteTransaction() {
+  const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
 
   const mutation = useTransactionsDelete({
@@ -18,7 +21,7 @@ export function useDeleteTransaction() {
       onError: (error) => {
         addNotification({
           id: "deleteTransactionError",
-          title: error?.code || "Не удалось удалить операцию",
+          title: "Не удалось удалить операцию",
           message: error?.message,
         });
       },
@@ -28,11 +31,15 @@ export function useDeleteTransaction() {
       onSuccess: async (_data, variables) => {
         const accountId = variables.accountId;
         await Promise.all([
-          invalidateTransactionsList(accountId),
-          invalidateTransactionSummary(accountId),
-          invalidateTransactionsCategorySummary(accountId),
-          invalidateTransaction(accountId, variables.transactionId),
-          invalidateCategories(accountId),
+          invalidateTransactionsList(queryClient, accountId),
+          invalidateTransactionSummary(queryClient, accountId),
+          invalidateTransactionsCategorySummary(queryClient, accountId),
+          invalidateTransaction(
+            queryClient,
+            accountId,
+            variables.transactionId,
+          ),
+          invalidateCategories(queryClient, accountId),
         ]);
         addNotification({
           id: `deleteTransactionSuccess-${variables.transactionId}-${Date.now()}`,
@@ -45,7 +52,7 @@ export function useDeleteTransaction() {
 
   const deleteTransaction = (transactionId: number) => {
     return mutation.mutateAsync({
-      accountId: requireCurrentAccountId(),
+      accountId: requireCurrentAccountId(queryClient),
       transactionId,
     });
   };

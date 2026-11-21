@@ -5,4 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type CategoriesListType = "income" | "expense";
+export type CategoriesListType =
+  (typeof CategoriesListType)[keyof typeof CategoriesListType];
+
+export const CategoriesListType = {
+  income: "income",
+  expense: "expense",
+} as const;

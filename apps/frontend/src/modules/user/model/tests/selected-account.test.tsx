@@ -5,13 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 
-let queryClient: typeof import("@/common/api/app-query").queryClient;
+let queryClient: ReturnType<
+  typeof import("@/common/api/app-query").createAppQueryClient
+>;
 let QueryClientProvider: typeof import("@tanstack/react-query").QueryClientProvider;
 let selectedAccount: typeof import("../selected-account.ts");
 let getSessionContext: typeof import("../session-context.ts").getSessionContext;
 
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const ACCOUNTS = [
@@ -35,7 +37,7 @@ beforeEach(async () => {
     import("../selected-account.ts"),
     import("../session-context.ts"),
   ]);
-  queryClient = api.queryClient;
+  queryClient = api.createAppQueryClient(() => {});
   QueryClientProvider = query.QueryClientProvider;
   selectedAccount = account;
   getSessionContext = session.getSessionContext;
@@ -81,8 +83,10 @@ describe("selected account resolution", () => {
       wrapper,
     });
     expect(result.current).toBeUndefined();
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
-    expect(() => selectedAccount.requireCurrentAccountId()).toThrow(
+    expect(
+      selectedAccount.getCurrentAccountIdSnapshot(queryClient),
+    ).toBeUndefined();
+    expect(() => selectedAccount.requireCurrentAccountId(queryClient)).toThrow(
       "Текущий счёт не определён",
     );
   });
@@ -93,15 +97,15 @@ describe("selected account resolution", () => {
       wrapper,
     });
     await waitFor(() => expect(result.current).toBeUndefined());
-    expect(selectedAccount.getCurrentUserIdSnapshot()).toBe(1);
-    expect(() => selectedAccount.requireCurrentAccountId()).toThrow(
+    expect(selectedAccount.getCurrentUserIdSnapshot(queryClient)).toBe(1);
+    expect(() => selectedAccount.requireCurrentAccountId(queryClient)).toThrow(
       "Текущий счёт не определён",
     );
   });
 
   it("does not reuse the previous user's selection after logout and a new login", async () => {
     seedMe();
-    act(() => selectedAccount.switchAccount(43));
+    act(() => selectedAccount.switchAccount(queryClient, 43));
     expect(window.localStorage.getItem("budget.selected-account")).toBe("43");
 
     const session = getSessionContext(queryClient);
@@ -130,7 +134,7 @@ describe("selected account resolution", () => {
       wrapper,
     });
     await waitFor(() => expect(result.current).toBe(50));
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(50);
+    expect(selectedAccount.getCurrentAccountIdSnapshot(queryClient)).toBe(50);
   });
 });
 
@@ -140,28 +144,42 @@ describe("imperative snapshots", () => {
       userId: 1,
       accounts: false,
     });
-    expect(selectedAccount.getCurrentUserIdSnapshot()).toBeUndefined();
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
-    expect(() => selectedAccount.requireCurrentAccountId()).toThrow();
+    expect(
+      selectedAccount.getCurrentUserIdSnapshot(queryClient),
+    ).toBeUndefined();
+    expect(
+      selectedAccount.getCurrentAccountIdSnapshot(queryClient),
+    ).toBeUndefined();
+    expect(() =>
+      selectedAccount.requireCurrentAccountId(queryClient),
+    ).toThrow();
   });
 
   it("retains both snapshots during and after a failed logout, then rejects retired cache", () => {
     seedMe();
     const session = getSessionContext(queryClient);
     const logout = session.beginCommand("logout");
-    expect(selectedAccount.getCurrentUserIdSnapshot()).toBe(1);
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(42);
+    expect(selectedAccount.getCurrentUserIdSnapshot(queryClient)).toBe(1);
+    expect(selectedAccount.getCurrentAccountIdSnapshot(queryClient)).toBe(42);
     session.apply(logout, { type: "logout-failure" });
-    expect(selectedAccount.getCurrentUserIdSnapshot()).toBe(1);
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(42);
+    expect(selectedAccount.getCurrentUserIdSnapshot(queryClient)).toBe(1);
+    expect(selectedAccount.getCurrentAccountIdSnapshot(queryClient)).toBe(42);
 
     session.apply(session.getSnapshot().token, { type: "me-unauthorized" });
-    expect(selectedAccount.getCurrentUserIdSnapshot()).toBeUndefined();
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
+    expect(
+      selectedAccount.getCurrentUserIdSnapshot(queryClient),
+    ).toBeUndefined();
+    expect(
+      selectedAccount.getCurrentAccountIdSnapshot(queryClient),
+    ).toBeUndefined();
 
     session.beginCommand("login");
-    expect(selectedAccount.getCurrentUserIdSnapshot()).toBeUndefined();
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBeUndefined();
+    expect(
+      selectedAccount.getCurrentUserIdSnapshot(queryClient),
+    ).toBeUndefined();
+    expect(
+      selectedAccount.getCurrentAccountIdSnapshot(queryClient),
+    ).toBeUndefined();
   });
 });
 
@@ -173,12 +191,12 @@ describe("switchAccount", () => {
     });
     await waitFor(() => expect(result.current).toBe(42));
 
-    act(() => selectedAccount.switchAccount(43));
+    act(() => selectedAccount.switchAccount(queryClient, 43));
 
     await waitFor(() => expect(result.current).toBe(43));
     expect(window.localStorage.getItem("budget.selected-account")).toBe("43");
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(43);
-    expect(selectedAccount.requireCurrentAccountId()).toBe(43);
+    expect(selectedAccount.getCurrentAccountIdSnapshot(queryClient)).toBe(43);
+    expect(selectedAccount.requireCurrentAccountId(queryClient)).toBe(43);
   });
 
   it("marks the previous account subtree stale without a background refetch", async () => {
@@ -186,7 +204,7 @@ describe("switchAccount", () => {
     const invalidateQueries = vi
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
-    act(() => selectedAccount.switchAccount(43));
+    act(() => selectedAccount.switchAccount(queryClient, 43));
 
     await waitFor(() => expect(invalidateQueries).toHaveBeenCalledTimes(1));
     expect(invalidateQueries).toHaveBeenCalledWith({
@@ -201,7 +219,7 @@ describe("switchAccount", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    act(() => selectedAccount.switchAccount(42));
+    act(() => selectedAccount.switchAccount(queryClient, 42));
 
     expect(invalidateQueries).not.toHaveBeenCalled();
     expect(window.localStorage.getItem("budget.selected-account")).toBeNull();
@@ -210,7 +228,7 @@ describe("switchAccount", () => {
   it("keeps the tab selection when another tab updates localStorage", async () => {
     seedMe();
     window.localStorage.setItem("budget.selected-account", "42");
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(42);
+    expect(selectedAccount.getCurrentAccountIdSnapshot(queryClient)).toBe(42);
     const { result, rerender } = renderHook(
       () => selectedAccount.useCurrentAccountId(),
       { wrapper },
@@ -227,8 +245,8 @@ describe("switchAccount", () => {
       }),
     );
 
-    expect(selectedAccount.getCurrentAccountIdSnapshot()).toBe(42);
-    expect(selectedAccount.requireCurrentAccountId()).toBe(42);
+    expect(selectedAccount.getCurrentAccountIdSnapshot(queryClient)).toBe(42);
+    expect(selectedAccount.requireCurrentAccountId(queryClient)).toBe(42);
     rerender();
     expect(result.current).toBe(42);
   });
@@ -236,13 +254,13 @@ describe("switchAccount", () => {
   it("can switch twice after an external storage write", () => {
     seedMe();
     window.localStorage.setItem("budget.selected-account", "42");
-    expect(selectedAccount.requireCurrentAccountId()).toBe(42);
+    expect(selectedAccount.requireCurrentAccountId(queryClient)).toBe(42);
 
     window.localStorage.setItem("budget.selected-account", "43");
-    act(() => selectedAccount.switchAccount(44));
-    act(() => selectedAccount.switchAccount(42));
+    act(() => selectedAccount.switchAccount(queryClient, 44));
+    act(() => selectedAccount.switchAccount(queryClient, 42));
 
-    expect(selectedAccount.requireCurrentAccountId()).toBe(42);
+    expect(selectedAccount.requireCurrentAccountId(queryClient)).toBe(42);
     expect(window.localStorage.getItem("budget.selected-account")).toBe("42");
   });
 });

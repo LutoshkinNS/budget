@@ -7,6 +7,9 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_ERROR_KIND, ApiError } from "@/common/api/api-error";
+import { BusinessErrorCodeDTO } from "@/common/api/generate/model/businessErrorCodeDTO";
+
 import { CategoryEditor } from "../category-editor";
 
 const mocks = vi.hoisted(() => {
@@ -84,10 +87,12 @@ describe("CategoryEditor", () => {
       screen.getByText("Наименование категории обязательно"),
     ).not.toBeNull();
     expect(mocks.mutateAsync).not.toHaveBeenCalled();
-    mocks.mutateAsync.mockRejectedValue({
+    mocks.mutateAsync.mockRejectedValue(new ApiError({
+      kind: API_ERROR_KIND.http,
       statusCode: 409,
-      code: "CATEGORY_ALREADY_EXISTS",
-    });
+      code: BusinessErrorCodeDTO.CATEGORY_ALREADY_EXISTS,
+      message: "Категория уже существует.",
+    }));
     fireEvent.change(name, { target: { value: "Занято" } });
     fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     await waitFor(() =>

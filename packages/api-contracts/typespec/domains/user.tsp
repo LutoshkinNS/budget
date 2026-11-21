@@ -22,11 +22,6 @@ model UserErrorResponse {
   ...Body<ValidationError>;
 }
 
-model UserNotFoundResponse {
-  ...NotFoundResponse;
-  ...Body<NotFoundError>;
-}
-
 model UserNoContentResponse {
   ...NoContentResponse;
 }

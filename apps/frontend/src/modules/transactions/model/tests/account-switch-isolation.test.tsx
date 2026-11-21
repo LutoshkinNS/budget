@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import { useTransactionsList } from "@/common/api/generate/transactions/transactions.gen.ts";
 import { switchAccount, useCurrentAccountId } from "@/modules/user";
@@ -11,8 +11,10 @@ import { switchAccount, useCurrentAccountId } from "@/modules/user";
 import { transactionKeys } from "../transaction-keys.ts";
 import { useTransactions } from "../use-transactions.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const RANGE = {
@@ -86,10 +88,11 @@ const wrapper = ({ children }: PropsWithChildren) => (
 );
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
   window.localStorage.clear();
   seedMe();
-  switchAccount(42);
+  switchAccount(queryClient, 42);
 });
 afterEach(() => {
   cleanup();
@@ -121,7 +124,7 @@ describe("account switch isolation", () => {
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(1));
     expect(http.lastUrl()).toContain("/api/v1/accounts/42/transactions");
 
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
     expect(http.lastUrl()).toContain("/api/v1/accounts/43/transactions");
 
@@ -168,7 +171,7 @@ describe("account switch isolation", () => {
       expect(result.current.transactions.map((t) => t.id)).toEqual([101]),
     );
 
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
     await act(async () => {
       http.resolveFor("/api/v1/accounts/43/transactions", tx43);
@@ -178,7 +181,7 @@ describe("account switch isolation", () => {
     );
     expect(http.fetchMock).toHaveBeenCalledTimes(2);
 
-    act(() => switchAccount(42));
+    act(() => switchAccount(queryClient, 42));
     await waitFor(() =>
       expect(result.current.transactions.map((t) => t.id)).toEqual([101]),
     );
@@ -208,11 +211,11 @@ describe("account switch isolation", () => {
     );
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(1));
 
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
 
     // Возврат к устаревшему счёту запускает повторную сверку.
-    act(() => switchAccount(42));
+    act(() => switchAccount(queryClient, 42));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(3));
     const urls = http.fetchMock.mock.calls.map(([input]) => String(input));
     expect(
@@ -248,7 +251,7 @@ describe("account switch isolation", () => {
     const { result } = renderHook(() => useTransactions(RANGE), { wrapper });
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(1));
 
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await waitFor(() => expect(http.fetchMock).toHaveBeenCalledTimes(2));
     const requestedUrls = http.fetchMock.mock.calls.map(([input]) =>
       String(input),

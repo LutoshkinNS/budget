@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import type { UserInfoDTO } from "@/common/api/generate/model";
-import { NotificationsContext } from "@/common/lib/notifications/useNotifications.ts";
+import { NotificationsContext } from "@/common/lib/notifications/model/use-notifications.ts";
 
 import { transactionKeys } from "../../../model/transaction-keys.ts";
 import { PeriodSummary } from "../period-summary.tsx";
@@ -38,6 +38,7 @@ const SUMMARY = {
   totalBalance: 475,
 };
 const notificationSink = {
+  notifications: [],
   addNotification: () => {},
   deleteNotification: () => {},
 };

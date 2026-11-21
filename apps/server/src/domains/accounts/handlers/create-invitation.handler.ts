@@ -2,16 +2,18 @@ import { randomBytes } from 'node:crypto';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import ForbiddenError from '#s/ForbiddenError.js';
 import type { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
 const INVITATION_TTL_HOURS = 72;
+const forbiddenMessage = 'Только владелец аккаунта может создавать приглашения';
 
-const ERRORS = {
-  FORBIDDEN: {
-    code: 'FORBIDDEN',
-    message: 'Только владелец аккаунта может создавать приглашения'
-  }
-} as const;
+const forbidden = createErrorResponse(
+  ForbiddenError,
+  ForbiddenError.properties.statusCode.default,
+  forbiddenMessage
+);
 
 export async function createInvitationHandler(
   this: FastifyApp,
@@ -27,7 +29,7 @@ export async function createInvitationHandler(
   });
 
   if (!account) {
-    return reply.code(403).send(ERRORS.FORBIDDEN);
+    return reply.code(forbidden.statusCode).send(forbidden);
   }
 
   const code = randomBytes(4).toString('hex');

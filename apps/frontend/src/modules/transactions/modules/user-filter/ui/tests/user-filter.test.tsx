@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import type { UserInfoDTO } from "@/common/api/generate/model";
-import { NotificationsContext } from "@/common/lib/notifications/useNotifications.ts";
+import { NotificationsContext } from "@/common/lib/notifications/model/use-notifications.ts";
 import { switchAccount } from "@/modules/user";
 
 import { UserFilter } from "../user-filter.tsx";
@@ -30,6 +30,7 @@ const MEMBERS = [
   { userId: 2, firstName: "Пётр", photoUrl: null },
 ];
 const notificationSink = {
+  notifications: [],
   addNotification: () => {},
   deleteNotification: () => {},
 };
@@ -84,13 +85,13 @@ beforeEach(() => {
     defaultOptions: { queries: { retry: false, staleTime: 60_000 } },
   });
   client.setQueryData(getAuthMeQueryKey(), ME);
-  switchAccount(42);
+  switchAccount(client, 42);
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 afterEach(() => {
   cleanup();
   client.clear();
-  switchAccount(42);
+  switchAccount(client, 42);
   vi.unstubAllGlobals();
 });
 
@@ -251,11 +252,11 @@ describe("UserFilter loading states", () => {
         wrapper: Wrapper,
       });
       await screen.findByRole("tab", { name: "Анна" });
-      act(() => switchAccount(43));
+      act(() => switchAccount(client, 43));
       await waitFor(() => expect(secondAccount.heldCount).toBe(1));
       expect(screen.queryByRole("tab", { name: "Анна" })).toBeNull();
       expect(screen.getByRole("status")).not.toBeNull();
-      act(() => switchAccount(42));
+      act(() => switchAccount(client, 42));
       expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
       expect(screen.queryByRole("status")).toBeNull();
       await act(async () =>
@@ -268,10 +269,10 @@ describe("UserFilter loading states", () => {
       );
       expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
       expect(screen.queryByRole("tab", { name: "Мария" })).toBeNull();
-      act(() => switchAccount(43));
+      act(() => switchAccount(client, 43));
       await screen.findByRole("tab", { name: "Мария" });
       expect(screen.queryByRole("tab", { name: "Анна" })).toBeNull();
-      act(() => switchAccount(42));
+      act(() => switchAccount(client, 42));
       expect(screen.getByRole("tab", { name: "Анна" })).not.toBeNull();
       expect(screen.queryByRole("status")).toBeNull();
     } finally {

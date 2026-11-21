@@ -25,9 +25,14 @@ import type {
   AuthClientEventDTO,
   InternalServerErrorDTO,
   LoginRequestDTO,
+  NotFoundErrorDTO,
+  PayloadTooLargeErrorDTO,
   SuccessResponseDTO,
+  TooManyRequestsErrorDTO,
   UnauthorizedErrorDTO,
+  UnsupportedMediaTypeErrorDTO,
   UserInfoDTO,
+  ValidationErrorDTO,
 } from "../model";
 
 import { fetcher } from "../../fetcher";
@@ -51,7 +56,12 @@ export const authClientEvent = async (
 };
 
 export const getAuthClientEventMutationOptions = <
-  TError = unknown,
+  TError =
+    | ValidationErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -92,9 +102,22 @@ export type AuthClientEventMutationResult = NonNullable<
   Awaited<ReturnType<typeof authClientEvent>>
 >;
 export type AuthClientEventMutationBody = AuthClientEventDTO;
-export type AuthClientEventMutationError = unknown;
+export type AuthClientEventMutationError =
+  | ValidationErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
+  | InternalServerErrorDTO;
 
-export const useAuthClientEvent = <TError = unknown, TContext = unknown>(
+export const useAuthClientEvent = <
+  TError =
+    | ValidationErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof authClientEvent>>,
@@ -130,7 +153,14 @@ export const authLogin = async (
 };
 
 export const getAuthLoginMutationOptions = <
-  TError = UnauthorizedErrorDTO | void | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -172,12 +202,23 @@ export type AuthLoginMutationResult = NonNullable<
 >;
 export type AuthLoginMutationBody = LoginRequestDTO;
 export type AuthLoginMutationError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
-  | void
+  | NotFoundErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useAuthLogin = <
-  TError = UnauthorizedErrorDTO | void | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
@@ -212,7 +253,13 @@ export const authLogout = async (
 };
 
 export const getAuthLogoutMutationOptions = <
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -252,11 +299,21 @@ export type AuthLogoutMutationResult = NonNullable<
 >;
 
 export type AuthLogoutMutationError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useAuthLogout = <
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
@@ -294,7 +351,11 @@ export const getAuthMeQueryKey = () => {
 
 export const getAuthMeQueryOptions = <
   TData = Awaited<ReturnType<typeof authMe>>,
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof authMe>>, TError, TData>
@@ -317,11 +378,19 @@ export const getAuthMeQueryOptions = <
 };
 
 export type AuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof authMe>>>;
-export type AuthMeQueryError = UnauthorizedErrorDTO | InternalServerErrorDTO;
+export type AuthMeQueryError =
+  | ValidationErrorDTO
+  | UnauthorizedErrorDTO
+  | TooManyRequestsErrorDTO
+  | InternalServerErrorDTO;
 
 export function useAuthMe<
   TData = Awaited<ReturnType<typeof authMe>>,
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options: {
     query: Partial<
@@ -343,7 +412,11 @@ export function useAuthMe<
 };
 export function useAuthMe<
   TData = Awaited<ReturnType<typeof authMe>>,
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -365,7 +438,11 @@ export function useAuthMe<
 };
 export function useAuthMe<
   TData = Awaited<ReturnType<typeof authMe>>,
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -380,7 +457,11 @@ export function useAuthMe<
 
 export function useAuthMe<
   TData = Awaited<ReturnType<typeof authMe>>,
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -428,7 +509,13 @@ export const authRefresh = async (
 };
 
 export const getAuthRefreshMutationOptions = <
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -468,11 +555,21 @@ export type AuthRefreshMutationResult = NonNullable<
 >;
 
 export type AuthRefreshMutationError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useAuthRefresh = <
-  TError = UnauthorizedErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {

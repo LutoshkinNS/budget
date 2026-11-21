@@ -23,11 +23,6 @@ model SubcategoryErrorResponse {
   ...Body<ValidationError>;
 }
 
-model SubcategoryNotFoundResponse {
-  ...NotFoundResponse;
-  ...Body<NotFoundError>;
-}
-
 model SubcategoryNoContentResponse {
   ...NoContentResponse;
 }

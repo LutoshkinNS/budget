@@ -1,27 +1,45 @@
 const InternalServerError = {
   "type": "object",
   "required": [
-    "code",
     "message",
     "statusCode"
   ],
   "properties": {
-    "code": {
-      "type": "string",
-      "enum": [
-        "INTERNAL_SERVER_ERROR"
-      ]
-    },
     "message": {
-      "type": "string"
+      "type": "string",
+      "default": "Внутренняя ошибка сервера."
     },
     "statusCode": {
       "type": "number",
-      "enum": [
-        500
-      ]
+      "format": "double",
+      "default": 500
     }
   },
+  "allOf": [
+    {
+      "type": "object",
+      "required": [
+        "statusCode",
+        "message"
+      ],
+      "properties": {
+        "statusCode": {
+          "type": "number",
+          "format": "double"
+        },
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVITATION_NOT_FOUND",
+            "CATEGORY_ALREADY_EXISTS"
+          ]
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 } as const;
 

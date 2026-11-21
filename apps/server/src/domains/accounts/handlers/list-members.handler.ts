@@ -1,14 +1,18 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import ForbiddenError from '#s/ForbiddenError.js';
 import type { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
 type ListMembersParams = { accountId: number };
 
-const FORBIDDEN = {
-  code: 'FORBIDDEN',
-  message: 'Доступ к участникам этого аккаунта запрещён',
-  statusCode: 403
-} as const;
+const forbiddenMessage = 'Доступ к участникам этого аккаунта запрещён';
+
+const forbidden = createErrorResponse(
+  ForbiddenError,
+  ForbiddenError.properties.statusCode.default,
+  forbiddenMessage
+);
 
 export async function listMembersHandler(
   this: FastifyApp,
@@ -27,7 +31,7 @@ export async function listMembersHandler(
   });
 
   if (!account) {
-    return reply.code(403).send(FORBIDDEN);
+    return reply.code(forbidden.statusCode).send(forbidden);
   }
 
   const isMember =
@@ -35,7 +39,7 @@ export async function listMembersHandler(
     account.users.some((au) => au.userId === requesterId);
 
   if (!isMember) {
-    return reply.code(403).send(FORBIDDEN);
+    return reply.code(forbidden.statusCode).send(forbidden);
   }
 
   return [

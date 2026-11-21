@@ -1,14 +1,21 @@
+import { createElement, type PropsWithChildren } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 
 import { subcategoryKeys } from "../subcategory-keys.ts";
 import { useInvalidateSubcategories } from "../use-subcategories.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
 });
 afterEach(() => {
+  cleanup();
   queryClient.clear();
 });
 
@@ -19,7 +26,11 @@ describe("subcategory invalidation scope", () => {
     queryClient.setQueryData(subcategoryKeys.list(43, 3), []);
     queryClient.setQueryData(["unrelated"], []);
 
-    await useInvalidateSubcategories()(42, 3);
+    const { result } = renderHook(useInvalidateSubcategories, {
+      wrapper: ({ children }: PropsWithChildren) =>
+        createElement(QueryClientProvider, { client: queryClient }, children),
+    });
+    await result.current(42, 3);
 
     expect(
       queryClient.getQueryState(subcategoryKeys.list(42, 3))?.isInvalidated,

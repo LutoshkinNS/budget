@@ -1,4 +1,5 @@
-import { queryClient } from "@/common/api/app-query";
+import type { QueryClient } from "@tanstack/react-query";
+
 import type {
   TransactionsCategorySummaryParams,
   TransactionsListParams,
@@ -7,8 +8,8 @@ import type {
 
 import { transactionKeys } from "./transaction-keys.ts";
 
-
 export function invalidateTransactionsList(
+  queryClient: QueryClient,
   accountId: number,
   params?: TransactionsListParams,
 ) {
@@ -21,6 +22,7 @@ export function invalidateTransactionsList(
 }
 
 export function invalidateTransaction(
+  queryClient: QueryClient,
   accountId: number,
   transactionId: number,
 ) {
@@ -30,6 +32,7 @@ export function invalidateTransaction(
 }
 
 export function invalidateTransactionSummary(
+  queryClient: QueryClient,
   accountId: number,
   params?: TransactionsSummaryParams,
 ) {
@@ -42,6 +45,7 @@ export function invalidateTransactionSummary(
 }
 
 export function invalidateTransactionsCategorySummary(
+  queryClient: QueryClient,
   accountId: number,
   params?: TransactionsCategorySummaryParams,
 ) {

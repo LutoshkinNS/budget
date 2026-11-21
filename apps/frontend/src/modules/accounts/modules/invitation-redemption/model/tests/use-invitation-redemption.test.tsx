@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import { deferred } from "@/common/api/tests/deferred";
-import { Notifications } from "@/common/lib/notifications";
+import { NotificationsTestRoot as Notifications } from "@/common/lib/notifications/tests/notifications-test-root";
 import { getSessionContext, useMe } from "@/modules/user";
 
 import { InvitationRedemption } from "../..";

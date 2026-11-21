@@ -4,11 +4,12 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
+import type { ErrorDTODTO } from "./errorDTODTO";
 import type { InvitationNotFoundErrorDTOCode } from "./invitationNotFoundErrorDTOCode";
 import type { InvitationNotFoundErrorDTOStatusCode } from "./invitationNotFoundErrorDTOStatusCode";
 
-export interface InvitationNotFoundErrorDTO {
+export type InvitationNotFoundErrorDTO = ErrorDTODTO & {
   code: InvitationNotFoundErrorDTOCode;
   message: string;
   statusCode: InvitationNotFoundErrorDTOStatusCode;
-}
+};

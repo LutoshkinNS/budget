@@ -346,13 +346,17 @@ describe('category usage ordering API', () => {
       headers: { cookie: cookies.get(3) }
     });
     assert.equal(foreign.statusCode, 403, foreign.body);
-    assert.equal(foreign.json<{ code: string }>().code, 'FORBIDDEN');
+    assert.deepEqual(foreign.json(), {
+      statusCode: 403,
+      message: 'Нет доступа к этому счёту'
+    });
 
     const missing = await app.inject({
       url: '/api/v1/accounts/999999/categories',
       headers: { cookie: cookies.get(1) }
     });
     assert.equal(missing.statusCode, 403, missing.body);
+    assert.deepEqual(missing.json(), foreign.json());
 
     const member = await app.inject({
       url: `/api/v1/accounts/${accountId}/categories`,
@@ -384,8 +388,7 @@ describe('category usage ordering API', () => {
       }
     });
 
-    const path = (entity: string) =>
-      `/api/v1/accounts/${accountId}/${entity}`;
+    const path = (entity: string) => `/api/v1/accounts/${accountId}/${entity}`;
     const requests = [
       { method: 'GET', url: path(`categories/${foreignCategory.id}`) },
       {

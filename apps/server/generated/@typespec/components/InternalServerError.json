@@ -1,26 +1,24 @@
 {
   "type": "object",
   "required": [
-    "code",
     "message",
     "statusCode"
   ],
   "properties": {
-    "code": {
-      "type": "string",
-      "enum": [
-        "INTERNAL_SERVER_ERROR"
-      ]
-    },
     "message": {
-      "type": "string"
+      "type": "string",
+      "default": "Внутренняя ошибка сервера."
     },
     "statusCode": {
       "type": "number",
-      "enum": [
-        500
-      ]
+      "format": "double",
+      "default": 500
     }
   },
+  "allOf": [
+    {
+      "$ref": "ErrorDTO.json"
+    }
+  ],
   "additionalProperties": false
 }

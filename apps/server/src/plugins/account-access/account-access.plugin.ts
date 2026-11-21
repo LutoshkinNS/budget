@@ -1,13 +1,17 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
+import ForbiddenError from '#s/ForbiddenError.js';
 import type { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
-const FORBIDDEN = {
-  code: 'FORBIDDEN',
-  message: 'Нет доступа к этому счёту',
-  statusCode: 403
-} as const;
+const forbiddenMessage = 'Нет доступа к этому счёту';
+
+const forbidden = createErrorResponse(
+  ForbiddenError,
+  ForbiddenError.properties.statusCode.default,
+  forbiddenMessage
+);
 
 function readAccountIdParam(params: unknown): number | undefined {
   if (typeof params !== 'object' || params === null || !('accountId' in params)) {
@@ -42,7 +46,7 @@ async function accountAccessPlugin(app: FastifyApp) {
       }
 
       // Единый ответ не раскрывает существование чужого счёта.
-      return reply.code(403).send(FORBIDDEN);
+      return reply.code(forbidden.statusCode).send(forbidden);
     }
   );
 }

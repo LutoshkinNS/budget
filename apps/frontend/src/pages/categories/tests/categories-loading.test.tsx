@@ -10,14 +10,18 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import type { CategoryDTO, UserInfoDTO } from "@/common/api/generate/model";
-import { Notifications } from "@/common/lib/notifications";
+import { NotificationsTestRoot as Notifications } from "@/common/lib/notifications/tests/notifications-test-root";
 import { categoryKeys } from "@/modules/categories/model/category-keys";
 import { switchAccount } from "@/modules/user";
 
 import { Categories } from "../categories";
+
+let runtime: ReturnType<typeof createApiRuntime>;
+let queryClient: ReturnType<typeof createApiRuntime>["queryClient"];
 
 const ME: UserInfoDTO = {
   userId: 1,
@@ -26,7 +30,9 @@ const ME: UserInfoDTO = {
     { id: 43, name: "Второй счёт", initialBalance: 0, isOwner: true },
   ],
 };
-const defaultOptions = queryClient.getDefaultOptions();
+let defaultOptions: ReturnType<
+  ReturnType<typeof createApiRuntime>["queryClient"]["getDefaultOptions"]
+>;
 const gates: ResponseGate[] = [];
 
 class ResponseGate {
@@ -107,9 +113,11 @@ function installApi(
 function renderPage() {
   return render(
     <Notifications>
-      <QueryClientProvider client={queryClient}>
-        <Categories />
-      </QueryClientProvider>
+      <ApiRuntimeContext.Provider value={runtime}>
+        <QueryClientProvider client={queryClient}>
+          <Categories />
+        </QueryClientProvider>
+      </ApiRuntimeContext.Provider>
     </Notifications>,
   );
 }
@@ -150,18 +158,25 @@ async function readyCategory(accountId = 42) {
 }
 
 beforeEach(() => {
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: () => {},
+  });
+  queryClient = runtime.queryClient;
+  defaultOptions = queryClient.getDefaultOptions();
   queryClient.clear();
   queryClient.setDefaultOptions({
     ...defaultOptions,
     queries: { ...defaultOptions.queries, retry: false },
   });
   queryClient.setQueryData(getAuthMeQueryKey(), ME);
-  switchAccount(42);
+  switchAccount(queryClient, 42);
 });
 
 afterEach(async () => {
   await act(async () => gates.splice(0).forEach((gate) => gate.release()));
   cleanup();
+  runtime.dispose();
   await queryClient.cancelQueries();
   queryClient.clear();
   queryClient.setDefaultOptions(defaultOptions);
@@ -375,7 +390,6 @@ describe("Categories local loading and actions", () => {
         ? Response.json(
             {
               statusCode: 400,
-              code: "CREATE_FAILED",
               message: "Создание отклонено",
             },
             { status: 400 },
@@ -424,7 +438,7 @@ describe("Categories local loading and actions", () => {
       await write.wait();
       return failWrite
         ? Response.json(
-            { statusCode: 400, code: "EDIT_FAILED" },
+            { statusCode: 400, message: "Не удалось сохранить категорию" },
             { status: 400 },
           )
         : Response.json({ ...category(), name: "Переименовано" });
@@ -531,7 +545,7 @@ describe("Categories local loading and actions", () => {
       });
       submit(group("Создание новой категории"));
       await waitFor(() => expect(write.heldCount).toBe(1));
-      if (context === "account") act(() => switchAccount(43));
+      if (context === "account") act(() => switchAccount(queryClient, 43));
       else fireEvent.click(screen.getByRole("button", { name: "доходы" }));
       const nextCategory =
         context === "account" ? category(43) : category(42, "income");
@@ -571,13 +585,13 @@ describe("Categories local loading and actions", () => {
     fireEvent.change(select(group("Удаление категории")), {
       target: { value: "3" },
     });
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await readyCategory(43);
     expect(
       screen.queryByRole("group", { name: /Редактирование категории/ }),
     ).toBeNull();
     expect(select(group("Удаление категории")).value).toBe("");
-    act(() => switchAccount(42));
+    act(() => switchAccount(queryClient, 42));
     await readyCategory();
     expect(
       screen.queryByRole("group", { name: /Редактирование категории/ }),
@@ -594,7 +608,7 @@ describe("Categories local loading and actions", () => {
     });
     renderPage();
     await waitFor(() => expect(firstRead.heldCount).toBe(1));
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await readyCategory(43);
     holdFirst = false;
     await act(async () => firstRead.release());
@@ -606,7 +620,7 @@ describe("Categories local loading and actions", () => {
     expect(select(group("Удаление категории")).options[1]?.textContent).toBe(
       category(43).name,
     );
-    act(() => switchAccount(42));
+    act(() => switchAccount(queryClient, 42));
     await readyCategory();
     expect(
       screen.queryByRole("button", {
@@ -630,7 +644,7 @@ describe("Categories local loading and actions", () => {
     });
     submit(group(/Редактирование категории/));
     await waitFor(() => expect(write.heldCount).toBe(1));
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     fireEvent.click(await readyCategory(43));
     fireEvent.change(nameInput(group(/Редактирование категории/)), {
       target: { value: "Черновик B" },
@@ -657,7 +671,7 @@ describe("Categories local loading and actions", () => {
     });
     submit(group("Удаление категории"));
     await waitFor(() => expect(write.heldCount).toBe(1));
-    act(() => switchAccount(43));
+    act(() => switchAccount(queryClient, 43));
     await readyCategory(43);
     fireEvent.change(select(group("Удаление категории")), {
       target: { value: "5" },

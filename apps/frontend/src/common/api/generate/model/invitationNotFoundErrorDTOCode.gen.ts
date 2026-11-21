@@ -5,4 +5,9 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type InvitationNotFoundErrorDTOCode = "INVITATION_NOT_FOUND";
+export type InvitationNotFoundErrorDTOCode =
+  (typeof InvitationNotFoundErrorDTOCode)[keyof typeof InvitationNotFoundErrorDTOCode];
+
+export const InvitationNotFoundErrorDTOCode = {
+  INVITATION_NOT_FOUND: "INVITATION_NOT_FOUND",
+} as const;

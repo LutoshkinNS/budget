@@ -5,4 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TransactionsListType = "income" | "expense";
+export type TransactionsListType =
+  (typeof TransactionsListType)[keyof typeof TransactionsListType];
+
+export const TransactionsListType = {
+  income: "income",
+  expense: "expense",
+} as const;

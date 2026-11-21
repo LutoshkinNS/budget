@@ -23,6 +23,7 @@ import type {
 
 import type {
   CategoriesListParams,
+  CategoryAlreadyExistsErrorDTO,
   CategoryCreateDTO,
   CategoryDTO,
   CategoryUpdateDTO,
@@ -30,6 +31,10 @@ import type {
   ForbiddenErrorDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
+  PayloadTooLargeErrorDTO,
+  TooManyRequestsErrorDTO,
+  UnauthorizedErrorDTO,
+  UnsupportedMediaTypeErrorDTO,
   ValidationErrorDTO,
 } from "../model";
 
@@ -80,7 +85,12 @@ export const getCategoriesListQueryKey = (
 
 export const getCategoriesListQueryOptions = <
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params?: CategoriesListParams,
@@ -117,12 +127,19 @@ export type CategoriesListQueryResult = NonNullable<
 >;
 export type CategoriesListQueryError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: undefined | CategoriesListParams,
@@ -146,7 +163,12 @@ export function useCategoriesList<
 };
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params?: CategoriesListParams,
@@ -170,7 +192,12 @@ export function useCategoriesList<
 };
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params?: CategoriesListParams,
@@ -187,7 +214,12 @@ export function useCategoriesList<
 
 export function useCategoriesList<
   TData = Awaited<ReturnType<typeof categoriesList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params?: CategoriesListParams,
@@ -249,8 +281,13 @@ export const categoriesCreate = async (
 export const getCategoriesCreateMutationOptions = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | ConflictErrorDTO
+    | CategoryAlreadyExistsErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
@@ -294,15 +331,25 @@ export type CategoriesCreateMutationResult = NonNullable<
 export type CategoriesCreateMutationBody = CategoryCreateDTO;
 export type CategoriesCreateMutationError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
   | ConflictErrorDTO
+  | CategoryAlreadyExistsErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useCategoriesCreate = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | ConflictErrorDTO
+    | CategoryAlreadyExistsErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(
@@ -352,7 +399,13 @@ export const getCategoriesGetQueryKey = (
 
 export const getCategoriesGetQueryOptions = <
   TData = Awaited<ReturnType<typeof categoriesGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   categoryId: number,
@@ -388,13 +441,22 @@ export type CategoriesGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof categoriesGet>>
 >;
 export type CategoriesGetQueryError =
+  | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
   | NotFoundErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useCategoriesGet<
   TData = Awaited<ReturnType<typeof categoriesGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   categoryId: number,
@@ -418,7 +480,13 @@ export function useCategoriesGet<
 };
 export function useCategoriesGet<
   TData = Awaited<ReturnType<typeof categoriesGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   categoryId: number,
@@ -442,7 +510,13 @@ export function useCategoriesGet<
 };
 export function useCategoriesGet<
   TData = Awaited<ReturnType<typeof categoriesGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   categoryId: number,
@@ -459,7 +533,13 @@ export function useCategoriesGet<
 
 export function useCategoriesGet<
   TData = Awaited<ReturnType<typeof categoriesGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   categoryId: number,
@@ -525,9 +605,14 @@ export const categoriesUpdate = async (
 export const getCategoriesUpdateMutationOptions = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | NotFoundErrorDTO
     | ConflictErrorDTO
+    | CategoryAlreadyExistsErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
@@ -571,17 +656,27 @@ export type CategoriesUpdateMutationResult = NonNullable<
 export type CategoriesUpdateMutationBody = CategoryUpdateDTO;
 export type CategoriesUpdateMutationError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
   | NotFoundErrorDTO
   | ConflictErrorDTO
+  | CategoryAlreadyExistsErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useCategoriesUpdate = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | NotFoundErrorDTO
     | ConflictErrorDTO
+    | CategoryAlreadyExistsErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(
@@ -622,7 +717,14 @@ export const categoriesDelete = async (
 };
 
 export const getCategoriesDeleteMutationOptions = <
-  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -664,11 +766,23 @@ export type CategoriesDeleteMutationResult = NonNullable<
 >;
 
 export type CategoriesDeleteMutationError =
+  | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useCategoriesDelete = <
-  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {

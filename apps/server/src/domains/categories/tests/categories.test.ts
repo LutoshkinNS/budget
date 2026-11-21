@@ -282,6 +282,12 @@ describe('category icon API', () => {
         payload
       });
       assert.equal(response.statusCode, 400, response.body);
+      const error = response.json<{ statusCode: number; message: string }>();
+      assert.deepEqual(Object.keys(error).sort(), ['message', 'statusCode']);
+      assert.equal(error.statusCode, 400);
+      assert.ok(error.message.trim().length > 0);
+      if ('iconKey' in payload)
+        assert.equal(error.message, 'Invalid category icon key');
     }
     const invalidCreate = await app.inject({
       method: 'POST',
@@ -290,6 +296,10 @@ describe('category icon API', () => {
       payload: { type: 'expense', name: 'Ошибка', iconKey: 'unknown' }
     });
     assert.equal(invalidCreate.statusCode, 400, invalidCreate.body);
+    assert.deepEqual(invalidCreate.json(), {
+      statusCode: 400,
+      message: 'Invalid category icon key'
+    });
     assert.equal(
       (
         await app.prisma.transactionCategory.findUniqueOrThrow({

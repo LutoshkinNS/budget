@@ -4,11 +4,9 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { ForbiddenErrorDTOCode } from "./forbiddenErrorDTOCode";
-import type { ForbiddenErrorDTOStatusCode } from "./forbiddenErrorDTOStatusCode";
+import type { ErrorDTODTO } from "./errorDTODTO";
 
-export interface ForbiddenErrorDTO {
-  code: ForbiddenErrorDTOCode;
+export type ForbiddenErrorDTO = ErrorDTODTO & {
   message: string;
-  statusCode: ForbiddenErrorDTOStatusCode;
-}
+  statusCode: number;
+};

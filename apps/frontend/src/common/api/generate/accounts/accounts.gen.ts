@@ -31,8 +31,12 @@ import type {
   InternalServerErrorDTO,
   InvitationNotFoundErrorDTO,
   NotFoundErrorDTO,
+  PayloadTooLargeErrorDTO,
   RedeemInvitationRequestDTO,
+  TooManyRequestsErrorDTO,
   UnauthorizedErrorDTO,
+  UnsupportedMediaTypeErrorDTO,
+  ValidationErrorDTO,
 } from "../model";
 
 import { fetcher } from "../../fetcher";
@@ -58,7 +62,12 @@ export const getAccountsListQueryKey = () => {
 
 export const getAccountsListQueryOptions = <
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof accountsList>>, TError, TData>
@@ -83,11 +92,21 @@ export const getAccountsListQueryOptions = <
 export type AccountsListQueryResult = NonNullable<
   Awaited<ReturnType<typeof accountsList>>
 >;
-export type AccountsListQueryError = NotFoundErrorDTO | InternalServerErrorDTO;
+export type AccountsListQueryError =
+  | ValidationErrorDTO
+  | UnauthorizedErrorDTO
+  | NotFoundErrorDTO
+  | TooManyRequestsErrorDTO
+  | InternalServerErrorDTO;
 
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options: {
     query: Partial<
@@ -109,7 +128,12 @@ export function useAccountsList<
 };
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -131,7 +155,12 @@ export function useAccountsList<
 };
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -146,7 +175,12 @@ export function useAccountsList<
 
 export function useAccountsList<
   TData = Awaited<ReturnType<typeof accountsList>>,
-  TError = NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   options?: {
     query?: Partial<
@@ -198,8 +232,13 @@ export const accountsRedeemInvitation = async (
 
 export const getAccountsRedeemInvitationMutationOptions = <
   TError =
+    | ValidationErrorDTO
     | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
     | InvitationNotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
@@ -242,14 +281,24 @@ export type AccountsRedeemInvitationMutationResult = NonNullable<
 >;
 export type AccountsRedeemInvitationMutationBody = RedeemInvitationRequestDTO;
 export type AccountsRedeemInvitationMutationError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
+  | NotFoundErrorDTO
   | InvitationNotFoundErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useAccountsRedeemInvitation = <
   TError =
+    | ValidationErrorDTO
     | UnauthorizedErrorDTO
+    | NotFoundErrorDTO
     | InvitationNotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(
@@ -292,7 +341,14 @@ export const accountsUpdate = async (
 };
 
 export const getAccountsUpdateMutationOptions = <
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -334,12 +390,23 @@ export type AccountsUpdateMutationResult = NonNullable<
 >;
 export type AccountsUpdateMutationBody = AccountUpdateDTO;
 export type AccountsUpdateMutationError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useAccountsUpdate = <
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
@@ -378,7 +445,14 @@ export const accountsCreateInvitation = async (
 };
 
 export const getAccountsCreateInvitationMutationOptions = <
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -420,12 +494,23 @@ export type AccountsCreateInvitationMutationResult = NonNullable<
 >;
 
 export type AccountsCreateInvitationMutationError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useAccountsCreateInvitation = <
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {
@@ -469,7 +554,12 @@ export const getAccountsListMembersQueryKey = (accountId: number) => {
 
 export const getAccountsListMembersQueryOptions = <
   TData = Awaited<ReturnType<typeof accountsListMembers>>,
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   options?: {
@@ -509,13 +599,20 @@ export type AccountsListMembersQueryResult = NonNullable<
   Awaited<ReturnType<typeof accountsListMembers>>
 >;
 export type AccountsListMembersQueryError =
+  | ValidationErrorDTO
   | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useAccountsListMembers<
   TData = Awaited<ReturnType<typeof accountsListMembers>>,
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   options: {
@@ -542,7 +639,12 @@ export function useAccountsListMembers<
 };
 export function useAccountsListMembers<
   TData = Awaited<ReturnType<typeof accountsListMembers>>,
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   options?: {
@@ -569,7 +671,12 @@ export function useAccountsListMembers<
 };
 export function useAccountsListMembers<
   TData = Awaited<ReturnType<typeof accountsListMembers>>,
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   options?: {
@@ -589,7 +696,12 @@ export function useAccountsListMembers<
 
 export function useAccountsListMembers<
   TData = Awaited<ReturnType<typeof accountsListMembers>>,
-  TError = UnauthorizedErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   options?: {

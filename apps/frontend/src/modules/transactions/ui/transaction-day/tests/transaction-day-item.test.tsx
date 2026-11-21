@@ -10,22 +10,29 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import type { TransactionDTO } from "@/common/api/generate/model";
 
 import { TransactionDayItem } from "../transaction-day-item.tsx";
 
+let runtime: ReturnType<typeof createApiRuntime>;
+let queryClient: ReturnType<typeof createApiRuntime>["queryClient"];
+
 const notifications = vi.hoisted(() => ({ add: vi.fn(), remove: vi.fn() }));
 vi.mock(import("@/common/lib/notifications"), () => ({
   useNotifications: () => ({
+    notifications: [],
     addNotification: notifications.add,
     deleteNotification: notifications.remove,
   }),
 }));
 
 const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  <ApiRuntimeContext.Provider value={runtime}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </ApiRuntimeContext.Provider>
 );
 
 const TRANSACTION: TransactionDTO = {
@@ -47,6 +54,11 @@ const OTHER: TransactionDTO = {
 const pendingDeletes: Array<() => void> = [];
 
 beforeEach(() => {
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: () => {},
+  });
+  queryClient = runtime.queryClient;
   queryClient.clear();
   window.localStorage.clear();
   vi.stubGlobal(
@@ -55,7 +67,9 @@ beforeEach(() => {
       const url = new URL(String(input), "http://localhost");
       if (init?.method === "DELETE") {
         return new Promise<Response>((resolve) => {
-          pendingDeletes.push(() => resolve(new Response(null, { status: 204 })));
+          pendingDeletes.push(() =>
+            resolve(new Response(null, { status: 204 })),
+          );
         });
       }
       if (url.pathname.endsWith("/categories")) {
@@ -75,6 +89,7 @@ afterEach(async () => {
     pendingDeletes.splice(0).forEach((release) => release()),
   );
   cleanup();
+  runtime.dispose();
   queryClient.clear();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();

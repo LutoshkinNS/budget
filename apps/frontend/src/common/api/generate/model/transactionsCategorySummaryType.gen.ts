@@ -5,4 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TransactionsCategorySummaryType = "income" | "expense";
+export type TransactionsCategorySummaryType =
+  (typeof TransactionsCategorySummaryType)[keyof typeof TransactionsCategorySummaryType];
+
+export const TransactionsCategorySummaryType = {
+  income: "income",
+  expense: "expense",
+} as const;

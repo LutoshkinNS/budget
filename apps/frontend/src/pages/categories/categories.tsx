@@ -1,17 +1,19 @@
 import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import type { CategoryType } from "@/modules/categories";
 import { CategoriesManager } from "@/modules/categories";
 import { invalidateTransactionsCategorySummary } from "@/modules/transactions";
 
 export function Categories() {
+  const queryClient = useQueryClient();
   const [type, setType] = useState<CategoryType>("expense");
 
   const handleCategoryUpdated = useCallback(
     ({ accountId }: { accountId: number }) => {
-      void invalidateTransactionsCategorySummary(accountId);
+      void invalidateTransactionsCategorySummary(queryClient, accountId);
     },
-    [],
+    [queryClient],
   );
 
   return (

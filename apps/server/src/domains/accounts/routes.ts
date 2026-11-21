@@ -2,7 +2,11 @@ import Account from '#s/Account.js';
 import AccountInvitation from '#s/AccountInvitation.js';
 import AccountMember from '#s/AccountMember.js';
 import AccountUpdate from '#s/AccountUpdate.js';
+import ForbiddenError from '#s/ForbiddenError.js';
+import InvitationNotFoundError from '#s/InvitationNotFoundError.js';
+import NotFoundError from '#s/NotFoundError.js';
 import RedeemInvitationRequest from '#s/RedeemInvitationRequest.js';
+import TooManyRequestsError from '#s/TooManyRequestsError.js';
 import UnauthorizedError from '#s/UnauthorizedError.js';
 import type { FastifyApp } from '#src/app-init.js';
 
@@ -43,6 +47,8 @@ export default async function accountsRoutes(app: FastifyApp) {
         },
         response: {
           200: { type: 'array', items: AccountMember },
+          403: ForbiddenError,
+          429: TooManyRequestsError,
           401: UnauthorizedError
         }
       }
@@ -57,6 +63,8 @@ export default async function accountsRoutes(app: FastifyApp) {
       schema: {
         response: {
           200: AccountInvitation,
+          403: ForbiddenError,
+          429: TooManyRequestsError,
           401: UnauthorizedError
         }
       }
@@ -72,7 +80,9 @@ export default async function accountsRoutes(app: FastifyApp) {
         body: RedeemInvitationRequest,
         response: {
           200: AccountInvitation,
-          401: UnauthorizedError
+          401: UnauthorizedError,
+          404: { anyOf: [NotFoundError, InvitationNotFoundError] },
+          429: TooManyRequestsError
         }
       }
     },
@@ -85,7 +95,12 @@ export default async function accountsRoutes(app: FastifyApp) {
       preHandler: [app.authenticate],
       schema: {
         body: AccountUpdate,
-        response: { 200: Account, 401: UnauthorizedError }
+        response: {
+          200: Account,
+          401: UnauthorizedError,
+          403: ForbiddenError,
+          429: TooManyRequestsError
+        }
       }
     },
     updateAccountHandler

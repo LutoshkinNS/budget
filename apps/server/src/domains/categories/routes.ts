@@ -1,9 +1,11 @@
 import CategorySchema from '#s/Category.js';
+import CategoryAlreadyExistsError from '#s/CategoryAlreadyExistsError.js';
 import CategoryCreate from '#s/CategoryCreate.js';
 import CategoryUpdate from '#s/CategoryUpdate.js';
 import ConflictError from '#s/ConflictError.js';
 import ForbiddenError from '#s/ForbiddenError.js';
 import NotFoundError from '#s/NotFoundError.js';
+import TooManyRequestsError from '#s/TooManyRequestsError.js';
 import ValidationError from '#s/ValidationError.js';
 import type { FastifyApp } from '#src/app-init.js';
 
@@ -38,6 +40,7 @@ export default async function categoriesRoutes(app: FastifyApp) {
         querystring: categoryListQuerySchema,
         response: {
           200: { type: 'array', items: CategorySchema },
+          400: ValidationError,
           403: ForbiddenError
         }
       }
@@ -67,7 +70,8 @@ export default async function categoriesRoutes(app: FastifyApp) {
           200: CategorySchema,
           400: ValidationError,
           403: ForbiddenError,
-          409: ConflictError
+          409: { anyOf: [ConflictError, CategoryAlreadyExistsError] },
+          429: TooManyRequestsError
         }
       }
     },
@@ -86,7 +90,8 @@ export default async function categoriesRoutes(app: FastifyApp) {
           400: ValidationError,
           403: ForbiddenError,
           404: NotFoundError,
-          409: ConflictError
+          409: { anyOf: [ConflictError, CategoryAlreadyExistsError] },
+          429: TooManyRequestsError
         }
       }
     },

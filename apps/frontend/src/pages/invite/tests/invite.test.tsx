@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Notifications } from "@/common/lib/notifications";
+import { NotificationsTestRoot as Notifications } from "@/common/lib/notifications/tests/notifications-test-root";
 import { INVITE_CODE_KEY } from "@/modules/auth";
 
 import { Invite } from "..";

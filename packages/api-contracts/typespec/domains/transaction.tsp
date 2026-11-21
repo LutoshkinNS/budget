@@ -91,11 +91,6 @@ model TransactionErrorResponse {
   ...Body<ValidationError>;
 }
 
-model TransactionNotFoundResponse {
-  ...NotFoundResponse;
-  ...Body<NotFoundError>;
-}
-
 model TransactionNoContentResponse {
   ...NoContentResponse;
 }

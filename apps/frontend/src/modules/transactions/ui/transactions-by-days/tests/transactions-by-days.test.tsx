@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
   cleanup,
@@ -10,9 +10,11 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import type { TransactionDTO, UserInfoDTO } from "@/common/api/generate/model";
-import { NotificationsContext } from "@/common/lib/notifications/useNotifications.ts";
+import { NotificationsContext } from "@/common/lib/notifications/model/use-notifications.ts";
 
 import { transactionKeys } from "../../../model/transaction-keys.ts";
 import { TransactionsByDays } from "../transactions-by-days.tsx";
@@ -40,6 +42,7 @@ const TRANSACTION: TransactionDTO = {
   description: "Покупка продуктов",
 };
 const notificationSink = {
+  notifications: [],
   addNotification: () => {},
   deleteNotification: () => {},
 };
@@ -64,14 +67,17 @@ class ResponseGate {
 }
 
 let client: QueryClient;
+let runtime: ReturnType<typeof createApiRuntime>;
 
 function Wrapper({ children }: PropsWithChildren) {
   return (
-    <QueryClientProvider client={client}>
-      <NotificationsContext.Provider value={notificationSink}>
-        {children}
-      </NotificationsContext.Provider>
-    </QueryClientProvider>
+    <ApiRuntimeContext.Provider value={runtime}>
+      <QueryClientProvider client={client}>
+        <NotificationsContext.Provider value={notificationSink}>
+          {children}
+        </NotificationsContext.Provider>
+      </QueryClientProvider>
+    </ApiRuntimeContext.Provider>
   );
 }
 
@@ -96,20 +102,145 @@ function stubHttp(
 }
 
 beforeEach(() => {
-  client = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: 60_000 } },
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: () => {},
   });
+  client = runtime.queryClient;
+  client.setDefaultOptions({ queries: { retry: false, staleTime: 60_000 } });
   client.setQueryData(getAuthMeQueryKey(), ME);
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterEach(() => {
   cleanup();
+  runtime.dispose();
   client.clear();
   vi.unstubAllGlobals();
 });
 
 describe("TransactionsByDays loading states", () => {
+  it("shows one shared initial category failure for multiple rows, leaves actions available and retries the same lookup", async () => {
+    const retry = new ResponseGate();
+    const rows = [
+      TRANSACTION,
+      { ...TRANSACTION, id: 102, description: "Вторая операция" },
+    ];
+    let categoryCalls = 0;
+    const validCategories = () =>
+      Response.json([
+        {
+          id: 3,
+          accountId: 42,
+          type: "expense",
+          name: "Продукты",
+          iconKey: null,
+        },
+      ]);
+    stubHttp(
+      () => Response.json(rows),
+      () => {
+        categoryCalls += 1;
+        if (categoryCalls === 1)
+          return Response.json({ statusCode: 400 }, { status: 400 });
+        return categoryCalls === 2 ? retry.wait() : validCategories();
+      },
+    );
+    const onEdit = vi.fn();
+    try {
+      render(<TransactionsByDays range={RANGE} onEdit={onEdit} />, {
+        wrapper: Wrapper,
+      });
+      await screen.findByText("Не удалось загрузить категории операций");
+      expect(
+        screen.getAllByText("Не удалось загрузить категории операций"),
+      ).toHaveLength(1);
+      expect(categoryCalls).toBe(1);
+      expect(
+        screen.getAllByRole("button", { name: "Удалить расход" }),
+      ).toHaveLength(2);
+      fireEvent.click(
+        screen.getByRole("button", { name: /Покупка продуктов/ }),
+      );
+      expect(onEdit).toHaveBeenCalledWith(101);
+      const button = screen.getByRole("button", { name: "Повторить" });
+      fireEvent.click(button);
+      await waitFor(() => expect(retry.heldCount).toBe(1));
+      await waitFor(() => {
+        const active = screen.queryByRole("button", { name: "Повторить" });
+        expect(active === null || active.hasAttribute("disabled")).toBe(true);
+      });
+      expect(screen.getByText("Вторая операция")).toBeTruthy();
+      await act(async () =>
+        retry.release(() =>
+          Response.json({ statusCode: 400 }, { status: 400 }),
+        ),
+      );
+      await screen.findByText("Не удалось загрузить категории операций");
+      expect(categoryCalls).toBe(2);
+      fireEvent.click(screen.getByRole("button", { name: "Повторить" }));
+      await waitFor(() =>
+        expect(
+          screen.queryByText("Не удалось загрузить категории операций"),
+        ).toBeNull(),
+      );
+      expect(screen.getAllByText("Продукты")).toHaveLength(2);
+      expect(categoryCalls).toBe(3);
+    } finally {
+      retry.release();
+    }
+  });
+
+  it.each([false, true])(
+    "does not start category lookup for empty or filtered-to-empty history (filtered=%s)",
+    async (filtered) => {
+      const categories = vi.fn(() => Response.json([]));
+      stubHttp(() => Response.json(filtered ? [TRANSACTION] : []), categories);
+      render(
+        <TransactionsByDays
+          range={RANGE}
+          categoryId={filtered ? 999 : null}
+          onEdit={() => {}}
+        />,
+        { wrapper: Wrapper },
+      );
+      await screen.findByText(
+        filtered
+          ? "По выбранным фильтрам операций за период нет"
+          : "Нет операций за период",
+      );
+      expect(categories).not.toHaveBeenCalled();
+      expect(
+        screen.queryByText("Не удалось загрузить категории операций"),
+      ).toBeNull();
+    },
+  );
+
+  it("does not replace successfully cached empty categories with an initial-error status after a background failure", async () => {
+    let categoryCalls = 0;
+    stubHttp(
+      () => Response.json([TRANSACTION]),
+      () =>
+        ++categoryCalls === 1
+          ? Response.json([])
+          : Response.json({ statusCode: 400 }, { status: 400 }),
+    );
+    render(<TransactionsByDays range={RANGE} onEdit={() => {}} />, {
+      wrapper: Wrapper,
+    });
+    await screen.findByText("Покупка продуктов");
+    await waitFor(() => expect(categoryCalls).toBe(1));
+    await act(async () => {
+      await client.refetchQueries({
+        predicate: (query) => query.queryKey.includes("categories"),
+      });
+    });
+    expect(categoryCalls).toBe(2);
+    expect(
+      screen.queryByText("Не удалось загрузить категории операций"),
+    ).toBeNull();
+    expect(screen.getByText("Покупка продуктов")).toBeTruthy();
+  });
   it("keeps loading inside history and shows a decorative skeleton", async () => {
     const history = new ResponseGate();
     stubHttp(() => history.wait());

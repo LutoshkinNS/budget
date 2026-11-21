@@ -6,23 +6,27 @@
  */
 
 export type CategoryIconKeyDTO =
-  | "groceries"
-  | "meals"
-  | "clothes"
-  | "sport"
-  | "car"
-  | "home"
-  | "leisure"
-  | "mobile"
-  | "internet"
-  | "gifts"
-  | "public-transport"
-  | "pets"
-  | "subscriptions"
-  | "games"
-  | "education"
-  | "travel"
-  | "taxi"
-  | "apartment"
-  | "health"
-  | "beauty";
+  (typeof CategoryIconKeyDTO)[keyof typeof CategoryIconKeyDTO];
+
+export const CategoryIconKeyDTO = {
+  groceries: "groceries",
+  meals: "meals",
+  clothes: "clothes",
+  sport: "sport",
+  car: "car",
+  home: "home",
+  leisure: "leisure",
+  mobile: "mobile",
+  internet: "internet",
+  gifts: "gifts",
+  "public-transport": "public-transport",
+  pets: "pets",
+  subscriptions: "subscriptions",
+  games: "games",
+  education: "education",
+  travel: "travel",
+  taxi: "taxi",
+  apartment: "apartment",
+  health: "health",
+  beauty: "beauty",
+} as const;

@@ -10,13 +10,15 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import { deferred } from "@/common/api/tests/deferred";
-import { Notifications } from "@/common/lib/notifications";
+import { NotificationsTestRoot as Notifications } from "@/common/lib/notifications/tests/notifications-test-root";
 import { useMe } from "@/modules/user";
 
 import { Settings } from "..";
+
+let queryClient: ReturnType<typeof createAppQueryClient>;
 
 vi.mock(import("@tanstack/react-router"), async (importOriginal) => ({
   ...(await importOriginal()),
@@ -43,6 +45,7 @@ function AuthenticatedSettings() {
 }
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.setDefaultOptions({
     queries: { retry: false, staleTime: 60_000 },
   });

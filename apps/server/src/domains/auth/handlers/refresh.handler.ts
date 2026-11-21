@@ -1,5 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import { verifyJwtRequest } from '#src/plugins/jwt/verify-jwt-request.js';
+
 import { ACCESS_TOKEN_MAX_AGE_SECONDS } from '../constants.js';
 
 export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
@@ -15,7 +17,7 @@ export async function refreshHandler(req: FastifyRequest, reply: FastifyReply) {
     'auth_request'
   );
 
-  await req.refreshJwtVerify();
+  await verifyJwtRequest(() => req.refreshJwtVerify());
 
   const { userId } = req.user;
 

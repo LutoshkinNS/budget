@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import { getSessionContext } from "@/modules/user";
 
@@ -15,8 +15,10 @@ import {
   useTransactionSummary,
 } from "../use-transactions.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const RANGE = {
@@ -115,6 +117,7 @@ const wrapper = ({ children }: PropsWithChildren) => (
 );
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
 });
 afterEach(() => {

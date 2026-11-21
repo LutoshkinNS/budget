@@ -4,11 +4,9 @@
  * Expense service
  * OpenAPI spec version: 0.0.0
  */
-import type { InternalServerErrorDTOCode } from "./internalServerErrorDTOCode";
-import type { InternalServerErrorDTOStatusCode } from "./internalServerErrorDTOStatusCode";
+import type { ErrorDTODTO } from "./errorDTODTO";
 
-export interface InternalServerErrorDTO {
-  code: InternalServerErrorDTOCode;
+export type InternalServerErrorDTO = ErrorDTODTO & {
   message: string;
-  statusCode: InternalServerErrorDTOStatusCode;
-}
+  statusCode: number;
+};

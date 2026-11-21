@@ -3,18 +3,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { API_ERROR_KIND, ApiError } from "@/common/api/api-error";
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 
 import { categoryKeys } from "../category-keys.ts";
 import { useCategories } from "../use-categories.ts";
 
-vi.mock(import("@/common/lib/notifications"), () => ({
-  useNotifications: () => ({
-    addNotification: vi.fn(),
-    deleteNotification: vi.fn(),
-  }),
-}));
+let runtime: ReturnType<typeof createApiRuntime>;
+let queryClient: ReturnType<typeof createApiRuntime>["queryClient"];
 
 const categoryPayload = [
   {
@@ -57,11 +55,21 @@ function stubFetch(
 }
 
 const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  <ApiRuntimeContext.Provider value={runtime}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </ApiRuntimeContext.Provider>
 );
-const defaultOptions = queryClient.getDefaultOptions();
+let defaultOptions: ReturnType<
+  ReturnType<typeof createApiRuntime>["queryClient"]["getDefaultOptions"]
+>;
 
 beforeEach(() => {
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: vi.fn(),
+  });
+  queryClient = runtime.queryClient;
+  defaultOptions = queryClient.getDefaultOptions();
   queryClient.clear();
   queryClient.setDefaultOptions({
     ...defaultOptions,
@@ -70,12 +78,49 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  runtime.dispose();
   queryClient.clear();
   queryClient.setDefaultOptions(defaultOptions);
   vi.unstubAllGlobals();
 });
 
 describe("useCategories me-guard and scoped key", () => {
+  it.each([
+    { status: 201, body: [{ ...categoryPayload[0], accountId: 99 }] },
+    { status: 202, body: { items: [] } },
+  ])(
+    "rejects invalid $status data before replacing the scoped cache",
+    async ({ status, body }) => {
+      seedMe(42);
+      const fetchMock = vi
+        .fn<typeof fetch>()
+        .mockResolvedValueOnce(Response.json(categoryPayload))
+        .mockImplementation(async () => Response.json(body, { status }));
+      vi.stubGlobal("fetch", fetchMock);
+      const { result } = renderHook(() => useCategories({ type: "expense" }), {
+        wrapper,
+      });
+      await waitFor(() => expect(result.current.data).toEqual(categoryPayload));
+      await act(async () => {
+        await result.current.refetch();
+      });
+      await waitFor(() =>
+        expect(result.current.error).toBeInstanceOf(ApiError),
+      );
+      expect(result.current.error).toMatchObject({
+        kind: API_ERROR_KIND.invalidResponse,
+        statusCode: status,
+      });
+      expect(result.current.isError).toBe(true);
+      expect(result.current.hasValidData).toBe(true);
+      expect(result.current.data).toEqual(categoryPayload);
+      expect(
+        queryClient.getQueryData(categoryKeys.list(42, { type: "expense" })),
+      ).toEqual(categoryPayload);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    },
+  );
+
   it("does not run the query while me is loading", async () => {
     let release = () => {};
     const { calls } = stubFetch(
@@ -216,7 +261,12 @@ describe("useCategories me-guard and scoped key", () => {
       wrapper,
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.error).toEqual(failure);
+    expect(result.current.error).toBeInstanceOf(ApiError);
+    expect(result.current.error).toMatchObject({
+      kind: API_ERROR_KIND.http,
+      statusCode: 403,
+      message: "Не удалось выполнить запрос. Повторите попытку.",
+    });
     expect(result.current.data).toEqual([]);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isFetching).toBe(false);

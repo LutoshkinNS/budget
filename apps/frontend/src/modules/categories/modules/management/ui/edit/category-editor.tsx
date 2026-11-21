@@ -1,6 +1,8 @@
 import { useId, useRef, useState } from "react";
 
+import { ApiError } from "@/common/api/api-error.ts";
 import type { CategoryDTO } from "@/common/api/generate/model";
+import { BusinessErrorCodeDTO } from "@/common/api/generate/model/businessErrorCodeDTO.ts";
 import { SimpleError } from "@/common/ui/simple-error/SimpleError";
 
 import type { CategoryIconKey } from "../../../../model/category-icons.ts";
@@ -51,14 +53,7 @@ export function CategoryEditor({
       });
       onClose();
     } catch (error) {
-      setErrorMessage(
-        typeof error === "object" &&
-          error !== null &&
-          "statusCode" in error &&
-          error.statusCode === 409
-          ? "Категория с таким названием уже существует"
-          : "Не удалось сохранить категорию. Попробуйте ещё раз.",
-      );
+      setErrorMessage(getCategoryUpdateErrorMessage(error));
     } finally {
       submitting.current = false;
       setIsSubmitting(false);
@@ -98,4 +93,16 @@ export function CategoryEditor({
       </fieldset>
     </form>
   );
+}
+
+function getCategoryUpdateErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) {
+    return "Не удалось сохранить категорию. Попробуйте ещё раз.";
+  }
+
+  if (error.code === BusinessErrorCodeDTO.CATEGORY_ALREADY_EXISTS) {
+    return "Категория с таким названием уже существует";
+  }
+
+  return error.message;
 }

@@ -3,12 +3,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 
 import { useCreateTransaction } from "../use-create-transaction";
 import { useDeleteTransaction } from "../use-delete-transaction";
 import { useUpdateTransaction } from "../use-update-transaction";
+
+let queryClient: ReturnType<typeof createAppQueryClient>;
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn(),
@@ -89,7 +91,7 @@ vi.mock(
   },
 );
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const wrapper = ({ children }: PropsWithChildren) => (
@@ -101,6 +103,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   mocks.create.mockReset();
   mocks.update.mockReset();
   mocks.delete.mockReset();
@@ -140,7 +143,10 @@ describe("transaction category invalidation", () => {
       }
 
       await waitFor(() =>
-        expect(mocks.invalidateCategories).toHaveBeenCalledWith(42),
+        expect(mocks.invalidateCategories).toHaveBeenCalledWith(
+          queryClient,
+          42,
+        ),
       );
     },
   );

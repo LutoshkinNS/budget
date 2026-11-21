@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import type { TransactionDTO } from "@/common/api/generate/model";
 import { Input } from "@/common/ui/input/Input";
@@ -46,6 +47,7 @@ export function EditTransactionForm({
   onRetryUnavailable,
   onSaved,
 }: EditTransactionFormProps) {
+  const queryClient = useQueryClient();
   const baseline = useRef(transaction).current;
   const initialDate = useRef(toLocalDateInputValue(baseline.date)).current;
   const [amount, setAmount] = useState(String(baseline.amount));
@@ -64,7 +66,8 @@ export function EditTransactionForm({
     actorId,
   );
   const amountValue = parseTransactionAmountInput(amount);
-  const canSubmit = amountValue !== null && amountValue > 0 && Boolean(date) && categoryId > 0;
+  const canSubmit =
+    amountValue !== null && amountValue > 0 && Boolean(date) && categoryId > 0;
   const unavailable = isUnavailable || unavailableAfterSave;
   const isBusy = isLoading || unavailable || checkingAvailability;
 
@@ -100,8 +103,9 @@ export function EditTransactionForm({
       });
       if (
         mounted.current &&
-        (actorId === undefined || getCurrentUserIdSnapshot() === actorId) &&
-        getCurrentAccountIdSnapshot() === baseline.accountId
+        (actorId === undefined ||
+          getCurrentUserIdSnapshot(queryClient) === actorId) &&
+        getCurrentAccountIdSnapshot(queryClient) === baseline.accountId
       ) {
         onSaved?.();
       }
@@ -110,31 +114,52 @@ export function EditTransactionForm({
         const status = getErrorStatus(error);
         if (status === 403 || status === 404) {
           setUnavailableAfterSave(true);
-          setSaveError("Операция недоступна. Проверьте доступ перед повторной попыткой.");
+          setSaveError(
+            "Операция недоступна. Проверьте доступ перед повторной попыткой.",
+          );
         } else {
-          setSaveError("Не удалось сохранить операцию. Проверьте данные и повторите попытку.");
+          setSaveError(
+            "Не удалось сохранить операцию. Проверьте данные и повторите попытку.",
+          );
         }
       }
       submitLock.current = false;
     }
   };
 
-  const categoryExists = categoriesQuery.data.some((category) => category.id === categoryId);
+  const categoryExists = categoriesQuery.data.some(
+    (category) => category.id === categoryId,
+  );
 
   return (
     <form className={s.form} onSubmit={handleSubmit}>
       <fieldset className={s.fields} disabled={isBusy}>
         <label className={s.field}>
           <span className={s.label}>Сумма</span>
-          <Input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} />
+          <Input
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+          />
         </label>
         <label className={s.field}>
           <span className={s.label}>Дата</span>
-          <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          <Input
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+          />
         </label>
         <label className={s.field}>
           <span className={s.label}>Комментарий</span>
-          <Input type="text" placeholder="добавить комментарий" value={description} onChange={(event) => setDescription(event.target.value)} />
+          <Input
+            type="text"
+            placeholder="добавить комментарий"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+          />
         </label>
         <label className={s.field}>
           <span className={s.label}>Категория</span>
@@ -151,10 +176,22 @@ export function EditTransactionForm({
               />
             </span>
           ) : (
-            <select className={s.select} value={categoryId} onChange={(event) => setCategoryId(Number(event.target.value))}>
-              {!categoryExists && <option value={categoryId}>Текущая категория</option>}
-              {categoriesQuery.data.length === 0 && <option value={categoryId}>Категории недоступны</option>}
-              {categoriesQuery.data.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+            <select
+              className={s.select}
+              value={categoryId}
+              onChange={(event) => setCategoryId(Number(event.target.value))}
+            >
+              {!categoryExists && (
+                <option value={categoryId}>Текущая категория</option>
+              )}
+              {categoriesQuery.data.length === 0 && (
+                <option value={categoryId}>Категории недоступны</option>
+              )}
+              {categoriesQuery.data.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           )}
           {categoriesQuery.isFetching && categoriesQuery.hasValidData ? (
@@ -166,14 +203,48 @@ export function EditTransactionForm({
               Обновляются категории…
             </span>
           ) : null}
-          {categoriesQuery.isError && <span className={s.message} role="status">Не удалось загрузить категории. Текущий выбор сохранён. <button className={s.inlineButton} type="button" onClick={() => void categoriesQuery.refetch()}>Повторить</button></span>}
+          {categoriesQuery.isError && (
+            <span className={s.message} role="status">
+              Не удалось загрузить категории. Текущий выбор сохранён.{" "}
+              <button
+                className={s.inlineButton}
+                type="button"
+                onClick={() => void categoriesQuery.refetch()}
+              >
+                Повторить
+              </button>
+            </span>
+          )}
         </label>
       </fieldset>
-      {unavailable && <p className={s.message} role="alert">Операция недоступна. Изменения пока нельзя сохранить.</p>}
-      {saveError && !unavailable && <p className={s.message} role="alert">{saveError}</p>}
+      {unavailable && (
+        <p className={s.message} role="alert">
+          Операция недоступна. Изменения пока нельзя сохранить.
+        </p>
+      )}
+      {saveError && !unavailable && (
+        <p className={s.message} role="alert">
+          {saveError}
+        </p>
+      )}
       <div className={s.actions}>
-        {unavailable && onRetryUnavailable ? <button className={s.submit} type="button" disabled={checkingAvailability} onClick={() => void retryAvailability()}>{checkingAvailability ? "Проверка..." : "Проверить доступ"}</button> : null}
-        <button className={s.submit} type="submit" disabled={isBusy || !canSubmit}>{isLoading ? "Сохранение..." : "Сохранить"}</button>
+        {unavailable && onRetryUnavailable ? (
+          <button
+            className={s.submit}
+            type="button"
+            disabled={checkingAvailability}
+            onClick={() => void retryAvailability()}
+          >
+            {checkingAvailability ? "Проверка..." : "Проверить доступ"}
+          </button>
+        ) : null}
+        <button
+          className={s.submit}
+          type="submit"
+          disabled={isBusy || !canSubmit}
+        >
+          {isLoading ? "Сохранение..." : "Сохранить"}
+        </button>
       </div>
     </form>
   );

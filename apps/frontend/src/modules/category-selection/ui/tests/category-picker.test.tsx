@@ -10,16 +10,21 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createApiRuntime } from "@/common/api/api-runtime";
+import { ApiRuntimeContext } from "@/common/api/api-runtime-context";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import type { CategoryDTO } from "@/common/api/generate/model";
 import { invalidateCategories } from "@/modules/categories";
 
 import { CategoryPicker } from "../../index";
 
+let runtime: ReturnType<typeof createApiRuntime>;
+let queryClient: ReturnType<typeof createApiRuntime>["queryClient"];
+
 const notifications = vi.hoisted(() => ({ add: vi.fn(), remove: vi.fn() }));
 vi.mock(import("@/common/lib/notifications"), () => ({
   useNotifications: () => ({
+    notifications: [],
     addNotification: notifications.add,
     deleteNotification: notifications.remove,
   }),
@@ -30,7 +35,9 @@ const CATEGORIES: CategoryDTO[] = [
   { id: 2, accountId: 42, type: "expense", name: "Редкая", iconKey: null },
 ];
 const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  <ApiRuntimeContext.Provider value={runtime}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </ApiRuntimeContext.Provider>
 );
 const pending: Array<() => void> = [];
 function holdResponse(body: unknown = CATEGORIES) {
@@ -43,6 +50,11 @@ function status() {
 }
 
 beforeEach(() => {
+  runtime = createApiRuntime({
+    fetch: (input, init) => globalThis.fetch(input, init),
+    notifyError: () => {},
+  });
+  queryClient = runtime.queryClient;
   queryClient.clear();
   queryClient.setQueryData(getAuthMeQueryKey(), {
     accounts: [{ id: 42, name: "Счёт", initialBalance: 0, isOwner: true }],
@@ -52,6 +64,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => pending.splice(0).forEach((release) => release()));
   cleanup();
+  runtime.dispose();
   queryClient.clear();
   vi.unstubAllGlobals();
 });
@@ -187,7 +200,7 @@ describe("CategoryPicker independent initial loading", () => {
     await screen.findByRole("button", { name: "Частая" });
     let refreshed: Promise<unknown> = Promise.resolve();
     act(() => {
-      refreshed = invalidateCategories(42);
+      refreshed = invalidateCategories(queryClient, 42);
     });
     await waitFor(() => expect(requestCount).toBe(2));
     expect(screen.getByRole("button", { name: "Частая" })).toBeTruthy();
@@ -210,7 +223,7 @@ describe("CategoryPicker independent initial loading", () => {
     await screen.findByRole("button", { name: "Частая" });
     let refreshed: Promise<unknown> = Promise.resolve();
     act(() => {
-      refreshed = invalidateCategories(42);
+      refreshed = invalidateCategories(queryClient, 42);
     });
     await waitFor(() => expect(pending).toHaveLength(1));
     expect(screen.getByRole("button", { name: "Частая" })).toBeTruthy();

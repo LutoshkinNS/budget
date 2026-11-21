@@ -1,12 +1,15 @@
+import type { PropsWithChildren, ReactNode } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   cleanup,
   fireEvent,
-  render,
+  render as renderView,
   screen,
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createAppQueryClient } from "@/common/api/app-query";
 import type { CategoryDTO, TransactionDTO } from "@/common/api/generate/model";
 
 import { EditTransactionForm } from "../edit-transaction-form";
@@ -46,8 +49,20 @@ const transaction: TransactionDTO = {
   description: null,
 };
 
-afterEach(cleanup);
+let client: ReturnType<typeof createAppQueryClient>;
+function render(ui: ReactNode) {
+  return renderView(ui, {
+    wrapper: ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
+}
+afterEach(() => {
+  cleanup();
+  client.clear();
+});
 beforeEach(() => {
+  client = createAppQueryClient(() => {});
   mocks.categories = [
     { id: 1, name: "Новая первая", iconKey: null },
     { id: 2, name: "Выбранная", iconKey: null },

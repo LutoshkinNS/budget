@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 
 import { invalidateCategories } from "../category-cache";
 import { categoryKeys } from "../category-keys";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
 });
 afterEach(() => {
@@ -26,7 +29,7 @@ describe("category query invalidation", () => {
     queryClient.setQueryData(categoryKeys.detail(42, 4), { id: 4 });
     queryClient.setQueryData(categoryKeys.detail(43, 3), { id: 3 });
     queryClient.setQueryData(["unrelated"], []);
-    await invalidateCategories(42, 3);
+    await invalidateCategories(queryClient, 42, 3);
     for (const key of lists)
       expect(queryClient.getQueryState(key)?.isInvalidated).toBe(true);
     expect(

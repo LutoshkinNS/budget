@@ -156,6 +156,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.3.1
+      fast-jwt:
+        specifier: 6.1.0
+        version: 6.1.0
       fastify:
         specifier: ^5.6.1
         version: 5.8.2

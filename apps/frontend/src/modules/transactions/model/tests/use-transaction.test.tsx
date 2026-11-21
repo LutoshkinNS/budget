@@ -3,14 +3,17 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 
 import { transactionKeys } from "../transaction-keys.ts";
 import { useTransaction } from "../use-transaction.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 vi.mock(import("@/common/lib/notifications"), () => ({
   useNotifications: () => ({
+    notifications: [],
     addNotification: vi.fn(),
     deleteNotification: vi.fn(),
   }),
@@ -28,7 +31,9 @@ const TRANSACTION = {
 const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
-const defaults = queryClient.getDefaultOptions();
+let defaults: ReturnType<
+  ReturnType<typeof createAppQueryClient>["getDefaultOptions"]
+>;
 function seedMe(hasAccount = true) {
   queryClient.setQueryData(getAuthMeQueryKey(), {
     userId: 1,
@@ -38,6 +43,8 @@ function seedMe(hasAccount = true) {
   });
 }
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
+  defaults = queryClient.getDefaultOptions();
   queryClient.clear();
   queryClient.setDefaultOptions({
     ...defaults,

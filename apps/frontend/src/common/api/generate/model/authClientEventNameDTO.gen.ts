@@ -6,11 +6,15 @@
  */
 
 export type AuthClientEventNameDTO =
-  | "page_loaded"
-  | "widget_script_loaded"
-  | "widget_script_failed"
-  | "auth_callback"
-  | "login_started"
-  | "login_succeeded"
-  | "login_failed"
-  | "session_confirmed";
+  (typeof AuthClientEventNameDTO)[keyof typeof AuthClientEventNameDTO];
+
+export const AuthClientEventNameDTO = {
+  page_loaded: "page_loaded",
+  widget_script_loaded: "widget_script_loaded",
+  widget_script_failed: "widget_script_failed",
+  auth_callback: "auth_callback",
+  login_started: "login_started",
+  login_succeeded: "login_succeeded",
+  login_failed: "login_failed",
+  session_confirmed: "session_confirmed",
+} as const;

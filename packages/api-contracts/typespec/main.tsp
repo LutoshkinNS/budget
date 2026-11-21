@@ -20,28 +20,28 @@ model idObj{
 @route("/accounts")
 @tag("Accounts")
 interface Accounts {
-  @get list(): Account[] | AccountNotFoundResponse | InternalServerErrorResponse;
+  @get list(): Account[] | ValidationErrorResponse | AuthUnauthorizedResponse | HttpNotFoundResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{accountId}/members")
   @get listMembers(
     @path accountId: integer
-  ): AccountMember[] | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  ): AccountMember[] | ValidationErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{accountId}/invitations")
   @post createInvitation(
     @path accountId: integer
-  ): AccountInvitation | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  ): AccountInvitation | ValidationErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/invitations/redeem")
   @post redeemInvitation(
     @body body: RedeemInvitationRequest
-  ): AccountInvitation | InvitationNotFoundResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  ): AccountInvitation | ValidationErrorResponse | HttpNotFoundResponse | InvitationNotFoundResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{accountId}")
   @patch update(
     @path accountId: AccountId,
     @body body: AccountUpdate,
-  ): Account | AccountForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  ): Account | ValidationErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 }
 
 @route("/accounts/{accountId}/categories")
@@ -51,31 +51,31 @@ interface Categories {
     @path accountId: integer,
     @query type?: TransactionType,
     @query sort?: "usage",
-  ): Category[] | CategoryErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Category[] | CategoryErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @get get(
     @path accountId: integer,
     @path categoryId: integer,
-  ): Category | CategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Category | ValidationErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @post create(
     @path accountId: integer,
     @body category: CategoryCreate,
-  ): Category | CategoryErrorResponse | CategoryConflictResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | HttpConflictResponse | CategoryConflictResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{categoryId}")
   @patch update(
     @path accountId: integer,
     @path categoryId: integer,
     @body category: CategoryUpdate,
-  ): Category | CategoryErrorResponse | CategoryConflictResponse | CategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Category | CategoryErrorResponse | HttpConflictResponse | CategoryConflictResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @delete delete(
     @path accountId: integer,
     @path categoryId: integer,
   ): {
     @statusCode statusCode: 204;
-  } | AccountForbiddenResponse | InternalServerErrorResponse;
+  } | ValidationErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 }
 
 @route("/accounts/{accountId}/categories/{categoryId}/subcategories")
@@ -84,19 +84,19 @@ interface CategorySubcategories {
   @get list(
     @path accountId: integer,
     @path categoryId: integer,
-  ): Subcategory[] | CategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Subcategory[] | ValidationErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @post create(
     @path accountId: integer,
     @path categoryId: integer,
     @body subcategory: SubcategoryCreate,
-  ): Subcategory | CategoryErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Subcategory | CategoryErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @get get(
     @path accountId: integer,
     @path categoryId: integer,
     @path subcategoryId: integer,
-  ): Subcategory | SubcategoryNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Subcategory | ValidationErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @delete delete(
     @path accountId: integer,
@@ -104,7 +104,7 @@ interface CategorySubcategories {
     @path subcategoryId: integer,
   ): {
     @statusCode statusCode: 204;
-  } | AccountForbiddenResponse | InternalServerErrorResponse;
+  } | ValidationErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 }
 
 @route("/accounts/{accountId}/transactions")
@@ -117,7 +117,7 @@ interface Transactions {
     @query type?: TransactionType,
     @minValue(1)
     @query categoryId?: integer,
-  ): Transaction[] | TransactionErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Transaction[] | TransactionErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/category-summary")
   @get categorySummary(
@@ -127,32 +127,32 @@ interface Transactions {
     @query compareFrom: utcDateTime,
     @query compareTo: utcDateTime,
     @query type?: TransactionType,
-  ): CategorySummary | TransactionErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): CategorySummary | TransactionErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/summary")
   @get summary(
     @path accountId: integer,
     @query from: utcDateTime,
     @query to: utcDateTime,
-  ): TransactionSummary | TransactionErrorResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): TransactionSummary | TransactionErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{transactionId}")
   @get get(
     @path accountId: integer,
     @path transactionId: integer,
-  ): Transaction | TransactionNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Transaction | ValidationErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @post create(
     @path accountId: integer,
     @body transaction: TransactionCreate,
-  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Transaction | TransactionErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{transactionId}")
   @patch update(
     @path accountId: integer,
     @path transactionId: integer,
     @body transaction: TransactionUpdate,
-  ): Transaction | TransactionErrorResponse | TransactionNotFoundResponse | AccountForbiddenResponse | InternalServerErrorResponse;
+  ): Transaction | TransactionErrorResponse | HttpNotFoundResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/{transactionId}")
   @delete delete(
@@ -160,7 +160,7 @@ interface Transactions {
     @path transactionId: integer,
   ): {
     @statusCode statusCode: 204;
-  } | AccountForbiddenResponse | InternalServerErrorResponse;
+  } | ValidationErrorResponse | HttpForbiddenResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 }
 
 @route("/auth")
@@ -169,19 +169,19 @@ interface Auth {
   @route("/client-event")
   @post op clientEvent(
     @body body: AuthClientEvent
-  ): SuccessResponse;
+  ): SuccessResponse | ValidationErrorResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/login")
   @post op login(
     @body loginRequest: LoginRequest
-  ): SuccessResponse | AuthUnauthorizedResponse | NotFoundResponse | InternalServerErrorResponse;
+  ): SuccessResponse | ValidationErrorResponse | AuthUnauthorizedResponse | HttpNotFoundResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/refresh")
-  @post op refresh(): SuccessResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  @post op refresh(): SuccessResponse | ValidationErrorResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/logout")
-  @post op logout(): SuccessResponse | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  @post op logout(): SuccessResponse | ValidationErrorResponse | AuthUnauthorizedResponse | PayloadTooLargeErrorResponse | UnsupportedMediaTypeErrorResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 
   @route("/me")
-  @get op me(): UserInfo | AuthUnauthorizedResponse | InternalServerErrorResponse;
+  @get op me(): UserInfo | ValidationErrorResponse | AuthUnauthorizedResponse | InternalServerErrorResponse | TooManyRequestsResponse;
 }

@@ -11,7 +11,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import {
   invalidateTransactionsCategorySummary,
@@ -22,8 +22,10 @@ import { switchAccount } from "@/modules/user";
 import { Reports } from "../reports.tsx";
 import type { ReportsSearch } from "../route.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const SEARCH: ReportsSearch = {
@@ -127,9 +129,13 @@ function SearchHarness({ initial = SEARCH }: { initial?: ReportsSearch }) {
 const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
-const defaults = queryClient.getDefaultOptions();
+let defaults: ReturnType<
+  ReturnType<typeof createAppQueryClient>["getDefaultOptions"]
+>;
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
+  defaults = queryClient.getDefaultOptions();
   queryClient.clear();
   queryClient.setDefaultOptions({
     ...defaults,
@@ -229,7 +235,7 @@ describe("reports local read regions", () => {
         isOwner: true,
       })),
     });
-    switchAccount(43);
+    switchAccount(queryClient, 43);
     const warm = render(<Reports search={SEARCH} onSearchChange={vi.fn()} />, {
       wrapper,
     });
@@ -237,7 +243,7 @@ describe("reports local read regions", () => {
       name: "Открыть операции категории Категория счёта B",
     });
     warm.unmount();
-    switchAccount(42);
+    switchAccount(queryClient, 42);
     const selectedSearch = { ...SEARCH, selectedCategoryId: 3 };
     const onSearchChange = vi.fn();
     const { rerender } = render(
@@ -248,7 +254,7 @@ describe("reports local read regions", () => {
       await screen.findByRole("dialog", { name: "Продукты" });
       await screen.findByText("Покупка яблок");
       warmB = false;
-      act(() => switchAccount(43));
+      act(() => switchAccount(queryClient, 43));
       await waitFor(() =>
         expect(onSearchChange).toHaveBeenCalledWith(SEARCH, { replace: true }),
       );
@@ -264,7 +270,7 @@ describe("reports local read regions", () => {
       expect(screen.queryByRole("dialog")).toBeNull();
       act(() => {
         returningA = true;
-        switchAccount(42);
+        switchAccount(queryClient, 42);
       });
       await waitFor(() => expect(onSearchChange).toHaveBeenCalledTimes(2));
       await waitFor(() =>
@@ -314,7 +320,7 @@ describe("reports local read regions", () => {
       await act(async () => {
         lateB.release(Response.json(summaryB));
         lateA.release(Response.json(SUMMARY));
-        switchAccount(42);
+        switchAccount(queryClient, 42);
       });
     }
   });
@@ -477,7 +483,7 @@ describe("reports local read regions", () => {
     });
     phase = "failure";
     await act(async () => {
-      await invalidateTransactionsCategorySummary(42);
+      await invalidateTransactionsCategorySummary(queryClient, 42);
     });
     expect(await screen.findByRole("alert")).toHaveProperty(
       "textContent",
@@ -517,7 +523,7 @@ describe("reports local read regions", () => {
     await screen.findByText("Покупка яблок");
     phase = "failure";
     await act(async () => {
-      await invalidateTransactionsList(42);
+      await invalidateTransactionsList(queryClient, 42);
     });
     const sheet = screen.getByRole("dialog", { name: "Продукты" });
     expect(await within(sheet).findByRole("alert")).toHaveProperty(

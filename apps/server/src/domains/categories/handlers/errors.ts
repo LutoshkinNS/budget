@@ -1,17 +1,24 @@
-export const CATEGORY_CONFLICT = {
-  code: 'CATEGORY_ALREADY_EXISTS',
-  message: 'Category already exists',
-  statusCode: 409
-} as const;
+import CategoryAlreadyExistsError from '#s/CategoryAlreadyExistsError.js';
+import NotFoundError from '#s/NotFoundError.js';
+import ValidationError from '#s/ValidationError.js';
+import {
+  createBusinessErrorResponse,
+  createErrorResponse
+} from '#src/plugins/error-handler/error-responses.js';
 
-export const CATEGORY_NOT_FOUND = {
-  code: 'NOT_FOUND',
-  message: 'Category not found or access denied',
-  statusCode: 404
-} as const;
+export const CATEGORY_CONFLICT = createBusinessErrorResponse(
+  CategoryAlreadyExistsError,
+  'Category already exists'
+);
 
-export const CATEGORY_INVALID_UPDATE = {
-  code: 'VALIDATION_ERROR',
-  message: 'Provide a non-empty name or an icon key',
-  statusCode: 400
-} as const;
+export const CATEGORY_NOT_FOUND = createErrorResponse(
+  NotFoundError,
+  NotFoundError.properties.statusCode.default,
+  'Category not found or access denied'
+);
+
+export const CATEGORY_INVALID_UPDATE = createErrorResponse(
+  ValidationError,
+  ValidationError.properties.statusCode.default,
+  'Provide a non-empty name or an icon key'
+);

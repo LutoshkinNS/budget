@@ -1,8 +1,12 @@
-import { queryClient } from "@/common/api/app-query";
+import type { QueryClient } from "@tanstack/react-query";
 
 import { categoryKeys } from "./category-keys.ts";
 
-export function invalidateCategories(accountId: number, categoryId?: number) {
+export function invalidateCategories(
+  queryClient: QueryClient,
+  accountId: number,
+  categoryId?: number,
+) {
   return Promise.all([
     queryClient.invalidateQueries({
       queryKey: categoryKeys.lists(accountId),

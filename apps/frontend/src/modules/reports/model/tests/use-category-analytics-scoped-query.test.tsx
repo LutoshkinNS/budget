@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import type { TransactionsCategorySummaryParams } from "@/common/api/generate/model";
 import { invalidateTransactionsCategorySummary } from "@/modules/transactions";
@@ -15,8 +15,10 @@ import {
   useReportsCategoryTransactions,
 } from "../use-category-analytics.ts";
 
+let queryClient: ReturnType<typeof createAppQueryClient>;
+
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const RANGES = {
@@ -102,9 +104,13 @@ function stubFetch(authMe: () => Response | Promise<Response>) {
 const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
-const defaultOptions = queryClient.getDefaultOptions();
+let defaultOptions: ReturnType<
+  ReturnType<typeof createAppQueryClient>["getDefaultOptions"]
+>;
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
+  defaultOptions = queryClient.getDefaultOptions();
   queryClient.clear();
   queryClient.setDefaultOptions({
     ...defaultOptions,
@@ -679,7 +685,11 @@ describe("useReportsCategorySummary me-guard and scoped key", () => {
     );
     expect(categorySummaryCalls()).toHaveLength(1);
 
-    await invalidateTransactionsCategorySummary(42, SUMMARY_PARAMS);
+    await invalidateTransactionsCategorySummary(
+      queryClient,
+      42,
+      SUMMARY_PARAMS,
+    );
     await waitFor(() => expect(categorySummaryCalls()).toHaveLength(2));
     expect(result.current.summary?.transactionCount).toBe(4);
   });

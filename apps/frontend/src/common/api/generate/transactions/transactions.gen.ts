@@ -26,6 +26,8 @@ import type {
   ForbiddenErrorDTO,
   InternalServerErrorDTO,
   NotFoundErrorDTO,
+  PayloadTooLargeErrorDTO,
+  TooManyRequestsErrorDTO,
   TransactionCreateDTO,
   TransactionDTO,
   TransactionSummaryDTO,
@@ -33,6 +35,8 @@ import type {
   TransactionsCategorySummaryParams,
   TransactionsListParams,
   TransactionsSummaryParams,
+  UnauthorizedErrorDTO,
+  UnsupportedMediaTypeErrorDTO,
   ValidationErrorDTO,
 } from "../model";
 
@@ -83,7 +87,12 @@ export const getTransactionsListQueryKey = (
 
 export const getTransactionsListQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsListParams,
@@ -125,12 +134,19 @@ export type TransactionsListQueryResult = NonNullable<
 >;
 export type TransactionsListQueryError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsListParams,
@@ -158,7 +174,12 @@ export function useTransactionsList<
 };
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsListParams,
@@ -186,7 +207,12 @@ export function useTransactionsList<
 };
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsListParams,
@@ -207,7 +233,12 @@ export function useTransactionsList<
 
 export function useTransactionsList<
   TData = Awaited<ReturnType<typeof transactionsList>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsListParams,
@@ -273,8 +304,12 @@ export const transactionsCreate = async (
 export const getTransactionsCreateMutationOptions = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | NotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
@@ -318,15 +353,23 @@ export type TransactionsCreateMutationResult = NonNullable<
 export type TransactionsCreateMutationBody = TransactionCreateDTO;
 export type TransactionsCreateMutationError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
   | NotFoundErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useTransactionsCreate = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | NotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(
@@ -397,7 +440,12 @@ export const getTransactionsCategorySummaryQueryKey = (
 
 export const getTransactionsCategorySummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsCategorySummaryParams,
@@ -443,12 +491,19 @@ export type TransactionsCategorySummaryQueryResult = NonNullable<
 >;
 export type TransactionsCategorySummaryQueryError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsCategorySummaryParams,
@@ -476,7 +531,12 @@ export function useTransactionsCategorySummary<
 };
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsCategorySummaryParams,
@@ -504,7 +564,12 @@ export function useTransactionsCategorySummary<
 };
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsCategorySummaryParams,
@@ -525,7 +590,12 @@ export function useTransactionsCategorySummary<
 
 export function useTransactionsCategorySummary<
   TData = Awaited<ReturnType<typeof transactionsCategorySummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsCategorySummaryParams,
@@ -617,7 +687,12 @@ export const getTransactionsSummaryQueryKey = (
 
 export const getTransactionsSummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsSummaryParams,
@@ -659,12 +734,19 @@ export type TransactionsSummaryQueryResult = NonNullable<
 >;
 export type TransactionsSummaryQueryError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsSummaryParams,
@@ -692,7 +774,12 @@ export function useTransactionsSummary<
 };
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsSummaryParams,
@@ -720,7 +807,12 @@ export function useTransactionsSummary<
 };
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsSummaryParams,
@@ -741,7 +833,12 @@ export function useTransactionsSummary<
 
 export function useTransactionsSummary<
   TData = Awaited<ReturnType<typeof transactionsSummary>>,
-  TError = ValidationErrorDTO | ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   params: TransactionsSummaryParams,
@@ -821,7 +918,13 @@ export const getTransactionsGetQueryKey = (
 
 export const getTransactionsGetQueryOptions = <
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   transactionId: number,
@@ -863,13 +966,22 @@ export type TransactionsGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof transactionsGet>>
 >;
 export type TransactionsGetQueryError =
+  | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
   | NotFoundErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   transactionId: number,
@@ -897,7 +1009,13 @@ export function useTransactionsGet<
 };
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   transactionId: number,
@@ -925,7 +1043,13 @@ export function useTransactionsGet<
 };
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   transactionId: number,
@@ -946,7 +1070,13 @@ export function useTransactionsGet<
 
 export function useTransactionsGet<
   TData = Awaited<ReturnType<typeof transactionsGet>>,
-  TError = ForbiddenErrorDTO | NotFoundErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | NotFoundErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
 >(
   accountId: number,
   transactionId: number,
@@ -1019,8 +1149,12 @@ export const transactionsUpdate = async (
 export const getTransactionsUpdateMutationOptions = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | NotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
@@ -1064,15 +1198,23 @@ export type TransactionsUpdateMutationResult = NonNullable<
 export type TransactionsUpdateMutationBody = TransactionUpdateDTO;
 export type TransactionsUpdateMutationError =
   | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
   | NotFoundErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useTransactionsUpdate = <
   TError =
     | ValidationErrorDTO
+    | UnauthorizedErrorDTO
     | ForbiddenErrorDTO
     | NotFoundErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
     | InternalServerErrorDTO,
   TContext = unknown,
 >(
@@ -1116,7 +1258,14 @@ export const transactionsDelete = async (
 };
 
 export const getTransactionsDeleteMutationOptions = <
-  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1158,11 +1307,23 @@ export type TransactionsDeleteMutationResult = NonNullable<
 >;
 
 export type TransactionsDeleteMutationError =
+  | ValidationErrorDTO
+  | UnauthorizedErrorDTO
   | ForbiddenErrorDTO
+  | PayloadTooLargeErrorDTO
+  | UnsupportedMediaTypeErrorDTO
+  | TooManyRequestsErrorDTO
   | InternalServerErrorDTO;
 
 export const useTransactionsDelete = <
-  TError = ForbiddenErrorDTO | InternalServerErrorDTO,
+  TError =
+    | ValidationErrorDTO
+    | UnauthorizedErrorDTO
+    | ForbiddenErrorDTO
+    | PayloadTooLargeErrorDTO
+    | UnsupportedMediaTypeErrorDTO
+    | TooManyRequestsErrorDTO
+    | InternalServerErrorDTO,
   TContext = unknown,
 >(
   options?: {

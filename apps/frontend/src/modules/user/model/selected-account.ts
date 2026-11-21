@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
+import type { QueryClient } from "@tanstack/react-query";
 
-import { queryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen.ts";
 import { AuthMeResponse } from "@/common/api/generate/authentication/authentication.zod.gen.ts";
 import type { UserInfoDTO } from "@/common/api/generate/model";
@@ -49,19 +49,22 @@ function notifyListeners() {
   }
 }
 
-function readMeAccounts(): UserInfoDTO["accounts"] | undefined {
+function readMeAccounts(
+  queryClient: QueryClient,
+): UserInfoDTO["accounts"] | undefined {
   const snapshot = getSessionContext(queryClient).getSnapshot();
   if (
-    (snapshot.phase !== "authenticated" && snapshot.phase !== "logout-pending") ||
+    (snapshot.phase !== "authenticated" &&
+      snapshot.phase !== "logout-pending") ||
     snapshot.actorId === null
   ) {
     return undefined;
   }
-  const me = readAdmittedMe();
+  const me = readAdmittedMe(queryClient);
   return me?.userId === snapshot.actorId ? me.accounts : undefined;
 }
 
-function readAdmittedMe(): UserInfoDTO | undefined {
+function readAdmittedMe(queryClient: QueryClient): UserInfoDTO | undefined {
   const me: unknown = queryClient.getQueryData(getAuthMeQueryKey());
   const validation = AuthMeResponse.safeParse(me);
   return validation.success ? validation.data : undefined;
@@ -88,26 +91,34 @@ export function useCurrentAccountId(): number | undefined {
 }
 
 /** Снимок accountId при вызове сохраняет область инвалидации после переключения. */
-export function getCurrentAccountIdSnapshot(): number | undefined {
-  return resolveAccountId(readMeAccounts() ?? [], getSelectedAccountId());
+export function getCurrentAccountIdSnapshot(
+  queryClient: QueryClient,
+): number | undefined {
+  return resolveAccountId(
+    readMeAccounts(queryClient) ?? [],
+    getSelectedAccountId(),
+  );
 }
 
 /** Снимок нужен для отбрасывания поздних callback после смены пользователя. */
-export function getCurrentUserIdSnapshot(): number | undefined {
+export function getCurrentUserIdSnapshot(
+  queryClient: QueryClient,
+): number | undefined {
   const snapshot = getSessionContext(queryClient).getSnapshot();
   if (
-    (snapshot.phase !== "authenticated" && snapshot.phase !== "logout-pending") ||
+    (snapshot.phase !== "authenticated" &&
+      snapshot.phase !== "logout-pending") ||
     snapshot.actorId === null
   ) {
     return undefined;
   }
-  return readAdmittedMe()?.userId === snapshot.actorId
+  return readAdmittedMe(queryClient)?.userId === snapshot.actorId
     ? snapshot.actorId
     : undefined;
 }
 
-export function requireCurrentAccountId(): number {
-  const accountId = getCurrentAccountIdSnapshot();
+export function requireCurrentAccountId(queryClient: QueryClient): number {
+  const accountId = getCurrentAccountIdSnapshot(queryClient);
   if (accountId === undefined) {
     throw new Error("Текущий счёт не определён");
   }
@@ -115,8 +126,8 @@ export function requireCurrentAccountId(): number {
 }
 
 /** Покинутое поддерево сверяется при возврате, без фонового рефетча. */
-export function switchAccount(accountId: number) {
-  const previousAccountId = getCurrentAccountIdSnapshot();
+export function switchAccount(queryClient: QueryClient, accountId: number) {
+  const previousAccountId = getCurrentAccountIdSnapshot(queryClient);
   if (previousAccountId === accountId) return;
   if (!persistAccountId(accountId)) return;
   selectedAccountId = accountId;

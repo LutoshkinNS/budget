@@ -1,42 +1,24 @@
 {
   "type": "object",
   "required": [
-    "code",
     "message",
     "statusCode"
   ],
   "properties": {
-    "code": {
-      "anyOf": [
-        {
-          "type": "string",
-          "enum": [
-            "UNAUTHORIZED"
-          ]
-        },
-        {
-          "type": "string",
-          "enum": [
-            "INVALID_TOKEN"
-          ]
-        },
-        {
-          "type": "string",
-          "enum": [
-            "MISSING_TOKEN"
-          ]
-        }
-      ]
-    },
     "message": {
-      "type": "string"
+      "type": "string",
+      "default": "Требуется действительная авторизация."
     },
     "statusCode": {
       "type": "number",
-      "enum": [
-        401
-      ]
+      "format": "double",
+      "default": 401
     }
   },
+  "allOf": [
+    {
+      "$ref": "ErrorDTO.json"
+    }
+  ],
   "additionalProperties": false
 }

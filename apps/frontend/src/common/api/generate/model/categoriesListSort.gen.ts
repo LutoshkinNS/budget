@@ -5,4 +5,9 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type CategoriesListSort = "usage";
+export type CategoriesListSort =
+  (typeof CategoriesListSort)[keyof typeof CategoriesListSort];
+
+export const CategoriesListSort = {
+  usage: "usage",
+} as const;

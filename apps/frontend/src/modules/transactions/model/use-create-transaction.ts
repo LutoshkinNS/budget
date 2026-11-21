@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 
 import type { TransactionCreateDTO } from "@/common/api/generate/model";
@@ -14,6 +15,7 @@ import {
 } from "./transaction-cache.ts";
 
 export function useCreateTransaction() {
+  const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
 
   const mutation = useTransactionsCreate({
@@ -24,10 +26,10 @@ export function useCreateTransaction() {
       // Фоновая инвалидация не должна блокировать следующий ввод.
       onSuccess: (_data, variables) => {
         const accountId = variables.accountId;
-        invalidateTransactionsList(accountId);
-        invalidateTransactionSummary(accountId);
-        invalidateTransactionsCategorySummary(accountId);
-        invalidateCategories(accountId);
+        invalidateTransactionsList(queryClient, accountId);
+        void invalidateTransactionSummary(queryClient, accountId);
+        void invalidateTransactionsCategorySummary(queryClient, accountId);
+        void invalidateCategories(queryClient, accountId);
       },
     },
   });
@@ -47,7 +49,7 @@ export function useCreateTransaction() {
     const { date, description, ...rest } = validation.data;
 
     return mutation.mutateAsync({
-      accountId: requireCurrentAccountId(),
+      accountId: requireCurrentAccountId(queryClient),
       data: {
         ...rest,
         ...(!!date && { date }),

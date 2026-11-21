@@ -41,6 +41,14 @@
   margin: 0;
 }
 
+.categoryStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: var(--app-error-color);
+}
+
 .retryLink {
   background: none;
   border: none;

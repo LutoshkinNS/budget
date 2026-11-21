@@ -1,13 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import InvitationNotFoundError from '#s/InvitationNotFoundError.js';
 import type { FastifyApp } from '#src/app-init.js';
+import { createBusinessErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
-const ERRORS = {
-  NOT_FOUND: {
-    code: 'INVITATION_NOT_FOUND',
-    message: 'Приглашение не найдено или уже использовано'
-  }
-} as const;
+const invitationNotFound = createBusinessErrorResponse(
+  InvitationNotFoundError
+);
 
 function formatInvitation(invitation: {
   id: number;
@@ -44,7 +43,7 @@ export async function redeemInvitationHandler(
   });
 
   if (!invitation) {
-    return reply.code(404).send(ERRORS.NOT_FOUND);
+    return reply.code(invitationNotFound.statusCode).send(invitationNotFound);
   }
 
   const userIdBig = BigInt(userId);

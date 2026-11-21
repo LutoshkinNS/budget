@@ -9,7 +9,10 @@ import type {
   CategoryType,
   CreateCategoryFormData,
 } from "../../model/types.ts";
-import { useCreateCategory } from "../../model/use-create-category.ts";
+import {
+  getCreateCategoryErrorMessage,
+  useCreateCategory,
+} from "../../model/use-create-category.ts";
 import { CategoryIconPicker } from "../icon-picker/category-icon-picker.tsx";
 
 import s from "./create-category.module.css";
@@ -64,7 +67,7 @@ export function CreateCategoryForm({ type }: CreateCategoryProps) {
       if (category) setFormState({ name: "", iconKey: null });
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? error.message : "Не удалось создать категорию",
+        getCreateCategoryErrorMessage(error) ?? "Не удалось создать категорию",
       );
     } finally {
       submitting.current = false;

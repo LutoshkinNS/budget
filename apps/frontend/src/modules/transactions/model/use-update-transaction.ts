@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 
 import type { TransactionUpdateDTO } from "@/common/api/generate/model";
@@ -24,6 +25,7 @@ export function useUpdateTransaction(
   sourceAccountId?: number,
   sourceUserId?: number,
 ) {
+  const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
   const currentAccountId = useCurrentAccountId();
   const isActiveRef = useRef(true);
@@ -41,16 +43,21 @@ export function useUpdateTransaction(
       meta: { localFeedback: true },
       onSuccess: (_data, variables) => {
         const accountId = variables.accountId;
-        void invalidateTransactionsList(accountId);
-        void invalidateTransactionSummary(accountId);
-        void invalidateTransactionsCategorySummary(accountId);
-        void invalidateTransaction(accountId, variables.transactionId);
-        void invalidateCategories(accountId);
+        void invalidateTransactionsList(queryClient, accountId);
+        void invalidateTransactionSummary(queryClient, accountId);
+        void invalidateTransactionsCategorySummary(queryClient, accountId);
+        void invalidateTransaction(
+          queryClient,
+          accountId,
+          variables.transactionId,
+        );
+        void invalidateCategories(queryClient, accountId);
 
         const isCurrentActor =
           sourceUserId === undefined ||
-          getCurrentUserIdSnapshot() === sourceUserId;
-        const isCurrentAccount = getCurrentAccountIdSnapshot() === accountId;
+          getCurrentUserIdSnapshot(queryClient) === sourceUserId;
+        const isCurrentAccount =
+          getCurrentAccountIdSnapshot(queryClient) === accountId;
 
         if (isActiveRef.current && isCurrentActor && isCurrentAccount) {
           addNotification({

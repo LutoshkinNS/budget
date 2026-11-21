@@ -5,4 +5,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type CategoryCreateDTOType = "income" | "expense";
+export type CategoryCreateDTOType =
+  (typeof CategoryCreateDTOType)[keyof typeof CategoryCreateDTOType];
+
+export const CategoryCreateDTOType = {
+  income: "income",
+  expense: "expense",
+} as const;

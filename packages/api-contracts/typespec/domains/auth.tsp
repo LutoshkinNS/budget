@@ -42,19 +42,6 @@ model UserInfo {
   accounts: AccountInfo[];
 }
 
-@error
-model UnauthorizedError {
-  code: ErrorCode.UNAUTHORIZED | ErrorCode.INVALID_TOKEN | ErrorCode.MISSING_TOKEN;
-  message: string;
-  statusCode: 401;
-}
-
-@error
-model AuthUnauthorizedResponse {
-  @statusCode statusCode: 401;
-  @body error: UnauthorizedError;
-}
-
 model SuccessResponse {
   success: boolean;
 }

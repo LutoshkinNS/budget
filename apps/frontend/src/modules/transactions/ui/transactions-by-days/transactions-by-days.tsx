@@ -10,6 +10,7 @@ import { useTransactions } from "../../model/use-transactions.ts";
 import { TransactionDayGroup } from "../transaction-day/transaction-day-group.tsx";
 
 import { EmptyState } from "./empty-state.tsx";
+import { TransactionCategoriesStatus } from "./transaction-categories-status.tsx";
 
 import s from "./transactions-by-days.module.css";
 
@@ -131,6 +132,7 @@ export function TransactionsByDays({
   return (
     <>
       {errorState}
+      <TransactionCategoriesStatus />
       <div className={s.container}>
         {filtered.map((group) => (
           <TransactionDayGroup

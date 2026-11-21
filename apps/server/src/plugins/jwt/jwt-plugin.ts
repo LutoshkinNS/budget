@@ -3,6 +3,8 @@ import fp from 'fastify-plugin';
 
 import type { FastifyApp } from '#src/app-init.js';
 
+import { verifyJwtRequest } from './verify-jwt-request.js';
+
 const accessTokenMessages = {
   badRequestErrorMessage: 'Неверный формат access токена',
   badCookieRequestErrorMessage: 'Access токен не может быть прочитан из cookie',
@@ -50,7 +52,7 @@ async function jwtPlugin(app: FastifyApp) {
   });
 
   app.decorate('authenticate', async function (request) {
-    await request.accessJwtVerify();
+    await verifyJwtRequest(() => request.accessJwtVerify());
   });
 }
 

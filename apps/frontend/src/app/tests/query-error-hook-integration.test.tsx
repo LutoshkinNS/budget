@@ -1,23 +1,22 @@
-import type { PropsWithChildren } from "react";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   act,
   cleanup,
-  render,
+  fireEvent,
   renderHook,
   screen,
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { ApiError } from "@/common/api/api-error";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
-import { Notifications } from "@/common/lib/notifications";
 import { InvitationRedemption, useAccounts } from "@/modules/accounts";
 import { useSubcategories } from "@/modules/subcategories";
 import { getSessionContext, useMe } from "@/modules/user";
 
-import { QueryErrorNotificationBridge } from "../query-error-notification-bridge";
+import { mountQueryTestRoot } from "./mount-query-test-root";
+import { QueryTestRoot } from "./query-test-root";
 
 const profile = {
   userId: 1,
@@ -25,103 +24,111 @@ const profile = {
 };
 const errorPayload = {
   statusCode: 400,
-  code: "HTTP_FAILURE",
   message: "Ошибка загрузки",
 };
 const fetchMock = vi.fn<typeof fetch>();
-
-function wrapper({ children }: PropsWithChildren) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Notifications>
-        <QueryErrorNotificationBridge />
-        {children}
-      </Notifications>
-    </QueryClientProvider>
-  );
+const clients: ReturnType<typeof mountQueryTestRoot>["client"][] = [];
+function mount() {
+  const root = mountQueryTestRoot();
+  clients.push(root.client);
+  return root;
 }
-
-function seedProfile() {
-  const session = getSessionContext(queryClient);
+function seedProfile(client: ReturnType<typeof mountQueryTestRoot>["client"]) {
+  const session = getSessionContext(client);
   const token = session.captureRead();
   if (!token) throw new Error("Fixture session is pending");
   session.apply(token, { type: "me-valid", actorId: 1 });
-  queryClient.setQueryData(getAuthMeQueryKey(), profile);
+  client.setQueryData(getAuthMeQueryKey(), profile);
 }
-
 beforeEach(() => {
-  queryClient.clear();
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
 });
 afterEach(() => {
   cleanup();
-  queryClient.clear();
+  clients.splice(0).forEach((client) => client.clear());
   vi.unstubAllGlobals();
 });
 
-describe("domain hooks use the global notification owner", () => {
-  it("reports one accounts query failure for two hook consumers and preserves successful-response validation", async () => {
+describe("domain hooks keep local initial errors and share background errors", () => {
+  it("keeps initial accounts failure silent, preserves validation and emits one background failure for two consumers", async () => {
+    const root = mount();
+    function Accounts() {
+      const query = useAccounts();
+      useAccounts();
+      return (
+        <>
+          <div>{JSON.stringify(query.data)}</div>
+          <div>{query.isError ? "accounts error" : "accounts ready"}</div>
+          <button onClick={() => void query.refetch()}>Refresh accounts</button>
+        </>
+      );
+    }
     fetchMock.mockResolvedValueOnce(
       Response.json(errorPayload, { status: 400 }),
     );
-    const { result } = renderHook(() => [useAccounts(), useAccounts()], {
-      wrapper,
-    });
-    await waitFor(() =>
-      expect(screen.getAllByText("HTTP_FAILURE")).toHaveLength(1),
-    );
+    root.rerenderChildren(<Accounts />);
+    await screen.findByText("accounts error");
+    expect(screen.queryByRole("button", { name: "×" })).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(result.current[0]?.data).toEqual([]);
-    expect(result.current[0]?.isError).toBe(true);
-    expect(result.current[0]?.error).toEqual(errorPayload);
+    expect(screen.getByText("[]")).toBeTruthy();
     fetchMock.mockResolvedValueOnce(Response.json([{ id: 7 }]));
-    await act(async () => {
-      await result.current[0]?.refetch();
-    });
-    await waitFor(() =>
-      expect(screen.getAllByText("Некорректные данные")).toHaveLength(1),
+    fireEvent.click(screen.getByRole("button", { name: "Refresh accounts" }));
+    await screen.findByText("Некорректные данные");
+    expect(screen.getByText('[{"id":7}]')).toBeTruthy();
+    fetchMock.mockResolvedValueOnce(
+      Response.json(errorPayload, { status: 400 }),
     );
-    expect(screen.getAllByText("HTTP_FAILURE")).toHaveLength(1);
-    expect(result.current[0]?.data).toEqual([{ id: 7 }]);
-    expect(result.current[0]?.isError).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Refresh accounts" }));
+    await waitFor(() =>
+      expect(screen.getAllByText("Не удалось выполнить запрос")).toHaveLength(
+        1,
+      ),
+    );
+    expect(screen.getAllByText("Некорректные данные")).toHaveLength(1);
+    const queryError = root.client
+      .getQueryCache()
+      .getAll()
+      .find((query) => query.state.error)?.state.error;
+    expect(queryError).toBeInstanceOf(ApiError);
+    expect(queryError).toMatchObject(errorPayload);
+    expect(queryError).toHaveProperty("code", undefined);
+    expect(screen.queryByText("HTTP_FAILURE")).toBeNull();
   });
 
-  it("reports one scoped subcategories failure and preserves malformed-success validation and empty return", async () => {
-    seedProfile();
-    fetchMock.mockResolvedValueOnce(
-      Response.json(errorPayload, { status: 400 }),
-    );
-    const { result } = renderHook(
-      () => [useSubcategories(3), useSubcategories(3)],
-      { wrapper },
-    );
-    await waitFor(() =>
-      expect(screen.getAllByText("HTTP_FAILURE")).toHaveLength(1),
-    );
+  it("keeps scoped subcategory return validation while sharing one background failure", async () => {
+    const root = mount();
+    seedProfile(root.client);
+    function Subcategories() {
+      const query = useSubcategories(3);
+      useSubcategories(3);
+      return <div>{JSON.stringify(query.data)}</div>;
+    }
+    fetchMock.mockResolvedValueOnce(Response.json([{ id: 7 }]));
+    root.rerenderChildren(<Subcategories />);
+    await screen.findByText("Некорректные данные");
+    expect(screen.getByText("[]")).toBeTruthy();
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
       "/api/v1/accounts/42/categories/3/subcategories",
     ]);
-    expect(result.current[0]?.data).toEqual([]);
-    fetchMock.mockResolvedValueOnce(Response.json([{ id: 7 }]));
+    fetchMock.mockResolvedValueOnce(
+      Response.json(errorPayload, { status: 400 }),
+    );
     await act(async () => {
-      await queryClient.refetchQueries({
-        predicate: (query) =>
-          query.queryKey !== getAuthMeQueryKey() &&
-          query.queryKey.includes("subcategories"),
+      await root.client.refetchQueries({
+        predicate: (query) => query.queryKey.includes("subcategories"),
       });
     });
-    await waitFor(() =>
-      expect(screen.getAllByText("Некорректные данные")).toHaveLength(1),
-    );
-    expect(screen.getAllByText("HTTP_FAILURE")).toHaveLength(1);
-    expect(result.current[0]?.data).toEqual([]);
+    expect(screen.getAllByText("Не удалось выполнить запрос")).toHaveLength(1);
+    expect(screen.queryByText("HTTP_FAILURE")).toBeNull();
+    expect(screen.getAllByText("Некорректные данные")).toHaveLength(1);
+    expect(screen.getByText("[]")).toBeTruthy();
   });
 
   it.each([401, 500, 0])(
-    "leaves useMe status %s to its own session UX and allows explicit retry",
+    "keeps cached useMe status %s outside the generic path and supports explicit retry",
     async (statusCode) => {
-      const respond = () =>
+      fetchMock.mockImplementation(() =>
         statusCode === 0
           ? Promise.reject(new TypeError("Offline"))
           : Promise.resolve(
@@ -129,25 +136,48 @@ describe("domain hooks use the global notification owner", () => {
                 { ...errorPayload, statusCode },
                 { status: statusCode },
               ),
-            );
-      fetchMock.mockImplementation(respond);
-      const { result } = renderHook(useMe, { wrapper });
-      await waitFor(() => expect(result.current.isError).toBe(true));
-      expect(result.current.isUnauthorized).toBe(statusCode === 401);
-      expect(result.current.hasValidData).toBe(false);
+            ),
+      );
+      const { result, unmount } = renderHook(
+        () => ({ client: useQueryClient(), query: useMe() }),
+        { wrapper: QueryTestRoot },
+      );
+      const client = result.current.client;
+      clients.push(client);
+      await waitFor(() => expect(result.current.query.isError).toBe(true));
       expect(screen.queryByRole("button", { name: "×" })).toBeNull();
-      expect(fetchMock).toHaveBeenCalledTimes(statusCode === 401 ? 2 : 1);
       fetchMock.mockResolvedValue(Response.json(profile));
       await act(async () => {
-        await result.current.refetch();
+        await result.current.query.refetch();
       });
-      await waitFor(() => expect(result.current.data).toEqual(profile));
+      await waitFor(() => expect(result.current.query.data).toEqual(profile));
+      const calls = fetchMock.mock.calls.length;
+      fetchMock.mockImplementation(() =>
+        statusCode === 0
+          ? Promise.reject(new TypeError("Offline"))
+          : Promise.resolve(
+              Response.json(
+                { ...errorPayload, statusCode },
+                { status: statusCode },
+              ),
+            ),
+      );
+      await act(async () => {
+        await result.current.query.refetch();
+      });
+      await waitFor(() => expect(result.current.query.isError).toBe(true));
+      expect(result.current.query.isUnauthorized).toBe(statusCode === 401);
+      expect(fetchMock.mock.calls.length - calls).toBe(
+        statusCode === 401 ? 2 : 1,
+      );
       expect(screen.queryByRole("button", { name: "×" })).toBeNull();
+      unmount();
     },
   );
 
-  it("keeps an invitation profile-refresh failure inline without adding a generic toast", async () => {
-    seedProfile();
+  it("keeps an invitation profile-refresh failure inline without a generic toast", async () => {
+    const root = mount();
+    seedProfile(root.client);
     fetchMock.mockImplementation(async (url) => {
       if (String(url).endsWith("/invitations/redeem"))
         return Response.json({
@@ -163,17 +193,14 @@ describe("domain hooks use the global notification owner", () => {
         );
       throw new Error(`Unexpected HTTP: ${String(url)}`);
     });
-    render(
+    root.rerenderChildren(
       <InvitationRedemption
         code="code-a"
         onRedeemed={vi.fn()}
         onAuthenticationRequired={vi.fn()}
       />,
-      { wrapper },
     );
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /Повторить/ })).toBeTruthy(),
-    );
+    await screen.findByRole("button", { name: /Повторить/ });
     expect(screen.queryByRole("button", { name: "×" })).toBeNull();
     expect(
       fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/auth/me")),

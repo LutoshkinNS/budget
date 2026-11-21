@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
+import { fetcher } from "@/common/api/fetcher.ts";
 import { authLogin } from "@/common/api/generate/authentication/authentication.gen.ts";
 import {
   AuthLoginBody,
@@ -127,16 +128,13 @@ export function useLogin() {
   }
 
   async function devLogin(): Promise<LoginResult> {
-    return runLogin(async () => {
-      const response = await fetch("/api/v1/auth/dev-login", {
-        method: "GET",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`Dev login failed with status ${response.status}`);
-      }
-      return response.json();
-    });
+    return runLogin(() =>
+      fetcher<unknown>(
+        "/api/v1/auth/dev-login",
+        { method: "GET" },
+        { refreshUnauthorized: false },
+      ),
+    );
   }
 
   return { login, devLogin, isPending, error };

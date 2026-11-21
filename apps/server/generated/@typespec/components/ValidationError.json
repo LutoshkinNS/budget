@@ -1,26 +1,24 @@
 {
   "type": "object",
   "required": [
-    "code",
     "message",
     "statusCode"
   ],
   "properties": {
-    "code": {
-      "type": "string",
-      "enum": [
-        "VALIDATION_ERROR"
-      ]
-    },
     "message": {
-      "type": "string"
+      "type": "string",
+      "default": "Некорректные параметры запроса."
     },
     "statusCode": {
       "type": "number",
-      "enum": [
-        400
-      ]
+      "format": "double",
+      "default": 400
     }
   },
+  "allOf": [
+    {
+      "$ref": "ErrorDTO.json"
+    }
+  ],
   "additionalProperties": false
 }

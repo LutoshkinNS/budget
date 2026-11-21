@@ -24,7 +24,7 @@ const syncModelImportProxies = () => {
   const generatedModelNames = new Set(
     generatedModelFiles.map((fileName) => fileName.replace(/\.gen\.ts$/, "")),
   );
-  const importedModelNames = new Set<string>();
+  const proxyModelNames = new Set<string>();
   const importPattern = /from ["']\.\/([^"']+)["'];/g;
   const proxyFiles = readdirSync(modelDir).filter(
     (fileName) => fileName.endsWith(".ts") && !fileName.endsWith(".gen.ts"),
@@ -42,7 +42,7 @@ const syncModelImportProxies = () => {
         !importName.includes(".") &&
         generatedModelNames.has(importName)
       ) {
-        importedModelNames.add(importName);
+        proxyModelNames.add(importName);
       }
     }
   }
@@ -55,7 +55,12 @@ const syncModelImportProxies = () => {
     }
   }
 
-  for (const modelName of [...importedModelNames].sort()) {
+  const modelIndexName = "index";
+  if (generatedModelNames.has(modelIndexName)) {
+    proxyModelNames.add(modelIndexName);
+  }
+
+  for (const modelName of [...proxyModelNames].sort()) {
     const proxyPath = join(modelDir, `${modelName}.ts`);
     const proxySource = `export * from "./${modelName}.gen.ts";\n`;
 
@@ -72,12 +77,15 @@ export default defineConfig({
   budget: {
     input: openapiPath,
     hooks: {
-      afterAllFilesWrite: syncModelImportProxies,
+      afterAllFilesWrite: () => {
+        syncModelImportProxies();
+      },
     },
     output: {
       mode: "tags-split",
       target: "src/common/api/generate",
       schemas: "src/common/api/generate/model",
+      clean: true,
       fileExtension: ".gen.ts",
       client: "react-query",
       mock: false,
@@ -98,7 +106,7 @@ export default defineConfig({
             suffix: "DTO",
           },
         },
-        enumGenerationType: "union",
+        enumGenerationType: "const",
         fetch: {
           includeHttpResponseReturnType: false,
         },

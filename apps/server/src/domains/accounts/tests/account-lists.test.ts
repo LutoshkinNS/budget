@@ -287,7 +287,6 @@ describe('account and member lists', () => {
       })
     ]);
     const expectedForbidden = {
-      code: 'FORBIDDEN',
       message: 'Доступ к участникам этого аккаунта запрещён',
       statusCode: 403
     };

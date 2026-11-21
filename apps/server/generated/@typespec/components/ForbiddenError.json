@@ -1,26 +1,24 @@
 {
   "type": "object",
   "required": [
-    "code",
     "message",
     "statusCode"
   ],
   "properties": {
-    "code": {
-      "type": "string",
-      "enum": [
-        "FORBIDDEN"
-      ]
-    },
     "message": {
-      "type": "string"
+      "type": "string",
+      "default": "Недостаточно прав для выполнения запроса."
     },
     "statusCode": {
       "type": "number",
-      "enum": [
-        403
-      ]
+      "format": "double",
+      "default": 403
     }
   },
+  "allOf": [
+    {
+      "$ref": "ErrorDTO.json"
+    }
+  ],
   "additionalProperties": false
 }

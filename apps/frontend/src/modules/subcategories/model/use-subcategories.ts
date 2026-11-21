@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { queryClient } from "@/common/api/app-query.ts";
 import { useCategorySubcategoriesList } from "@/common/api/generate/subcategories/subcategories.gen.ts";
 import { CategorySubcategoriesListResponse } from "@/common/api/generate/subcategories/subcategories.zod.gen.ts";
 import { useNotifications } from "@/common/lib/notifications";
@@ -10,7 +10,7 @@ import { subcategoryKeys } from "./subcategory-keys.ts";
 
 export function useSubcategories(categoryId: number) {
   const accountId = useCurrentAccountId();
-      // Placeholder безопасен при отключённом запросе.
+  // Placeholder безопасен при отключённом запросе.
   const { data, isError } = useCategorySubcategoriesList(
     accountId ?? 1,
     categoryId,
@@ -43,6 +43,7 @@ export function useSubcategories(categoryId: number) {
 }
 
 export function useInvalidateSubcategories() {
+  const queryClient = useQueryClient();
   return (accountId: number, categoryId: number) =>
     queryClient.invalidateQueries({
       queryKey: subcategoryKeys.list(accountId, categoryId),

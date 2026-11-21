@@ -4,14 +4,23 @@ import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-
 import fastify from 'fastify';
 
 import accountAccessPlugin from './plugins/account-access/account-access.plugin.js';
+import apiObservationPlugin from './plugins/api-observation/api-observation.js';
+import type { ApiObservationOptions } from './plugins/api-observation/types.js';
 import envPlugin from './plugins/env/envPlugin.js';
-import errorHandlerPlugin from './plugins/errorHandler/error-handler-plugin.js';
+import errorHandlerPlugin from './plugins/error-handler/error-handler-plugin.js';
 import jwtPlugin from './plugins/jwt/jwt-plugin.js';
 import prismaPlugin from './plugins/prisma/prismaPlugin.js';
 
-export default async function appInit() {
+export default async function appInit(options?: ApiObservationOptions) {
   const app = fastify({
-    logger: true,
+    logger: {
+      serializers: {
+        req: (request: { id?: string; method: string }) => ({
+          method: request.method,
+          requestId: request.id
+        })
+      }
+    },
     ajv: {
       customOptions: {
         discriminator: true
@@ -19,6 +28,7 @@ export default async function appInit() {
     }
   }).withTypeProvider<JsonSchemaToTsProvider>();
 
+  await app.register(apiObservationPlugin, options ?? {});
   await app.register(envPlugin);
   await app.register(fastifyCors, {
     origin: app.envs.FRONTEND_URL,

@@ -1,4 +1,5 @@
-import { queryClient } from "@/common/api/app-query.ts";
+import { useQueryClient } from "@tanstack/react-query";
+
 import {
   getAccountsListQueryKey,
   useAccountsUpdate,
@@ -11,6 +12,7 @@ import { invalidateTransactionSummary } from "@/modules/transactions";
 import { getSessionContext } from "@/modules/user";
 
 export function useUpdateAccount() {
+  const queryClient = useQueryClient();
   function reconcileAuthMe() {
     void queryClient.invalidateQueries(
       { queryKey: getAuthMeQueryKey(), exact: true },
@@ -22,7 +24,7 @@ export function useUpdateAccount() {
     void queryClient.invalidateQueries({
       queryKey: getAccountsListQueryKey(),
     });
-    void invalidateTransactionSummary(accountId);
+    void invalidateTransactionSummary(queryClient, accountId);
   }
 
   const managedMutation = useAccountsUpdate({

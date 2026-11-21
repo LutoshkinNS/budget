@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
 import type {
   TransactionsCategorySummaryParams,
@@ -14,6 +14,8 @@ import { transactionKeys } from "../transaction-keys.ts";
 import { useCreateTransaction } from "../use-create-transaction.ts";
 import { useDeleteTransaction } from "../use-delete-transaction.ts";
 import { useUpdateTransaction } from "../use-update-transaction.ts";
+
+let queryClient: ReturnType<typeof createAppQueryClient>;
 
 const mocks = vi.hoisted(() => ({
   create: vi.fn<() => Promise<{ id: 1 }>>(),
@@ -100,7 +102,7 @@ vi.mock(
   },
 );
 vi.mock("@/common/lib/notifications", () => ({
-  useNotifications: () => ({ addNotification: vi.fn() }),
+  useNotifications: () => ({ notifications: [], addNotification: vi.fn() }),
 }));
 
 const LIST_PARAMS: TransactionsListParams = {
@@ -224,6 +226,7 @@ async function runOperation(
 }
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
   pendingMutations.length = 0;
   mocks.invalidateCategories.mockReset();
@@ -250,8 +253,11 @@ describe("transaction mutations invalidate only the executing account subtree", 
       }
       for (const key of keys43) expect(invalidated(key)).toBe(false);
       expect(invalidated(["unrelated"])).toBe(false);
-      expect(mocks.invalidateCategories).toHaveBeenCalledWith(42);
-      expect(mocks.invalidateCategories).not.toHaveBeenCalledWith(43);
+      expect(mocks.invalidateCategories).toHaveBeenCalledWith(queryClient, 42);
+      expect(mocks.invalidateCategories).not.toHaveBeenCalledWith(
+        queryClient,
+        43,
+      );
     },
   );
 
@@ -276,8 +282,10 @@ describe("transaction mutations invalidate only the executing account subtree", 
 
     for (const key of baseKeys42) expect(invalidated(key)).toBe(true);
     for (const key of keys43) expect(invalidated(key)).toBe(false);
-    expect(mocks.invalidateCategories).toHaveBeenCalledWith(42);
-    expect(mocks.invalidateCategories).not.toHaveBeenCalledWith(43);
+    expect(mocks.invalidateCategories).toHaveBeenCalledWith(queryClient, 42);
+    expect(mocks.invalidateCategories).not.toHaveBeenCalledWith(
+      queryClient,
+      43,
+    );
   });
-
 });

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { useCategoriesDelete } from "@/common/api/generate/categories/categories.gen.ts";
@@ -10,11 +11,12 @@ import { invalidateCategories } from "../../../model/category-cache.ts";
 import { deleteCategoryFormDataSchema } from "./schemas.ts";
 
 export function useDeleteCategory() {
+  const queryClient = useQueryClient();
   const mutation = useCategoriesDelete({
     mutation: {
       meta: { localFeedback: true },
       onSuccess: (_data, variables) => {
-        void invalidateCategories(variables.accountId);
+        void invalidateCategories(queryClient, variables.accountId);
       },
     },
   });
@@ -30,7 +32,7 @@ export function useDeleteCategory() {
       return;
     }
 
-    const accountId = requireCurrentAccountId();
+    const accountId = requireCurrentAccountId(queryClient);
     const resultDtoParsed = CategoriesDeleteParams.safeParse({
       accountId,
       categoryId: resultParsedFormData.data?.categoryId,

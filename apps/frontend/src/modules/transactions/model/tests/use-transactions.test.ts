@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import type {
   TransactionsCategorySummaryParams,
   TransactionsListParams,
@@ -14,6 +14,8 @@ import {
   invalidateTransactionSummary,
 } from "../transaction-cache.ts";
 import { transactionKeys } from "../transaction-keys.ts";
+
+let queryClient: ReturnType<typeof createAppQueryClient>;
 
 const LIST_PARAMS: TransactionsListParams = {
   from: "2026-07-01T00:00:00.000Z",
@@ -31,6 +33,7 @@ const CATEGORY_SUMMARY_PARAMS: TransactionsCategorySummaryParams = {
 };
 
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   queryClient.clear();
 });
 afterEach(() => {
@@ -44,7 +47,7 @@ describe("invalidateTransactionsCategorySummary", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    await invalidateTransactionsCategorySummary(42);
+    await invalidateTransactionsCategorySummary(queryClient, 42);
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: transactionKeys.categorySummaries(42),
@@ -57,6 +60,7 @@ describe("invalidateTransactionsCategorySummary", () => {
       .mockResolvedValue();
 
     await invalidateTransactionsCategorySummary(
+      queryClient,
       42,
       CATEGORY_SUMMARY_PARAMS,
     );
@@ -73,7 +77,7 @@ describe("invalidateTransactionsList", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    await invalidateTransactionsList(42);
+    await invalidateTransactionsList(queryClient, 42);
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: transactionKeys.lists(42),
@@ -85,7 +89,7 @@ describe("invalidateTransactionsList", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    await invalidateTransactionsList(42, LIST_PARAMS);
+    await invalidateTransactionsList(queryClient, 42, LIST_PARAMS);
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: transactionKeys.list(42, LIST_PARAMS),
@@ -99,7 +103,7 @@ describe("invalidateTransaction (detail)", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    await invalidateTransaction(42, 5);
+    await invalidateTransaction(queryClient, 42, 5);
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: transactionKeys.detail(42, 5),
@@ -113,7 +117,7 @@ describe("invalidateTransactionSummary", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    await invalidateTransactionSummary(42);
+    await invalidateTransactionSummary(queryClient, 42);
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: transactionKeys.summaries(42),
@@ -125,7 +129,7 @@ describe("invalidateTransactionSummary", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    await invalidateTransactionSummary(42, SUMMARY_PARAMS);
+    await invalidateTransactionSummary(queryClient, 42, SUMMARY_PARAMS);
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: transactionKeys.summary(42, SUMMARY_PARAMS),

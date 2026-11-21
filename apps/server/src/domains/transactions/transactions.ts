@@ -7,6 +7,7 @@ import TransactionSummary from '#s/TransactionSummary.js';
 import TransactionUpdate from '#s/TransactionUpdate.js';
 import ValidationError from '#s/ValidationError.js';
 import { FastifyApp } from '#src/app-init.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
 
 import { calculateTransactionSummary } from './balance.js';
 import { buildCategorySummaryResponse } from './category-summary.js';
@@ -14,6 +15,11 @@ import { buildCategorySummaryResponse } from './category-summary.js';
 const transactionTypes = ['income', 'expense'] as const;
 
 type TransactionType = (typeof transactionTypes)[number];
+
+const HTTP_ERROR_STATUS = {
+  badRequest: ValidationError.properties.statusCode.default,
+  notFound: NotFoundError.properties.statusCode.default
+} as const;
 
 const accountParamsSchema = {
   type: 'object',
@@ -34,17 +40,11 @@ const transactionParamsSchema = {
   additionalProperties: false
 } as const;
 
-const notFound = (message: string) => ({
-  code: 'NOT_FOUND' as const,
-  message,
-  statusCode: 404 as const
-});
+const notFound = (message: string) =>
+  createErrorResponse(NotFoundError, HTTP_ERROR_STATUS.notFound, message);
 
-const validationError = (message: string) => ({
-  code: 'VALIDATION_ERROR' as const,
-  message,
-  statusCode: 400 as const
-});
+const validationError = (message: string) =>
+  createErrorResponse(ValidationError, HTTP_ERROR_STATUS.badRequest, message);
 
 function isTransactionType(type: string): type is TransactionType {
   return transactionTypes.includes(type as TransactionType);
@@ -174,9 +174,9 @@ export default async function transactionsModule(app: FastifyApp) {
         },
         response: {
           200: { type: 'array', items: Transaction },
-          400: ValidationError,
-          403: ForbiddenError,
-          404: NotFoundError
+          [HTTP_ERROR_STATUS.badRequest]: ValidationError,
+          [ForbiddenError.properties.statusCode.default]: ForbiddenError,
+          [HTTP_ERROR_STATUS.notFound]: NotFoundError
         }
       }
     },
@@ -184,7 +184,7 @@ export default async function transactionsModule(app: FastifyApp) {
       const dateRange = parseDateRange(req.query);
 
       if ('statusCode' in dateRange) {
-        return reply.code(400).send(dateRange);
+        return reply.code(HTTP_ERROR_STATUS.badRequest).send(dateRange);
       }
 
       const type = req.query.type;
@@ -192,14 +192,14 @@ export default async function transactionsModule(app: FastifyApp) {
 
       if (type !== undefined && !isTransactionType(type)) {
         return reply
-          .code(400)
+          .code(HTTP_ERROR_STATUS.badRequest)
           .send(
             validationError('Query parameter type must be income or expense')
           );
       }
 
       if (categoryId !== undefined && typeof categoryId !== 'number') {
-        return reply.code(400).send(categoryId);
+        return reply.code(HTTP_ERROR_STATUS.badRequest).send(categoryId);
       }
 
       if (categoryId !== undefined) {
@@ -248,8 +248,8 @@ export default async function transactionsModule(app: FastifyApp) {
         },
         response: {
           200: CategorySummary,
-          400: ValidationError,
-          403: ForbiddenError
+          [HTTP_ERROR_STATUS.badRequest]: ValidationError,
+          [ForbiddenError.properties.statusCode.default]: ForbiddenError
         }
       }
     },
@@ -261,18 +261,18 @@ export default async function transactionsModule(app: FastifyApp) {
       });
 
       if ('statusCode' in currentRange) {
-        return reply.code(400).send(currentRange);
+        return reply.code(HTTP_ERROR_STATUS.badRequest).send(currentRange);
       }
 
       if ('statusCode' in previousRange) {
-        return reply.code(400).send(previousRange);
+        return reply.code(HTTP_ERROR_STATUS.badRequest).send(previousRange);
       }
 
       const type = req.query.type ?? 'expense';
 
       if (!isTransactionType(type)) {
         return reply
-          .code(400)
+          .code(HTTP_ERROR_STATUS.badRequest)
           .send(
             validationError('Query parameter type must be income or expense')
           );
@@ -352,9 +352,9 @@ export default async function transactionsModule(app: FastifyApp) {
         },
         response: {
           200: TransactionSummary,
-          400: ValidationError,
-          403: ForbiddenError,
-          404: NotFoundError
+          [HTTP_ERROR_STATUS.badRequest]: ValidationError,
+          [ForbiddenError.properties.statusCode.default]: ForbiddenError,
+          [HTTP_ERROR_STATUS.notFound]: NotFoundError
         }
       }
     },
@@ -362,7 +362,7 @@ export default async function transactionsModule(app: FastifyApp) {
       const dateRange = parseDateRange(req.query);
 
       if ('statusCode' in dateRange) {
-        return reply.code(400).send(dateRange);
+        return reply.code(HTTP_ERROR_STATUS.badRequest).send(dateRange);
       }
 
       const accountId = req.params.accountId;
@@ -382,7 +382,7 @@ export default async function transactionsModule(app: FastifyApp) {
 
       if (!account) {
         return reply
-          .code(404)
+          .code(HTTP_ERROR_STATUS.notFound)
           .send(notFound('Account not found or access denied'));
       }
 
@@ -415,7 +415,7 @@ export default async function transactionsModule(app: FastifyApp) {
     {
       schema: {
         params: transactionParamsSchema,
-        response: { 200: Transaction, 403: ForbiddenError, 404: NotFoundError }
+        response: { 200: Transaction, [ForbiddenError.properties.statusCode.default]: ForbiddenError, [HTTP_ERROR_STATUS.notFound]: NotFoundError }
       }
     },
     async function (req, reply) {
@@ -428,7 +428,7 @@ export default async function transactionsModule(app: FastifyApp) {
 
       if (!transaction) {
         return reply
-          .code(404)
+          .code(HTTP_ERROR_STATUS.notFound)
           .send(notFound('Transaction not found or access denied'));
       }
 
@@ -444,9 +444,9 @@ export default async function transactionsModule(app: FastifyApp) {
         body: TransactionCreate,
         response: {
           200: Transaction,
-          400: ValidationError,
-          403: ForbiddenError,
-          404: NotFoundError
+          [HTTP_ERROR_STATUS.badRequest]: ValidationError,
+          [ForbiddenError.properties.statusCode.default]: ForbiddenError,
+          [HTTP_ERROR_STATUS.notFound]: NotFoundError
         }
       }
     },
@@ -487,9 +487,9 @@ export default async function transactionsModule(app: FastifyApp) {
         body: TransactionUpdate,
         response: {
           200: Transaction,
-          400: ValidationError,
-          403: ForbiddenError,
-          404: NotFoundError
+          [HTTP_ERROR_STATUS.badRequest]: ValidationError,
+          [ForbiddenError.properties.statusCode.default]: ForbiddenError,
+          [HTTP_ERROR_STATUS.notFound]: NotFoundError
         }
       }
     },
@@ -505,7 +505,7 @@ export default async function transactionsModule(app: FastifyApp) {
 
       if (!transaction) {
         return reply
-          .code(404)
+          .code(HTTP_ERROR_STATUS.notFound)
           .send(notFound('Transaction not found or access denied'));
       }
 
@@ -534,7 +534,7 @@ export default async function transactionsModule(app: FastifyApp) {
 
       if (update.count === 0) {
         return reply
-          .code(404)
+          .code(HTTP_ERROR_STATUS.notFound)
           .send(notFound('Transaction not found or access denied'));
       }
 
@@ -547,7 +547,7 @@ export default async function transactionsModule(app: FastifyApp) {
 
       if (!result) {
         return reply
-          .code(404)
+          .code(HTTP_ERROR_STATUS.notFound)
           .send(notFound('Transaction not found or access denied'));
       }
 
@@ -560,7 +560,7 @@ export default async function transactionsModule(app: FastifyApp) {
     {
       schema: {
         params: transactionParamsSchema,
-        response: { 204: { type: 'null' }, 403: ForbiddenError }
+        response: { 204: { type: 'null' }, [ForbiddenError.properties.statusCode.default]: ForbiddenError }
       }
     },
     async function (req, reply) {

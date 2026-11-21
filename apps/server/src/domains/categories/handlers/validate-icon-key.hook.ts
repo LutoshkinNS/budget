@@ -1,6 +1,11 @@
 import type { preValidationAsyncHookHandler } from 'fastify';
 
+import ValidationError from '#s/ValidationError.js';
+import { createErrorResponse } from '#src/plugins/error-handler/error-responses.js';
+
 import { isCategoryIconKey } from '../helpers/category-icon.js';
+
+const invalidCategoryIconKeyMessage = 'Invalid category icon key';
 
 // Проверка до AJV нужна, чтобы отклонить исходную пустую строку.
 export const validateIconKey: preValidationAsyncHookHandler = async (
@@ -15,10 +20,11 @@ export const validateIconKey: preValidationAsyncHookHandler = async (
     body.iconKey !== null &&
     !isCategoryIconKey(body.iconKey)
   ) {
-    return reply.code(400).send({
-      code: 'VALIDATION_ERROR',
-      message: 'Invalid category icon key',
-      statusCode: 400
-    });
+    const error = createErrorResponse(
+      ValidationError,
+      ValidationError.properties.statusCode.default,
+      invalidCategoryIconKeyMessage
+    );
+    return reply.code(error.statusCode).send(error);
   }
 };

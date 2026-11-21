@@ -30,6 +30,7 @@ vi.mock(import("../../model/report-auth-event"), () => ({ reportAuthEvent }));
 vi.mock(import("@/common/lib/notifications"), async (importOriginal) => ({
   ...(await importOriginal()),
   useNotifications: () => ({
+    notifications: [],
     addNotification: vi.fn(),
     deleteNotification: vi.fn(),
   }),

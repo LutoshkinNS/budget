@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useCategoriesUpdate } from "@/common/api/generate/categories/categories.gen.ts";
 import type { CategoryUpdateDTO } from "@/common/api/generate/model";
 import { requireCurrentAccountId } from "@/modules/user";
@@ -16,11 +18,16 @@ export type CategoryUpdatedCallback = (
 export function useUpdateCategory(options?: {
   onCategoryUpdated?: CategoryUpdatedCallback;
 }) {
+  const queryClient = useQueryClient();
   const { mutateAsync: rawMutateAsync, ...rest } = useCategoriesUpdate({
     mutation: {
       meta: { localFeedback: true },
       onSuccess: async (_category, variables) => {
-        void invalidateCategories(variables.accountId, variables.categoryId);
+        void invalidateCategories(
+          queryClient,
+          variables.accountId,
+          variables.categoryId,
+        );
         await options?.onCategoryUpdated?.({
           accountId: variables.accountId,
           categoryId: variables.categoryId,
@@ -34,7 +41,7 @@ export function useUpdateCategory(options?: {
     options?: Parameters<typeof rawMutateAsync>[1],
   ) =>
     rawMutateAsync(
-      { accountId: requireCurrentAccountId(), ...variables },
+      { accountId: requireCurrentAccountId(queryClient), ...variables },
       options,
     );
 

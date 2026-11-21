@@ -2,9 +2,13 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryClient } from "@/common/api/app-query";
+import { createAppQueryClient } from "@/common/api/app-query";
 import { getAuthMeQueryKey } from "@/common/api/generate/authentication/authentication.gen";
-import { Notifications } from "@/common/lib/notifications";
+import { NotificationsTestRoot as Notifications } from "@/common/lib/notifications/tests/notifications-test-root";
+
+import { Categories } from "../categories";
+
+let queryClient: ReturnType<typeof createAppQueryClient>;
 
 const mocks = vi.hoisted(() => {
   const holder: {
@@ -41,9 +45,8 @@ vi.mock("@/modules/transactions", () => ({
     mocks.invalidateTransactionsCategorySummary,
 }));
 
-import { Categories } from "../categories";
-
 beforeEach(() => {
+  queryClient = createAppQueryClient(() => {});
   mocks.capturedCallback = null;
   mocks.capturedType = undefined;
   mocks.invalidateTransactionsCategorySummary.mockReset();
@@ -91,6 +94,7 @@ describe("Categories page composition", () => {
     await mocks.capturedCallback?.({ accountId: 42, categoryId: 3 });
 
     expect(mocks.invalidateTransactionsCategorySummary).toHaveBeenCalledWith(
+      queryClient,
       42,
     );
   });
@@ -109,6 +113,7 @@ describe("Categories page composition", () => {
     });
     try {
       expect(mocks.invalidateTransactionsCategorySummary).toHaveBeenCalledWith(
+        queryClient,
         42,
       );
       expect(completion).toBeUndefined();
