@@ -1,6 +1,6 @@
 import { TokenError } from 'fast-jwt';
 import fastify from 'fastify';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import errorHandlerPlugin from '../../error-handler/error-handler-plugin.js';
 import jwtPlugin from '../jwt-plugin.js';
@@ -8,6 +8,13 @@ import { verifyJwtRequest } from '../verify-jwt-request.js';
 
 const SECRET = 'private-jwt-boundary-secret';
 const PATH = '/verify-boundary';
+const HTTP_FIELD = { status: 'status', statusCode: 'statusCode' } as const;
+const STATUS = {
+  forbidden: 403,
+  limited: 429,
+  unauthorized: 401,
+  invalid: 600
+} as const;
 
 function tokenError() {
   return new TokenError(TokenError.codes.missingSignature, SECRET);
@@ -57,6 +64,64 @@ describe('JWT verification error boundary', () => {
       });
     }
   );
+
+  it('preserves a valid status without reading a lower-priority statusCode getter', async () => {
+    const readStatusCode = vi.fn(() => {
+      throw new Error(SECRET);
+    });
+    const original = Object.defineProperty(
+      Object.assign(tokenError(), { status: STATUS.forbidden }),
+      HTTP_FIELD.statusCode,
+      { get: readStatusCode }
+    );
+
+    await expect(
+      verifyJwtRequest(async () => {
+        throw original;
+      })
+    ).rejects.toBe(original);
+    expect(readStatusCode).not.toHaveBeenCalled();
+  });
+
+  it('preserves statusCode and error identity when the status getter throws', async () => {
+    const original = Object.defineProperty(
+      Object.assign(tokenError(), { statusCode: STATUS.limited }),
+      HTTP_FIELD.status,
+      {
+        get() {
+          throw new Error(SECRET);
+        }
+      }
+    );
+
+    await expect(
+      verifyJwtRequest(async () => {
+        throw original;
+      })
+    ).rejects.toBe(original);
+    const response = await responseAfterVerify(original, true);
+    expect(response.statusCode).toBe(STATUS.limited);
+    expect(response.json()).toEqual({
+      statusCode: STATUS.limited,
+      message: 'Слишком много запросов. Повторите попытку позже.'
+    });
+    expect(response.body).not.toContain(SECRET);
+  });
+
+  it('adapts a verify TokenError with invalid native status fields to safe401', async () => {
+    const original = Object.assign(tokenError(), {
+      status: String(STATUS.unauthorized),
+      statusCode: STATUS.invalid
+    });
+    const response = await responseAfterVerify(original, true);
+
+    expect(response.statusCode).toBe(STATUS.unauthorized);
+    expect(response.json()).toEqual({
+      statusCode: STATUS.unauthorized,
+      message: 'Требуется действительная авторизация.'
+    });
+    expect(response.body).not.toContain(SECRET);
+  });
 
   it('keeps an unknown verify error a server failure', async () => {
     const original = new Error(SECRET);

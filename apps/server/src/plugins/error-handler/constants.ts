@@ -6,16 +6,8 @@ export const ERROR_HANDLER = {
     unknown: 'unknown'
   },
   phase: {
-    request: 'request',
-    parser: 'parser',
-    jwt: 'jwt',
     router: 'router',
     handler: 'handler'
-  },
-  header: {
-    wwwAuthenticate: 'www-authenticate',
-    retryAfter: 'retry-after',
-    allow: 'allow'
   },
   logMessage: {
     requestError: 'request_error'

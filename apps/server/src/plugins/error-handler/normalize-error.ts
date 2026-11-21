@@ -11,34 +11,38 @@ import ValidationError from '#s/ValidationError.js';
 
 import { ERROR_HANDLER } from './constants.js';
 import { createErrorResponse } from './error-responses.js';
-import type { ErrorCategory, ErrorPhase, NormalizedError } from './types.js';
+import { HTTP_STATUS, readHttpStatus } from './http-error-status.js';
+import type { ErrorCategory, NormalizedError } from './types.js';
 
-export const HTTP_STATUS = {
-  badRequest: 400,
-  unauthorized: 401,
-  forbidden: 403,
-  notFound: 404,
-  conflict: 409,
-  payloadTooLarge: 413,
-  unsupportedMediaType: 415,
-  tooManyRequests: 429,
-  clientErrorMinimum: 400,
-  clientErrorMaximum: 499,
-  serverErrorMinimum: 500,
-  serverErrorMaximum: 599,
-  internalServerError: 500
-} as const;
+export { HTTP_STATUS } from './http-error-status.js';
+
+const ERROR_SCHEMAS: Partial<
+  Record<number, Parameters<typeof createErrorResponse>[0]>
+> = {
+  [HTTP_STATUS.badRequest]: ValidationError,
+  [HTTP_STATUS.unauthorized]: UnauthorizedError,
+  [HTTP_STATUS.forbidden]: ForbiddenError,
+  [HTTP_STATUS.notFound]: NotFoundError,
+  [HTTP_STATUS.conflict]: ConflictError,
+  [HTTP_STATUS.payloadTooLarge]: PayloadTooLargeError,
+  [HTTP_STATUS.unsupportedMediaType]: UnsupportedMediaTypeError,
+  [HTTP_STATUS.tooManyRequests]: TooManyRequestsError
+};
 
 export function normalizeError(error: unknown): NormalizedError {
   const status = readHttpStatus(error);
   const responseStatus = status ?? HTTP_STATUS.internalServerError;
-  const statusSchema = getErrorSchema(responseStatus);
-  const response = createErrorResponse(statusSchema.schema, responseStatus);
+  const schema =
+    ERROR_SCHEMAS[responseStatus] ??
+    (responseStatus <= HTTP_STATUS.clientErrorMaximum
+      ? RequestError
+      : InternalServerError);
+  const response = createErrorResponse(schema, responseStatus);
 
   return {
     response,
     category: getCategory(responseStatus),
-    phase: getPhase()
+    phase: ERROR_HANDLER.phase.handler
   };
 }
 
@@ -48,68 +52,6 @@ export function getNotFoundError(): NormalizedError {
     category: ERROR_HANDLER.category.notFound,
     phase: ERROR_HANDLER.phase.router
   };
-}
-
-function getErrorSchema(statusCode: number) {
-  if (statusCode === HTTP_STATUS.badRequest) {
-    return { schema: ValidationError };
-  }
-  if (statusCode === HTTP_STATUS.unauthorized) {
-    return { schema: UnauthorizedError };
-  }
-  if (statusCode === HTTP_STATUS.forbidden) {
-    return { schema: ForbiddenError };
-  }
-  if (statusCode === HTTP_STATUS.notFound) {
-    return { schema: NotFoundError };
-  }
-  if (statusCode === HTTP_STATUS.conflict) {
-    return { schema: ConflictError };
-  }
-  if (statusCode === HTTP_STATUS.payloadTooLarge) {
-    return { schema: PayloadTooLargeError };
-  }
-  if (statusCode === HTTP_STATUS.unsupportedMediaType) {
-    return { schema: UnsupportedMediaTypeError };
-  }
-  if (statusCode === HTTP_STATUS.tooManyRequests) {
-    return { schema: TooManyRequestsError };
-  }
-  if (
-    statusCode >= HTTP_STATUS.clientErrorMinimum &&
-    statusCode <= HTTP_STATUS.clientErrorMaximum
-  ) {
-    return { schema: RequestError };
-  }
-  return { schema: InternalServerError };
-}
-
-function readHttpStatus(error: unknown): number | undefined {
-  const status = readNumberProperty(error, 'status');
-  if (isHttpErrorStatus(status)) return status;
-
-  const statusCode = readNumberProperty(error, 'statusCode');
-  return isHttpErrorStatus(statusCode) ? statusCode : undefined;
-}
-
-function isHttpErrorStatus(value: number | undefined): value is number {
-  return (
-    value !== undefined &&
-    Number.isInteger(value) &&
-    value >= HTTP_STATUS.clientErrorMinimum &&
-    value <= HTTP_STATUS.serverErrorMaximum
-  );
-}
-
-function readNumberProperty(value: unknown, property: string): number | undefined {
-  if (typeof value !== 'object' || value === null) return undefined;
-
-  try {
-    const propertyValue: unknown = Reflect.get(value, property);
-    return typeof propertyValue === 'number' ? propertyValue : undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 function getCategory(statusCode: number): ErrorCategory {
@@ -127,8 +69,4 @@ function getCategory(statusCode: number): ErrorCategory {
     return ERROR_HANDLER.category.notFound;
   }
   return ERROR_HANDLER.category.unknown;
-}
-
-function getPhase(): ErrorPhase {
-  return ERROR_HANDLER.phase.handler;
 }

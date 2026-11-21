@@ -4,7 +4,6 @@ import fp from 'fastify-plugin';
 import { FastifyApp } from '#src/app-init.js';
 
 import { ERROR_HANDLER } from './constants.js';
-import { getSafeErrorHeaders } from './error-headers.js';
 import {
   getNotFoundError,
   HTTP_STATUS,
@@ -33,11 +32,6 @@ async function errorHandlerPlugin(app: FastifyApp) {
   app.setErrorHandler((error, request, reply) => {
     const normalized = normalizeError(error);
     logError(request, normalized);
-    for (const [headerName, headerValue] of Object.entries(
-      getSafeErrorHeaders(error)
-    )) {
-      reply.header(headerName, headerValue);
-    }
     return reply.code(normalized.response.statusCode).send(normalized.response);
   });
 
